@@ -8,7 +8,7 @@ const portfolio = {
   status: "持续学习中",
   location: "中国 · 四川",
   email: "714721230qq.com",
-  github: "https://github.com/wangsy1150/wangsy1150.github.io",
+  github: "https://wangsy1150.github.io/wangsy11500.github.io/",
   csdn: "https://blog.csdn.net/simonwang267?type=blog",
   gitee: "https://gitee.com/simonwangsy/a-new-beginning",
   resumeUrl: "",
