@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>抖音点赞工具 · 项目详情</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"Microsoft YaHei","PingFang SC",Arial,sans-serif;
+    color:#eae6f5;background:#0d0a17;line-height:1.75;overflow-x:hidden}
+  .glow{position:fixed;inset:0;pointer-events:none;z-index:0;
+    background:
+      radial-gradient(circle at 18% 6%, rgba(139,92,246,.26), transparent 45%),
+      radial-gradient(circle at 84% 14%, rgba(56,189,248,.16), transparent 40%),
+      radial-gradient(circle at 50% 96%, rgba(236,72,153,.14), transparent 45%)}
+  .wrap{position:relative;z-index:1;max-width:960px;margin:0 auto;padding:56px 24px 96px}
+  .back{display:inline-flex;align-items:center;gap:8px;color:#a89ec9;text-decoration:none;
+    font-size:14px;margin-bottom:36px;transition:color .2s}
+  .back:hover{color:#c4b5fd}
+  .num{display:inline-block;font-size:13px;letter-spacing:.18em;color:#8b7fc7;
+    border:1px solid rgba(139,92,246,.35);border-radius:999px;padding:5px 14px;margin-bottom:18px}
+  h1{font-size:clamp(28px,4.6vw,44px);line-height:1.25;font-weight:800;
+    background:linear-gradient(120deg,#c4b5fd 0%,#a78bfa 40%,#7dd3fc 100%);
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:16px}
+  .lede{font-size:17px;color:#b9b0d6;max-width:660px;margin-bottom:30px}
+  .tags{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:46px}
+  .tag{font-size:12.5px;padding:5px 13px;border-radius:999px;
+    background:rgba(139,92,246,.14);border:1px solid rgba(139,92,246,.32);color:#c9bff0}
+  h2{font-size:20px;color:#ddd6f3;margin:0 0 16px;padding-left:14px;position:relative}
+  h2::before{content:"";position:absolute;left:0;top:5px;bottom:5px;width:3px;
+    border-radius:2px;background:linear-gradient(180deg,#a78bfa,#38bdf8)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:46px}
+  .card{background:rgba(255,255,255,.035);border:1px solid rgba(139,92,246,.18);
+    border-radius:13px;padding:18px 20px}
+  .card h3{font-size:14px;color:#a78bfa;margin-bottom:8px}
+  .card p{font-size:14px;color:#b3aacd;margin:0}
+  ul.flow{list-style:none;counter-reset:step;margin-bottom:46px}
+  ul.flow li{position:relative;padding-left:32px;margin-bottom:16px;font-size:14.5px;color:#b8afd3}
+  ul.flow li::before{content:counter(step);counter-increment:step;position:absolute;left:0;top:1px;
+    width:21px;height:21px;border-radius:50%;font-size:12px;font-weight:700;color:#0d0a17;
+    text-align:center;line-height:21px;background:linear-gradient(135deg,#a78bfa,#7dd3fc)}
+  ul.flow li strong{color:#ddd6f3;font-weight:600}
+  .code{background:#120f1f;border:1px solid rgba(139,92,246,.2);border-radius:12px;
+    padding:18px 20px;font-family:Consolas,Monaco,monospace;font-size:13px;color:#c9d6f5;
+    overflow-x:auto;margin-bottom:46px;line-height:1.7}
+  .code .c{color:#6f6690}.code .k{color:#c4b5fd}.code .s{color:#7dd3fc}
+  .note{background:rgba(56,189,248,.07);border-left:3px solid #38bdf8;border-radius:8px;
+    padding:14px 18px;font-size:14px;color:#a9c4dd;margin-bottom:46px}
+  footer{text-align:center;font-size:13px;color:#6f6690;padding-top:36px;
+    border-top:1px solid rgba(139,92,246,.14)}
+  footer a{color:#a78bfa;text-decoration:none}
+</style>
+</head>
+<body>
+<div class="glow"></div>
+<div class="wrap">
+  <a class="back" href="../../index.html">← 返回作品集</a>
+  <div class="num">PROJECT 13 · 自动化</div>
+  <h1>抖音点赞工具</h1>
+  <p class="lede">基于浏览器自动化的抖音批量互动脚本：按目标账号进入作品页，模拟真人节奏完成点赞、收藏等操作，支持批量执行与数量控制。</p>
+  <div class="tags">
+    <span class="tag">Python</span>
+    <span class="tag">DrissionPage</span>
+    <span class="tag">XPath</span>
+    <span class="tag">自动化控制</span>
+  </div>
+
+  <h2>项目背景</h2>
+  <p style="font-size:15px;color:#b8afd3;margin-bottom:46px">
+    这是一个把「重复手工操作」交给程序的项目。难点不在点击本身，而在<strong style="color:#ddd6f3">如何让自动化不被识别、不误触、不中断</strong>：
+    抖音的按钮是动态渲染的，滚动加载会改变元素位置，操作节奏太快会触发风控。
+  </p>
+
+  <h2>技术要点</h2>
+  <div class="grid">
+    <div class="card">
+      <h3>浏览器接管</h3>
+      <p>用 DrissionPage 直接接管已登录的 Chrome 实例，复用真实登录态，避免反复扫码。</p>
+    </div>
+    <div class="card">
+      <h3>元素定位</h3>
+      <p>用 XPath 按文案与属性双重条件定位点赞 / 收藏按钮，比固定选择器更抗页面改版。</p>
+    </div>
+    <div class="card">
+      <h3>节奏控制</h3>
+      <p>每次操作间插入随机延时，模拟自然停顿，降低被判定为机器的概率。</p>
+    </div>
+    <div class="card">
+      <h3>批量与计数</h3>
+      <p>支持传入目标列表与执行上限，跑完自动停止，避免无边界循环。</p>
+    </div>
+  </div>
+
+  <h2>执行流程</h2>
+  <ul class="flow">
+    <li><strong>启动浏览器</strong> — 接管本地已登录会话，打开目标作品页。</li>
+    <li><strong>等待渲染</strong> — 显式等待目标元素出现，而非固定 sleep，兼顾速度与稳定。</li>
+    <li><strong>判断状态</strong> — 读取按钮当前是否已点赞，已操作过的直接跳过，避免重复计数。</li>
+    <li><strong>执行操作</strong> — 点击目标按钮，随机延时后进入下一个目标。</li>
+    <li><strong>循环终止</strong> — 达到设定数量或目标列表耗尽即结束，输出执行摘要。</li>
+  </ul>
+
+  <h2>关键代码结构</h2>
+  <div class="code">
+<span class="k">from</span> DrissionPage <span class="k">import</span> ChromiumPage
+<span class="k">import</span> random, time
+
+page = ChromiumPage()          <span class="c"># 接管已登录的浏览器</span>
+
+<span class="k">for</span> url <span class="k">in</span> targets:
+    page.get(url)
+    page.wait.ele_displayed(<span class="s">'xpath://div[contains(@class,"like")]'</span>)
+
+    btn = page.ele(<span class="s">'xpath://div[@data-e2e="like-icon"]'</span>)
+    <span class="k">if</span> <span class="k">not</span> is_liked(btn):        <span class="c"># 已操作过则跳过</span>
+        btn.click()
+        time.sleep(random.uniform(<span class="s">1.5</span>, <span class="s">3.2</span>))  <span class="c"># 随机节奏</span>
+  </div>
+
+  <div class="note">
+    <strong>说明：</strong>这是一个自动化效率工具的练习项目，用于验证浏览器自动化在动态页面上的稳定性。
+    实际使用需遵守平台规则，仅用于自己账号的日常互动管理。
+  </div>
+
+  <footer>
+    王思洋 · Python 自动化作品 · <a href="https://gitee.com/simonwangsy/a-new-beginning" target="_blank" rel="noopener">源码仓库</a>
+  </footer>
+</div>
+</body>
+</html>

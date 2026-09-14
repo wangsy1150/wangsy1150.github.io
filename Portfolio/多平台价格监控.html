@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>多平台价格监控 · 项目详情</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"Microsoft YaHei","PingFang SC",Arial,sans-serif;
+    color:#eae6f5;background:#0d0a17;line-height:1.75;overflow-x:hidden}
+  .glow{position:fixed;inset:0;pointer-events:none;z-index:0;
+    background:
+      radial-gradient(circle at 18% 6%, rgba(139,92,246,.26), transparent 45%),
+      radial-gradient(circle at 84% 14%, rgba(56,189,248,.16), transparent 40%),
+      radial-gradient(circle at 50% 96%, rgba(236,72,153,.14), transparent 45%)}
+  .wrap{position:relative;z-index:1;max-width:960px;margin:0 auto;padding:56px 24px 96px}
+  .back{display:inline-flex;align-items:center;gap:8px;color:#a89ec9;text-decoration:none;
+    font-size:14px;margin-bottom:36px;transition:color .2s}
+  .back:hover{color:#c4b5fd}
+  .num{display:inline-block;font-size:13px;letter-spacing:.18em;color:#8b7fc7;
+    border:1px solid rgba(139,92,246,.35);border-radius:999px;padding:5px 14px;margin-bottom:18px}
+  h1{font-size:clamp(28px,4.6vw,44px);line-height:1.25;font-weight:800;
+    background:linear-gradient(120deg,#c4b5fd 0%,#a78bfa 40%,#7dd3fc 100%);
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:16px}
+  .lede{font-size:17px;color:#b9b0d6;max-width:660px;margin-bottom:30px}
+  .tags{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:46px}
+  .tag{font-size:12.5px;padding:5px 13px;border-radius:999px;
+    background:rgba(139,92,246,.14);border:1px solid rgba(139,92,246,.32);color:#c9bff0}
+  h2{font-size:20px;color:#ddd6f3;margin:0 0 16px;padding-left:14px;position:relative}
+  h2::before{content:"";position:absolute;left:0;top:5px;bottom:5px;width:3px;
+    border-radius:2px;background:linear-gradient(180deg,#a78bfa,#38bdf8)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:46px}
+  .card{background:rgba(255,255,255,.035);border:1px solid rgba(139,92,246,.18);
+    border-radius:13px;padding:18px 20px}
+  .card h3{font-size:14px;color:#a78bfa;margin-bottom:8px}
+  .card p{font-size:14px;color:#b3aacd;margin:0}
+  ul.flow{list-style:none;counter-reset:step;margin-bottom:46px}
+  ul.flow li{position:relative;padding-left:32px;margin-bottom:16px;font-size:14.5px;color:#b8afd3}
+  ul.flow li::before{content:counter(step);counter-increment:step;position:absolute;left:0;top:1px;
+    width:21px;height:21px;border-radius:50%;font-size:12px;font-weight:700;color:#0d0a17;
+    text-align:center;line-height:21px;background:linear-gradient(135deg,#a78bfa,#7dd3fc)}
+  ul.flow li strong{color:#ddd6f3;font-weight:600}
+  .code{background:#120f1f;border:1px solid rgba(139,92,246,.2);border-radius:12px;
+    padding:18px 20px;font-family:Consolas,Monaco,monospace;font-size:13px;color:#c9d6f5;
+    overflow-x:auto;margin-bottom:46px;line-height:1.7}
+  .code .c{color:#6f6690}.code .k{color:#c4b5fd}.code .s{color:#7dd3fc}
+  footer{text-align:center;font-size:13px;color:#6f6690;padding-top:36px;
+    border-top:1px solid rgba(139,92,246,.14)}
+  footer a{color:#a78bfa;text-decoration:none}
+</style>
+</head>
+<body>
+<div class="glow"></div>
+<div class="wrap">
+  <a class="back" href="../../index.html">← 返回作品集</a>
+  <div class="num">PROJECT 14 · 自动化</div>
+  <h1>多平台价格监控</h1>
+  <p class="lede">跨商城商品价格监控系统：定时采集京东、淘宝等平台的目标商品价格，命中预设阈值时通过微信推送提醒，并支持定时任务自动收尾。</p>
+  <div class="tags">
+    <span class="tag">Python</span>
+    <span class="tag">DrissionPage</span>
+    <span class="tag">APScheduler</span>
+    <span class="tag">Server酱推送</span>
+    <span class="tag">JSON 持久化</span>
+  </div>
+
+  <h2>项目背景</h2>
+  <p style="font-size:15px;color:#b8afd3;margin-bottom:46px">
+    「等到降价再买」这件事最适合交给程序。这个项目把<strong style="color:#ddd6f3">定时抓取 → 价格比对 → 命中提醒 → 任务收尾</strong>
+    串成一条完整链路，并且针对每个平台单独处理了登录态与页面差异，而不是用一份代码硬套所有站点。
+  </p>
+
+  <h2>技术要点</h2>
+  <div class="grid">
+    <div class="card">
+      <h3>多平台适配</h3>
+      <p>京东、淘宝各写独立采集器，共用同一套「读取目标 → 抓价 → 比对 → 推送」的主流程。</p>
+    </div>
+    <div class="card">
+      <h3>定时调度</h3>
+      <p>APScheduler 管理定时任务，按设定间隔自动执行，无需人工触发。</p>
+    </div>
+    <div class="card">
+      <h3>微信推送</h3>
+      <p>接入 Server酱，把「某商品已降到目标价」推到微信，SendKey 由环境变量注入。</p>
+    </div>
+    <div class="card">
+      <h3>任务自收尾</h3>
+      <p>监控任务由独立脚本启动，达到条件后自动结束并清理，避免进程长期驻留。</p>
+    </div>
+  </div>
+
+  <h2>执行流程</h2>
+  <ul class="flow">
+    <li><strong>加载目标</strong> — 读取待监控商品列表：名称、链接、目标价格。</li>
+    <li><strong>逐项抓价</strong> — 按平台分发到对应采集器，取回当前价格与库存状态。</li>
+    <li><strong>比对阈值</strong> — 当前价 ≤ 目标价时进入提醒分支，否则只记录不打扰。</li>
+    <li><strong>推送通知</strong> — 通过 Server酱把商品名、原价、现价、链接推到微信。</li>
+    <li><strong>任务收尾</strong> — 独立调度脚本负责启动与结束，全程无人值守。</li>
+  </ul>
+
+  <h2>关键代码结构</h2>
+  <div class="code">
+<span class="c"># 凭据统一从环境变量读取，不落代码</span>
+<span class="k">from</span> config <span class="k">import</span> get_credential
+SENDKEY = get_credential(<span class="s">"SERVERCHAN_SENDKEY"</span>)
+
+<span class="k">def</span> check_and_notify(name, url, target_price):
+    price = fetch_price(url)               <span class="c"># 按平台分发采集</span>
+    <span class="k">if</span> price <span class="k">and</span> price &lt;= target_price:
+        push_wechat(SENDKEY, name, price)  <span class="c"># 命中阈值 → 微信提醒</span>
+        <span class="k">return</span> <span class="k">True</span>
+    <span class="k">return</span> <span class="k">False</span>
+  </div>
+
+  <footer>
+    王思洋 · Python 自动化作品 · <a href="https://gitee.com/simonwangsy/a-new-beginning" target="_blank" rel="noopener">源码仓库</a>
+  </footer>
+</div>
+</body>
+</html>
