@@ -571,6 +571,7 @@ h2 {
 .project-card.accent-mint::before  { background: #389e70; }
 .project-card.accent-blue::before  { background: #4888c8; }
 .project-card.accent-pink::before  { background: #b84870; }
+.project-card.accent-purple::before{ background: #8b5cf6; }
 
 /* 缩略图 */
 .card-thumb {
@@ -588,6 +589,7 @@ h2 {
 .thumb-mint  { background-image: linear-gradient(135deg, #002a1a 0%, #005038 40%, #1a7a58 100%); }
 .thumb-blue  { background-image: linear-gradient(135deg, #0a1e40 0%, #153878 40%, #2858a8 100%); }
 .thumb-pink  { background-image: linear-gradient(135deg, #3a0a24 0%, #702048 40%, #a83868 100%); }
+.thumb-purple{ background-image: linear-gradient(135deg, #1b0a33 0%, #3d1a70 40%, #7a3fb0 100%); }
 
 .project-top, .project-bottom {
   display: flex;

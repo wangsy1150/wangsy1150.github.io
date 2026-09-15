@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>语音交互助手 · 项目详情</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"Microsoft YaHei","PingFang SC",Arial,sans-serif;
+    color:#eae6f5;background:#0d0a17;line-height:1.75;overflow-x:hidden}
+  .glow{position:fixed;inset:0;pointer-events:none;z-index:0;
+    background:
+      radial-gradient(circle at 18% 6%, rgba(139,92,246,.26), transparent 45%),
+      radial-gradient(circle at 84% 14%, rgba(56,189,248,.16), transparent 40%),
+      radial-gradient(circle at 50% 96%, rgba(236,72,153,.14), transparent 45%)}
+  .wrap{position:relative;z-index:1;max-width:960px;margin:0 auto;padding:56px 24px 96px}
+  .back{display:inline-flex;align-items:center;gap:8px;color:#a89ec9;text-decoration:none;
+    font-size:14px;margin-bottom:36px;transition:color .2s}
+  .back:hover{color:#c4b5fd}
+  .num{display:inline-block;font-size:13px;letter-spacing:.18em;color:#8b7fc7;
+    border:1px solid rgba(139,92,246,.35);border-radius:999px;padding:5px 14px;margin-bottom:18px}
+  h1{font-size:clamp(28px,4.6vw,44px);line-height:1.25;font-weight:800;
+    background:linear-gradient(120deg,#c4b5fd 0%,#a78bfa 40%,#7dd3fc 100%);
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:16px}
+  .lede{font-size:17px;color:#b9b0d6;max-width:660px;margin-bottom:30px}
+  .tags{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:46px}
+  .tag{font-size:12.5px;padding:5px 13px;border-radius:999px;
+    background:rgba(139,92,246,.14);border:1px solid rgba(139,92,246,.32);color:#c9bff0}
+  h2{font-size:20px;color:#ddd6f3;margin:0 0 16px;padding-left:14px;position:relative}
+  h2::before{content:"";position:absolute;left:0;top:5px;bottom:5px;width:3px;
+    border-radius:2px;background:linear-gradient(180deg,#a78bfa,#38bdf8)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:46px}
+  .card{background:rgba(255,255,255,.035);border:1px solid rgba(139,92,246,.18);
+    border-radius:13px;padding:18px 20px}
+  .card h3{font-size:14px;color:#a78bfa;margin-bottom:8px}
+  .card p{font-size:14px;color:#b3aacd;margin:0}
+  .card code{font-family:Consolas,Monaco,monospace;font-size:12.5px;color:#c9bff0;
+    background:rgba(139,92,246,.16);border-radius:4px;padding:1px 5px}
+  ul.flow{list-style:none;counter-reset:step;margin-bottom:46px}
+  ul.flow li{position:relative;padding-left:32px;margin-bottom:16px;font-size:14.5px;color:#b8afd3}
+  ul.flow li::before{content:counter(step);counter-increment:step;position:absolute;left:0;top:1px;
+    width:21px;height:21px;border-radius:50%;font-size:12px;font-weight:700;color:#0d0a17;
+    text-align:center;line-height:21px;background:linear-gradient(135deg,#a78bfa,#7dd3fc)}
+  ul.flow li strong{color:#ddd6f3;font-weight:600}
+  .code{background:#120f1f;border:1px solid rgba(139,92,246,.2);border-radius:12px;
+    padding:18px 20px;font-family:Consolas,Monaco,monospace;font-size:13px;color:#c9d6f5;
+    overflow-x:auto;margin-bottom:46px;line-height:1.7}
+  .code .c{color:#6f6690}.code .k{color:#c4b5fd}.code .s{color:#7dd3fc}
+  .cap{font-size:12.5px;color:#6f6690;margin:-36px 0 46px}
+  .lede+p strong{color:#ddd6f3}
+  footer{text-align:center;font-size:13px;color:#6f6690;padding-top:36px;
+    border-top:1px solid rgba(139,92,246,.14)}
+  footer a{color:#a78bfa;text-decoration:none}
+</style>
+</head>
+<body>
+<div class="glow"></div>
+<div class="wrap">
+  <a class="back" href="../index.html">← 返回作品集</a>
+  <div class="num">PROJECT 19 · AI 应用</div>
+  <h1>语音交互助手</h1>
+  <p class="lede">对着麦克风说话 → DeepSeek 思考 → edge-tts 朗读的本地语音应用。从 v3 起它不只会聊天，
+  更是一个 <strong style="color:#ddd6f3">Agent</strong>：<strong style="color:#ddd6f3">要不要查资料由模型自己决定</strong>，
+  查不到就如实回答「资料里没有提到」，整个决策过程在前端摊开给你看。</p>
+  <div class="tags">
+    <span class="tag">Python</span>
+    <span class="tag">Flask</span>
+    <span class="tag">DeepSeek</span>
+    <span class="tag">Function Calling</span>
+    <span class="tag">edge-tts</span>
+    <span class="tag">原生 JavaScript</span>
+    <span class="tag">102 个单元测试</span>
+  </div>
+
+  <h2>项目背景</h2>
+  <p style="font-size:15px;color:#b8afd3;margin-bottom:46px">
+    常见语音助手只能「问一句答一句」，答案对不对全靠模型自由发挥。这个项目想验证另一条路：
+    把本地文档交给 AI 当资料库，<strong style="color:#ddd6f3">让它自己判断什么时候该去查、什么时候不该查</strong>，
+    并且把「查没查、查到什么、来源是哪个文件」全部暴露出来。整条链路
+    <strong style="color:#ddd6f3">listen → think → speak</strong> 三层互不依赖，任何一层都能单独替换或测试。
+  </p>
+
+  <h2>技术要点</h2>
+  <div class="grid">
+    <div class="card">
+      <h3>Function Calling 真自主</h3>
+      <p>请求体带 <code>tools</code> + <code>tool_choice:"auto"</code>，闲聊不查库，问事实才调工具 —— 决策权在模型手上。</p>
+    </div>
+    <div class="card">
+      <h3>诚实性三重保险</h3>
+      <p>系统提示词约束 + 工具结果里再强调一遍 + <strong>一致性校验</strong>：没查就下结论时系统替它补查再重答。</p>
+    </div>
+    <div class="card">
+      <h3>朗读自动降级</h3>
+      <p>edge-tts 在线合成失败时，自动回退到浏览器原生 speechSynthesis，对话流程完全不中断。</p>
+    </div>
+    <div class="card">
+      <h3>服务端记忆</h3>
+      <p>按 session_id 隔离，保留最近 10 轮；刷新页面、甚至重启后端上下文都还在。</p>
+    </div>
+    <div class="card">
+      <h3>零依赖中文检索</h3>
+      <p>只用标准库实现二元组切词 + BM25 风格 IDF 打分，另有单字兜底与文件名入词表。</p>
+    </div>
+    <div class="card">
+      <h3>不侵入老代码</h3>
+      <p>v3 的新接口全部走 Flask Blueprint，原有路由一行没改，老测试 102 个用例全绿。</p>
+    </div>
+  </div>
+
+  <h2>一次问答发生了什么</h2>
+  <ul class="flow">
+    <li><strong>听</strong> — 浏览器 <code>SpeechRecognition</code> 把语音转成文字（listen）。</li>
+    <li><strong>决策</strong> — <code>decide()</code> 带上工具箱请模型做一次判断：调工具，还是直接回答。</li>
+    <li><strong>调用</strong> — 模型说要查，<code>run_tool()</code> 就在本地知识库检索，把命中片段塞回对话。</li>
+    <li><strong>再决策</strong> — 带着观察结果回到第 2 步，最多 3 轮；到上限则强制收口回答。</li>
+    <li><strong>校验</strong> — 若模型全程没查却断言「查不到」，系统自动补查一次并让它重新作答。</li>
+    <li><strong>说</strong> — 回答交给 edge-tts 合成朗读，同时把整条 trace 渲染成决策卡。</li>
+  </ul>
+
+  <h2>关键代码结构</h2>
+  <div class="code">
+<span class="c"># agent_core.py —— 交给模型的工具说明（节选，真实文案）</span>
+SEARCH_TOOL_DESCRIPTION = (
+    <span class="s">"在用户上传的本地知识库（.md / .txt 文档）中做相关性检索……"</span>
+    <span class="s">"【什么时候必须调用】当用户的问题涉及事实、定义、数字、流程、政策、规则时，"</span>
+    <span class="s">"必须先调用本工具，不要凭自己的记忆回答。"</span>
+    <span class="s">"【返回什么】如果片段列表为空，说明知识库里没有这部分资料，"</span>
+    <span class="s">"此时必须如实回答「资料里没有提到」，绝对不要编造。"</span>
+)
+
+<span class="c"># 工具箱：一个工具一项，这份说明会原样发给模型</span>
+TOOLBOX = [{<span class="s">"name"</span>: <span class="s">"search_knowledge_base"</span>, <span class="s">"description"</span>: SEARCH_TOOL_DESCRIPTION, ...}]
+  </div>
+  <p class="cap">模型能否正确判断「该不该查」，全靠这段说明 —— 所以它写得足够具体。</p>
+
+  <div class="code">
+<span class="c"># 一轮 Agent 对话（ReAct 风格结构示意，实现见源码 agent_core.py）</span>
+messages = build_messages(text, history)
+
+<span class="k">for</span> step <span class="k">in</span> range(AGENT_MAX_STEPS):          <span class="c"># 最多 3 轮决策</span>
+    decision = decide(messages, tools=TOOLBOX, tool_choice=<span class="s">"auto"</span>)
+    <span class="k">if</span> decision.action == <span class="s">"final"</span>:
+        <span class="k">break</span>
+    result = run_tool(decision.name, decision.arguments)   <span class="c"># → 检索本地知识库</span>
+    messages.append(observation(result))                   <span class="c"># 片段塞回对话</span>
+<span class="k">else</span>:
+    decision = decide(messages)                            <span class="c"># 到步数上限：强制收口</span>
+
+<span class="c"># 一致性校验：没查过就说「没有」，系统替它补查再让它重答</span>
+<span class="k">if</span> decision.says_not_found <span class="k">and</span> <span class="k">not</span> trace.has_tool_call <span class="k">and</span> kb.has_documents():
+    messages.append(observation(run_tool(SEARCH_TOOL_NAME, {<span class="s">"query"</span>: text})))
+    decision = decide(messages)
+  </div>
+  <p class="cap">真实案例：问「我们几点下班？」模型一度直接答「资料里没有提到」，补查后它才正确回答「下午 18:00 下班」。</p>
+
+  <h2>怎么运行</h2>
+  <div class="code">
+<span class="c"># 1) 配置密钥（代码里没有任何硬编码，全部从环境变量读取）</span>
+<span class="k">set</span> DEEPSEEK_API_KEY=sk-你的密钥
+
+<span class="c"># 2) 双击 start.bat 即可：自动建虚拟环境、装依赖、启动并打开浏览器</span>
+<span class="c">#    麦克风需要 Chrome 或 Edge，通过 http://127.0.0.1:5000 访问</span>
+
+<span class="c"># 3) 离线跑测试：不联网、不需要 API Key</span>
+.venv\Scripts\python.exe -m unittest test_app -v
+  </div>
+
+  <h2>工程细节</h2>
+  <div class="grid">
+    <div class="card">
+      <h3>102 个单元测试</h3>
+      <p>两个真正联网的函数都支持注入替身，因此全链路可离线验证：参数换算、重试与降级、记忆窗口、接口契约、前端函数调用关系。</p>
+    </div>
+    <div class="card">
+      <h3>可视化决策过程</h3>
+      <p>每条回答下方附决策卡，徽章区分「调用工具 N 次」「未调用工具」「系统补查 N 次」，一眼看出这轮有没有查资料。</p>
+    </div>
+    <div class="card">
+      <h3>知识库管理面板</h3>
+      <p>支持拖拽上传 .md / .txt，文件名做安全清洗挡掉路径穿越，单文件 2MB、整库 20MB 上限。</p>
+    </div>
+    <div class="card">
+      <h3>凭据零硬编码</h3>
+      <p>密钥只从环境变量读取，仓库中不含任何真实凭据，clone 下来配一个变量就能跑。</p>
+    </div>
+  </div>
+
+  <footer>
+    王思洋 · AI 语音 Agent 作品 ·
+    <a href="https://github.com/wangsy1150/deepseek-voice-assistant" target="_blank" rel="noopener">GitHub 源码仓库</a>
+  </footer>
+</div>
+</body>
+</html>
