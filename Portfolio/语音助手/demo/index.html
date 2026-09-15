@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>语音交互助手 · 在线演示</title>
+<link rel="stylesheet" href="style.css" />
+<style>
+  /* ---------- 演示版专属：顶部说明条 + 追问区 ---------- */
+  .demo-banner{
+    position:relative;z-index:5;display:flex;flex-wrap:wrap;gap:10px 16px;
+    align-items:center;justify-content:center;
+    padding:11px 18px;font-size:13px;line-height:1.5;
+    background:linear-gradient(90deg,rgba(124,58,237,.14),rgba(34,211,238,.14));
+    border-bottom:1px solid rgba(139,92,246,.22);color:#4b5563
+  }
+  .demo-banner b{color:#5b21b6;font-weight:600}
+  .demo-banner .dot-sep{color:#c4b5fd}
+  .demo-banner a{color:#7c3aed;text-decoration:none;border-bottom:1px dashed rgba(124,58,237,.5)}
+  .demo-banner a:hover{color:#5b21b6}
+  .demo-banner .badge-live{
+    display:inline-flex;align-items:center;gap:6px;font-weight:600;color:#0e7490;
+    background:rgba(34,211,238,.16);border:1px solid rgba(34,211,238,.4);
+    border-radius:999px;padding:3px 11px;font-size:12.5px
+  }
+  .demo-banner .badge-live::before{
+    content:"";width:7px;height:7px;border-radius:50%;background:#06b6d4;
+    box-shadow:0 0 0 3px rgba(6,182,212,.22)
+  }
+
+  /* 底部追问区：取代真实版的麦克风输入（演示版不能真的调模型） */
+  .demo-ask{position:relative;z-index:5;padding:14px 22px 20px;
+    border-top:1px solid rgba(148,163,184,.22);background:rgba(255,255,255,.72)}
+  .demo-ask-head{font-size:13px;color:#6b7280;margin-bottom:10px}
+  .demo-ask-head b{color:#4c1d95}
+  .demo-chips{display:flex;flex-wrap:wrap;gap:9px}
+  .demo-chip{
+    font:inherit;font-size:13.5px;cursor:pointer;
+    padding:8px 15px;border-radius:999px;color:#5b21b6;
+    background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.32);
+    transition:.18s
+  }
+  .demo-chip:hover{background:rgba(139,92,246,.2);border-color:rgba(139,92,246,.55);transform:translateY(-1px)}
+  .demo-chip[disabled]{opacity:.5;cursor:not-allowed;transform:none}
+  .demo-chip.is-done{background:rgba(16,185,129,.12);border-color:rgba(16,185,129,.4);color:#047857}
+
+  /* 正在播放时的状态点动画 */
+  @keyframes demoPulse{0%,100%{opacity:1}50%{opacity:.35}}
+  .demo-ask.is-playing .demo-ask-head b::after{
+    content:" …";animation:demoPulse 1s ease-in-out infinite
+  }
+
+  /* ---------- 布局覆盖：真实版用 height:100vh 撑满，演示版要让「场景按钮」始终可见 ---------- */
+  .app{
+    height:auto;
+    min-height:100vh;
+    padding-bottom:0;
+  }
+  /* 空状态：对话区收紧，别把下面的按钮挤出去 */
+  .chat{
+    flex:0 0 auto;
+    min-height:240px;
+    max-height:58vh;
+    overflow-y:auto;
+  }
+  /* 有消息后放开高度，让对话自然铺开 */
+  body.has-messages .chat{
+    max-height:none;
+    min-height:0;
+  }
+  body.has-messages .empty{ display:none; }
+
+  /* ---------- 修正：命中片段里的换行要保留 ----------
+     片段原文带 \n，但 .trace-preview li 默认为 normal，换行会被折叠成空格，
+     导致「## 报销流程 先提交发票再由部门主管审批」这种句子糊成一行。 */
+  .trace-preview li{ white-space:pre-line; }
+
+  /* ---------- 演示版：给决策卡加一句"怎么读"的注解 ---------- */
+  .demo-note{
+    margin:12px 0 2px;padding:11px 15px;border-radius:11px;font-size:13px;
+    line-height:1.65;color:#4b5563;
+    background:rgba(139,92,246,.07);border-left:3px solid rgba(139,92,246,.5)
+  }
+  .demo-note b{color:#5b21b6}
+  .demo-note code{
+    font-family:Consolas,Monaco,monospace;font-size:12.5px;color:#5b21b6;
+    background:rgba(139,92,246,.14);border-radius:4px;padding:1px 5px
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== 顶部说明条：讲清"这是录播，不是真调模型" ===== -->
+<div class="demo-banner">
+  <span class="badge-live">真实运行录播</span>
+  <span>以下对话是<b>本地真实跑出来</b>的结果，原样回放</span>
+  <span class="dot-sep">·</span>
+  <span>静态页无法调用 DeepSeek（密钥不能放前端），故此处不接模型</span>
+  <span class="dot-sep">·</span>
+  <a href="../index.html">← 返回项目详情</a>
+</div>
+
+<div class="app">
+  <!-- ============ 顶部标题栏（结构同真实版） ============ -->
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-logo">声</div>
+      <div class="brand-text">
+        <h1>语音交互助手</h1>
+        <p>麦克风说话 → DeepSeek 思考 → edge-tts 朗读（失败自动降级浏览器）</p>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <span class="pill" id="modelPill">模型：deepseek-chat</span>
+      <span class="pill" id="agentPill">Agent：Function Calling · 1 个工具</span>
+      <span class="pill" id="voicePill">朗读：edge-tts · 晓晓</span>
+      <span class="pill" id="memoryPill">记忆：1/10 轮</span>
+      <span class="pill" id="keyPill">密钥已配置 ✔</span>
+    </div>
+  </header>
+
+  <!-- ============ 对话区 ============ -->
+  <main class="chat" id="chat">
+    <div class="empty" id="emptyState">
+      <div class="empty-icon">🎙️</div>
+      <p>点击下方按钮开始说话</p>
+      <p class="empty-sub">也支持直接在输入框里打字提问</p>
+    </div>
+  </main>
+
+  <!-- ============ 实时状态 ============ -->
+  <div class="statusbar">
+    <span class="status-dot" id="statusDot"></span>
+    <span id="statusText">准备就绪</span>
+    <span class="status-extra" id="statusExtra"></span>
+  </div>
+
+  <!-- ============ 演示版互动区 ============ -->
+  <footer class="demo-ask" id="demoAsk">
+    <div class="demo-ask-head">
+      <b>选择一个场景回放</b>（点击后逐字打出真实回答，决策卡同步展开）
+    </div>
+    <div class="demo-chips" id="demoChips"></div>
+  </footer>
+</div>
+
+<script src="replay.js"></script>
+<script>
+'use strict';
+/* ============================================================================
+ * 演示版回放逻辑
+ *
+ * 为什么这么做：真实版前端要调 /api/think（Flask），而静态站点没有后端，
+ * 且 DeepSeek 密钥绝不能出现在公开前端。所以把「真实运行的输出」录下来回放，
+ * 界面与真实版共用同一份 style.css，视觉完全一致。
+ *
+ * 每个场景的 HTML 都是从真实运行中的 #chat 里直接取的，未经改写。
+ * ========================================================================== */
+
+const R = window.VA_REPLAY;
+const chat = document.getElementById('chat');
+const emptyState = document.getElementById('emptyState');
+const statusText = document.getElementById('statusText');
+const statusDot = document.getElementById('statusDot');
+const demoAsk = document.getElementById('demoAsk');
+const chipsBox = document.getElementById('demoChips');
+
+/** 打乱消息顺序用的小工具：把 HTML 字符串切成一条条 .msg 的「薄片」 */
+function sliceMessages(html) {
+  const parts = [];
+  const re = /<div class="msg /g;
+  let m, start = -1;
+  while ((m = re.exec(html)) !== null) {
+    if (start >= 0) parts.push(html.slice(start, m.index));
+    start = m.index;
+  }
+  if (start >= 0) parts.push(html.slice(start));
+  return parts;
+}
+
+/** 决策卡默认展开还是收起（真实版默认展开，这里保持） */
+function keepTraceOpen(node) {
+  const btn = node.querySelector('.trace-toggle');
+  if (btn) btn.textContent = '收起';
+}
+
+let playing = false;
+
+/** 回放一个场景：逐条消息插入，带打字机效果 */
+async function playTurn(turn) {
+  if (playing) return;
+  playing = true;
+  setChipsDisabled(true);
+
+  emptyState.hidden = true;
+  chat.innerHTML = '';
+  chat.scrollTop = 0;
+  document.body.classList.add('has-messages');
+
+  const messages = sliceMessages(turn.html);
+  demoAsk.classList.add('is-playing');
+
+  for (const msgHtml of messages) {
+    const holder = document.createElement('div');
+    holder.innerHTML = msgHtml;
+    const node = holder.firstElementChild;
+    if (!node) continue;
+
+    const isUser = node.classList.contains('user');
+    // 插入时先隐藏，再淡入
+    node.style.opacity = '0';
+    node.style.transform = 'translateY(8px)';
+    node.style.transition = 'opacity .28s ease, transform .28s ease';
+    chat.appendChild(node);
+
+    statusText.textContent = isUser ? '识别中…' : '思考中…';
+    statusDot.style.background = isUser ? '#f59e0b' : '#8b5cf6';
+
+    requestAnimationFrame(() => {
+      node.style.opacity = '1';
+      node.style.transform = 'translateY(0)';
+    });
+
+    if (isUser) {
+      await sleep(620);
+    } else {
+      // AI 回答：先显示"逐字打出"的观感 —— 用气泡文本做打字机
+      const body = node.querySelector('.bubble-body');
+      const full = body ? body.textContent : '';
+      const trace = node.querySelector('.trace-card');
+      if (trace) trace.style.visibility = 'hidden';
+      if (body) {
+        body.textContent = '';
+        await typewrite(body, full);
+      }
+      await sleep(220);
+      if (trace) {
+        trace.style.visibility = 'visible';
+        trace.style.opacity = '0';
+        trace.style.transition = 'opacity .3s ease';
+        requestAnimationFrame(() => { trace.style.opacity = '1'; });
+        keepTraceOpen(node);
+      }
+      await sleep(420);
+    }
+    chat.scrollTo({ top: chat.scrollHeight, behavior: 'smooth' });
+  }
+
+  statusText.textContent = R.pills.status || '已收到回答';
+  statusDot.style.background = '#10b981';
+  memoryPillSet(turn);
+  demoAsk.classList.remove('is-playing');
+  appendNote(turn);
+  playing = false;
+  setChipsDisabled(false);
+  markChipDone(turn.id);
+}
+
+/** 每个场景看点的简短注解，帮助访客读懂画面 */
+const NOTES = {
+  chat: '<b>这一轮的关键：它没有查资料。</b>面对「你能帮我做什么」这种闲聊，' +
+        '模型判断不需要检索，决策卡直接写 <code>未调用工具，直接回答</code> —— ' +
+        '没有为了"显得在干活"而空跑一次检索。这就是 <code>tool_choice:"auto"</code> 生效的证据。',
+  kb: '<b>这一轮的关键：它自己决定要查。</b>问的是事实（年假规定），模型先调 ' +
+      '<code>search_knowledge_base</code> 检索本地 <code>员工手册.md</code>，' +
+      '拿到命中片段后第二轮才作答，答案末尾标注「来源：员工手册.md」。<br>' +
+      '注意片段里夹着「报销流程」的内容 —— 那是 <b>BM25 按词频打分带出的相邻段落</b>，' +
+      '不是模型编的；真实检索本来就会这样，所以答案还必须自己判断该用哪一段。'
+};
+
+function appendNote(turn) {
+  const old = document.getElementById('demoNote');
+  if (old) old.remove();
+  const txt = NOTES[turn.id];
+  if (!txt) return;
+  const box = document.createElement('div');
+  box.className = 'demo-note';
+  box.id = 'demoNote';
+  box.innerHTML = txt;
+  chat.appendChild(box);
+  chat.scrollTo({ top: chat.scrollHeight, behavior: 'smooth' });
+}
+
+/** 逐字打出 */
+function typewrite(el, text) {
+  return new Promise(resolve => {
+    const total = text.length;
+    // 长回答按比例加速，整体控制在 0.5–1.1 秒内，避免拖沓
+    const step = Math.max(1, Math.round(total / 90));
+    const delay = Math.min(24, Math.max(9, Math.round(900 / Math.max(1, total / step))));
+    let i = 0;
+    const timer = setInterval(() => {
+      i += step;
+      el.textContent = text.slice(0, i);
+      if (i >= total) {
+        el.textContent = text;
+        clearInterval(timer);
+        resolve();
+      }
+      chat.scrollTop = chat.scrollHeight;
+    }, delay);
+  });
+}
+
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+/** 同步"记忆 N/10 轮"标签（照真实版的语义） */
+function memoryPillSet(turn) {
+  const pill = document.getElementById('memoryPill');
+  const n = turn.id === 'kb' ? 1 : 2;
+  pill.textContent = '记忆：' + n + '/10 轮';
+}
+
+function setChipsDisabled(v) {
+  chipsBox.querySelectorAll('button').forEach(b => { b.disabled = v; });
+}
+
+function markChipDone(id) {
+  const b = chipsBox.querySelector('[data-turn="' + id + '"]');
+  if (b) b.classList.add('is-done');
+}
+
+/* ---------- 初始化 ---------- */
+(function init() {
+  // 侧栏标签用真实导出值覆盖
+  if (R.pills) {
+    const map = { modelPill: 'model', agentPill: 'agent',
+                  voicePill: 'voice', memoryPill: 'memory', keyPill: 'key' };
+    Object.keys(map).forEach(id => {
+      const v = R.pills[map[id]];
+      if (v) document.getElementById(id).textContent = v;
+    });
+  }
+
+  // 生成场景按钮
+  R.turns.forEach(t => {
+    const btn = document.createElement('button');
+    btn.className = 'demo-chip';
+    btn.type = 'button';
+    btn.dataset.turn = t.id;
+    btn.textContent = t.label;
+    btn.addEventListener('click', () => playTurn(t));
+    chipsBox.appendChild(btn);
+  });
+
+  statusText.textContent = '准备就绪';
+  statusDot.style.background = '#10b981';
+})();
+</script>
+</body>
+</html>
