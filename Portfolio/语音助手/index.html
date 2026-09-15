@@ -48,6 +48,21 @@
   .code .c{color:#6f6690}.code .k{color:#c4b5fd}.code .s{color:#7dd3fc}
   .cap{font-size:12.5px;color:#6f6690;margin:-36px 0 46px}
   .lede+p strong{color:#ddd6f3}
+
+  /* ---------- 运行截图 ---------- */
+  .shots{display:grid;gap:26px;margin-bottom:46px}
+  .shot{background:rgba(255,255,255,.035);border:1px solid rgba(139,92,246,.18);
+    border-radius:14px;overflow:hidden;transition:border-color .25s,transform .25s}
+  .shot:hover{border-color:rgba(139,92,246,.42);transform:translateY(-2px)}
+  .shot img{display:block;width:100%;height:auto}
+  .shot-body{padding:15px 20px 18px}
+  .shot-body h4{font-size:14.5px;color:#ddd6f3;margin-bottom:7px;font-weight:600}
+  .shot-body p{font-size:13.5px;color:#a89ec9;margin:0}
+  .shot-body code{font-family:Consolas,Monaco,monospace;font-size:12.5px;color:#c9bff0;
+    background:rgba(139,92,246,.16);border-radius:4px;padding:1px 5px}
+  .shot-num{display:inline-block;font-size:11.5px;letter-spacing:.1em;color:#8b7fc7;
+    border:1px solid rgba(139,92,246,.35);border-radius:999px;padding:2px 10px;margin-right:9px}
+
   footer{text-align:center;font-size:13px;color:#6f6690;padding-top:36px;
     border-top:1px solid rgba(139,92,246,.14)}
   footer a{color:#a78bfa;text-decoration:none}
@@ -79,6 +94,50 @@
     并且把「查没查、查到什么、来源是哪个文件」全部暴露出来。整条链路
     <strong style="color:#ddd6f3">listen → think → speak</strong> 三层互不依赖，任何一层都能单独替换或测试。
   </p>
+
+  <h2>运行截图</h2>
+  <div class="shots">
+
+    <div class="shot">
+      <img src="shots/02-Agent检索知识库.png" alt="Agent 自主检索知识库并标注来源">
+      <div class="shot-body">
+        <h4><span class="shot-num">核心</span>Agent 自己决定「要查资料」</h4>
+        <p>问一句公司年假规定，模型先调 <code>search_knowledge_base</code> 检索本地 <code>员工手册.md</code>，
+        相关度 5.81 / 6.61 两条命中后，第二轮才决定作答 —— 答案末尾自动标注「来源：员工手册.md」。
+        整条 trace（决策 → 调用 → 命中片段 → 再决策）实时渲染在回答下方。</p>
+      </div>
+    </div>
+
+    <div class="shot">
+      <img src="shots/03-多轮对话与记忆.png" alt="多轮对话与未调用工具的直接回答">
+      <div class="shot-body">
+        <h4><span class="shot-num">对比</span>闲聊不查库，问事实才查</h4>
+        <p>同样一个 Agent，面对「你能帮我做什么」这类闲聊时，两轮决策卡都写着
+        <code>未调用工具，直接回答</code> —— 没有为了「显得在干活」而空跑一次检索；
+        而上一张图里问年假规定时它主动调了工具。标签栏的「记忆 2/10 轮」说明多轮上下文由服务端按
+        <code>session_id</code> 保留。这个对比正是 <code>tool_choice:"auto"</code> 生效的证据。</p>
+      </div>
+    </div>
+
+    <div class="shot">
+      <img src="shots/04-知识库与工具箱.png" alt="知识库管理面板与 AI 工具箱">
+      <div class="shot-body">
+        <h4><span class="shot-num">工具</span>知识库与工具箱一览</h4>
+        <p>拖拽上传 <code>.md</code> / <code>.txt</code> 即成为 AI 的资料；面板直接把发给模型的工具说明摊开 ——
+        「什么时候必须调用」「返回什么」「查不到必须如实回答」，让 Agent 的行为完全可解释。</p>
+      </div>
+    </div>
+
+    <div class="shot">
+      <img src="shots/01-界面总览.png" alt="语音交互助手主界面">
+      <div class="shot-body">
+        <h4><span class="shot-num">入口</span>主界面与实时自检</h4>
+        <p>顶部标签实时反映运行状态：当前模型、Agent 工具数、朗读引擎与音色、记忆轮次、密钥是否配置。
+        底部一行是语音入口（按住说话）与文字输入双通道。</p>
+      </div>
+    </div>
+
+  </div>
 
   <h2>技术要点</h2>
   <div class="grid">

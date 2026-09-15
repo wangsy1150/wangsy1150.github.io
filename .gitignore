@@ -1,0 +1,20 @@
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Python 缓存（如果目录内有脚本运行）
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# 截图/调试临时产物
+_*.log
+_*.txt
+*.tmp
