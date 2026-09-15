@@ -1,46 +1,33 @@
 #!/bin/bash
-# GitHub Pages 部署脚本 - 个人作品集
-# 用户名: Kelly0905
-# 仓库: Kelly0905.github.io
+# 作品集网站 一键部署
+# 仓库: wangsy1150/wangsy1150.github.io
+# 站点: https://wangsy1150.github.io/
+set -e
+
+cd "$(dirname "$0")"
 
 echo "========================================"
-echo "  GitHub Pages 部署脚本"
-echo "  用户名: Kelly0905"
-echo "  仓库: Kelly0905.github.io"
+echo "  作品集网站 一键部署"
+echo "  仓库: wangsy1150/wangsy1150.github.io"
+echo "  站点: https://wangsy1150.github.io/"
 echo "========================================"
 echo ""
 
-# 切换到作品集目录
-cd "/g/Desktop/5.3(开阳)课程资料/day24个人作品集搭建+简历优化/02课程代码/01个人作品集部署/个人作品集"
-
-echo "[1/4] 初始化 Git 仓库..."
-git init
-git checkout -b main
+echo "[1/3] 查看改动..."
+git status --short
 
 echo ""
-echo "[2/4] 添加所有文件并提交..."
-git add .
-git commit -m "Initial commit: 个人作品集"
+echo "[2/3] 提交改动..."
+git add -A
+MSG="${1:-更新作品集内容}"
+git commit -m "$MSG" || echo "(没有新改动可提交)"
 
 echo ""
-echo "[3/4] 配置远程仓库..."
-git remote remove origin 2>/dev/null
-git remote add origin https://github.com/Kelly0905/Kelly0905.github.io.git
-
-echo ""
-echo "[4/4] 推送到 GitHub..."
-echo ""
-echo "如果提示认证，请使用："
-echo "  用户名: Kelly0905"
-echo "  密码: GitHub Personal Access Token"
-echo ""
-echo "获取 Token: https://github.com/settings/tokens"
-echo ""
-git push -u origin main
+echo "[3/3] 推送到 GitHub..."
+git push
 
 echo ""
 echo "========================================"
-echo "  推送完成！"
-echo "  访问地址: https://Kelly0905.github.io"
-echo "  （等待 1-5 分钟后生效）"
+echo "  推送完成！等待 1-2 分钟后生效"
+echo "  访问: https://wangsy1150.github.io/"
 echo "========================================"

@@ -1,63 +1,47 @@
 @echo off
 chcp 65001 >nul
 echo ========================================
-echo   GitHub Pages 部署脚本
-echo   用户名: Kelly0905
-echo   仓库名: Kelly0905.github.io
+echo   作品集网站 一键部署
+echo   仓库: wangsy1150/wangsy1150.github.io
+echo   站点: https://wangsy1150.github.io/
 echo ========================================
 echo.
 
-REM 检查 Git 是否可用
 where git >nul 2>nul
 if %errorlevel% neq 0 (
     echo [错误] 未检测到 Git，请先安装 Git for Windows
-    echo 下载地址: https://git-scm.com/download/win
     pause
     exit /b 1
 )
 
-echo [1/4] 正在初始化 Git 仓库...
-git init
-git checkout -b main
+cd /d "%~dp0"
+
+echo [1/3] 查看改动...
+git status --short
 
 echo.
-echo [2/4] 添加所有文件...
-git add .
-git commit -m "Initial commit: 个人作品集"
+echo [2/3] 提交改动...
+git add -A
+set /p MSG=请输入提交说明（直接回车用默认）: 
+if "%MSG%"=="" set MSG=更新作品集内容
+git commit -m "%MSG%"
 
 echo.
-echo [3/4] 添加远程仓库...
-git remote remove origin 2>nul
-git remote add origin https://github.com/Kelly0905/Kelly0905.github.io.git
-
-echo.
-echo [4/4] 推送到 GitHub...
-echo.
-echo 如果提示输入用户名和密码：
-echo   用户名: Kelly0905
-echo   密码: 使用 GitHub Personal Access Token（不是登录密码）
-echo.
-echo 如未配置 Token，请先在 GitHub -^> Settings -^> Developer settings -^> Personal access tokens 生成
-echo.
-pause
-git push -u origin main
+echo [3/3] 推送到 GitHub...
+git push
 
 if %errorlevel% neq 0 (
     echo.
-    echo [提示] 如果推送失败，可能是因为：
-    echo   1. 仓库 Kelly0905.github.io 还未创建
-    echo   2. 认证信息不正确
-    echo.
-    echo 请先访问 https://github.com/new 创建仓库:
-    echo   Repository name: Kelly0905.github.io
-    echo   选择: Public
-    echo   然后回来重新运行此脚本
+    echo [提示] 推送失败。若提示认证问题：
+    echo   1. 确认已登录 GitHub 凭据管理器
+    echo   2. 或改用 SSH 远端
+    pause
+    exit /b 1
 )
 
 echo.
 echo ========================================
-echo   部署完成！
-echo   访问地址: https://Kelly0905.github.io
-echo   （等待 1-5 分钟后生效）
+echo   推送完成！等待 1-2 分钟后生效
+echo   访问: https://wangsy1150.github.io/
 echo ========================================
 pause
