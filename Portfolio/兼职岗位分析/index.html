@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>兼职岗位技能溢价分析大屏 · 项目详情</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"Microsoft YaHei","PingFang SC",Arial,sans-serif;
+    color:#eae6f5;background:#0d0a17;line-height:1.75;overflow-x:hidden}
+  .glow{position:fixed;inset:0;pointer-events:none;z-index:0;
+    background:
+      radial-gradient(circle at 18% 6%, rgba(139,92,246,.26), transparent 45%),
+      radial-gradient(circle at 84% 14%, rgba(56,189,248,.16), transparent 40%),
+      radial-gradient(circle at 50% 96%, rgba(236,72,153,.14), transparent 45%)}
+  .wrap{position:relative;z-index:1;max-width:960px;margin:0 auto;padding:56px 24px 96px}
+  .back{display:inline-flex;align-items:center;gap:8px;color:#a89ec9;text-decoration:none;
+    font-size:14px;margin-bottom:36px;transition:color .2s}
+  .back:hover{color:#c4b5fd}
+  .num{display:inline-block;font-size:13px;letter-spacing:.18em;color:#8b7fc7;
+    border:1px solid rgba(139,92,246,.35);border-radius:999px;padding:5px 14px;margin-bottom:18px}
+  h1{font-size:clamp(28px,4.6vw,44px);line-height:1.25;font-weight:800;
+    background:linear-gradient(120deg,#c4b5fd 0%,#a78bfa 40%,#7dd3fc 100%);
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:16px}
+  .lede{font-size:17px;color:#b9b0d6;max-width:680px;margin-bottom:30px}
+  .tags{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:34px}
+  .tag{font-size:12.5px;padding:5px 13px;border-radius:999px;
+    background:rgba(139,92,246,.14);border:1px solid rgba(139,92,246,.32);color:#c9bff0}
+
+  /* 数据口径声明 —— 主动把边界讲在前面 */
+  .notice{display:flex;gap:14px;padding:16px 20px;margin:0 0 46px;border-radius:13px;
+    background:rgba(236,72,153,.07);border:1px solid rgba(236,72,153,.34)}
+  .notice-icon{flex:none;font-size:17px;line-height:1.5}
+  .notice-body{font-size:13.8px;color:#c9bfdd}
+  .notice-body b{color:#f0c4dc}
+  .notice-body code{font-family:Consolas,Monaco,monospace;font-size:12.5px;color:#c9bff0;
+    background:rgba(139,92,246,.16);border-radius:4px;padding:1px 5px}
+
+  h2{font-size:20px;color:#ddd6f3;margin:0 0 16px;padding-left:14px;position:relative}
+  h2::before{content:"";position:absolute;left:0;top:5px;bottom:5px;width:3px;
+    border-radius:2px;background:linear-gradient(180deg,#a78bfa,#38bdf8)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:46px}
+  .card{background:rgba(255,255,255,.035);border:1px solid rgba(139,92,246,.18);
+    border-radius:13px;padding:18px 20px}
+  .card h3{font-size:14px;color:#a78bfa;margin-bottom:8px}
+  .card p{font-size:14px;color:#b3aacd;margin:0}
+  .card code{font-family:Consolas,Monaco,monospace;font-size:12.5px;color:#c9bff0;
+    background:rgba(139,92,246,.16);border-radius:4px;padding:1px 5px}
+  ul.flow{list-style:none;counter-reset:step;margin-bottom:46px}
+  ul.flow li{position:relative;padding-left:32px;margin-bottom:16px;font-size:14.5px;color:#b8afd3}
+  ul.flow li::before{content:counter(step);counter-increment:step;position:absolute;left:0;top:1px;
+    width:21px;height:21px;border-radius:50%;font-size:12px;font-weight:700;color:#0d0a17;
+    text-align:center;line-height:21px;background:linear-gradient(135deg,#a78bfa,#7dd3fc)}
+  ul.flow li strong{color:#ddd6f3;font-weight:600}
+  ul.flow li code{font-family:Consolas,Monaco,monospace;font-size:12.5px;color:#c9bff0;
+    background:rgba(139,92,246,.16);border-radius:4px;padding:1px 5px}
+  .code{background:#120f1f;border:1px solid rgba(139,92,246,.2);border-radius:12px;
+    padding:18px 20px;font-family:Consolas,Monaco,monospace;font-size:13px;color:#c9d6f5;
+    overflow-x:auto;margin-bottom:46px;line-height:1.7}
+  .code .c{color:#6f6690}.code .k{color:#c4b5fd}.code .s{color:#7dd3fc}
+  .cap{font-size:12.5px;color:#6f6690;margin:-36px 0 46px}
+
+  /* ---------- 运行截图 ---------- */
+  .shots{display:grid;gap:26px;margin-bottom:46px}
+  .shot{background:rgba(255,255,255,.035);border:1px solid rgba(139,92,246,.18);
+    border-radius:14px;overflow:hidden;transition:border-color .25s,transform .25s}
+  .shot:hover{border-color:rgba(139,92,246,.42);transform:translateY(-2px)}
+  .shot img{display:block;width:100%;height:auto}
+  .shot-body{padding:15px 20px 18px}
+  .shot-body h4{font-size:14.5px;color:#ddd6f3;margin-bottom:7px;font-weight:600}
+  .shot-body p{font-size:13.5px;color:#a89ec9;margin:0}
+  .shot-body code{font-family:Consolas,Monaco,monospace;font-size:12.5px;color:#c9bff0;
+    background:rgba(139,92,246,.16);border-radius:4px;padding:1px 5px}
+  .shot-num{display:inline-block;font-size:11.5px;letter-spacing:.1em;color:#8b7fc7;
+    border:1px solid rgba(139,92,246,.35);border-radius:999px;padding:2px 10px;margin-right:9px}
+
+  /* ---------- KPI 对照表 ---------- */
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:46px}
+  .kpi{background:rgba(255,255,255,.035);border:1px solid rgba(139,92,246,.18);
+    border-radius:12px;padding:15px 16px}
+  .kpi span{display:block;font-size:12px;color:#8b7fc7;letter-spacing:.03em}
+  .kpi b{display:block;font-size:22px;color:#c4b5fd;font-weight:800;margin:5px 0 2px;line-height:1.25}
+  .kpi i{font-style:normal;font-size:12px;color:#7d7599}
+
+  footer{text-align:center;font-size:13px;color:#6f6690;padding-top:36px;
+    border-top:1px solid rgba(139,92,246,.14)}
+  footer a{color:#a78bfa;text-decoration:none}
+</style>
+</head>
+<body>
+<div class="glow"></div>
+<div class="wrap">
+  <a class="back" href="../index.html">← 返回作品集</a>
+  <div class="num">PROJECT 20 · 数据分析</div>
+  <h1>兼职岗位技能溢价分析大屏</h1>
+  <p class="lede">把一个模糊的感觉——「复合技能更值钱」——变成一组可以被追问的数字。
+  用 <strong style="color:#ddd6f3">KPI 概览条 + 薪资柱状图 + 成长潜力雷达图</strong> 三个视角交叉验证同一件事，
+  而不是堆三张同义的图。</p>
+  <div class="tags">
+    <span class="tag">Python</span>
+    <span class="tag">pandas</span>
+    <span class="tag">ECharts 5</span>
+    <span class="tag">占位符模板</span>
+    <span class="tag">30,000 行数据</span>
+    <span class="tag">28 个字段</span>
+  </div>
+
+  <!-- ============ 数据口径声明 ============ -->
+  <div class="notice">
+    <div class="notice-icon">⚠️</div>
+    <div class="notice-body">
+      <b>数据口径先说明：</b>本项目使用的 <code>兼职岗位数据.csv</code> 是<b>课程/练习提供的模拟演示数据集</b>，
+      <b>不是我从招聘平台采集的真实报价</b>。数据集自带字段已明确标注「数据性质＝模拟演示数据」
+      「按技能稀缺度、城市和时间趋势生成，<b>非真实招聘报价</b>」。
+      因此这个项目展示的是<b>分析口径与可视化链路</b>，页面上所有结论<b>仅在该模拟数据集上成立，不代表真实市场水平</b>。
+      —— 我选择主动讲清这一点，因为分析的严谨性比结论好看更重要。
+    </div>
+  </div>
+
+  <h2>项目背景</h2>
+  <p style="font-size:15px;color:#b8afd3;margin-bottom:46px">
+    手上拿到一份 3 万行的兼职岗位数据，里面有个字段叫「技能方向」。于是想回答一个很具体的问题：
+    <strong style="color:#ddd6f3">同时会 Python 和 AIGC 的岗位，比纯基础服务岗到底值钱多少、值钱在哪</strong>。
+    「更值钱」只靠感觉说不清楚，也没法拿给别人看 —— 得先把感觉变成数字，再让数字能被追问。
+  </p>
+
+  <h2>运行截图</h2>
+  <div class="shots">
+
+    <div class="shot">
+      <img src="shots/01-大屏整体.png" alt="兼职岗位分析大屏：KPI 概览条 + 薪资柱状图 + 成长潜力雷达图">
+      <div class="shot-body">
+        <h4><span class="shot-num">核心</span>三个视角交叉验证同一个结论</h4>
+        <p>顶部六个 KPI 给结论（月薪 14,081 元 vs 2,809 元、溢价率 401.2%、增长斜率 503.6 元/季、热度 91.6、成长潜力 4.51/5、远程办公率 77.1%）；
+        左侧柱状图给薪资差距的<strong>绝对量</strong>；右侧雷达图给<strong>结构</strong>——复合型在成长潜力、技能门槛、岗位热度、远程办公率四个维度全面外扩，
+        基础岗只在「培训可胜任率」「高考生适配率」上满格。一张图只能说一个数，三个视角才能说清结构。</p>
+      </div>
+    </div>
+
+    <div class="shot">
+      <img src="shots/02-扩展版13图.png" alt="扩展版大屏：13 张图表的完整分析矩阵">
+      <div class="shot-body">
+        <h4><span class="shot-num">扩展</span>把结论拆到 13 个维度去验证</h4>
+        <p>基础版回答「差多少」，扩展版回答「为什么差」。13 张图覆盖薪资五方向对比、成长潜力五维雷达、
+        技能方向结构环形、18 个月薪资趋势、岗位量与时薪双轴、热度仪表盘 ——
+        其中<strong>薪资趋势那条线最能说明问题</strong>：18 个月里复合型月薪从 12,786 涨到 15,406（+20.5%），
+        基础岗从 2,768 到 2,801，几乎是一条平线。</p>
+      </div>
+    </div>
+
+  </div>
+
+  <h2>核心数字（该数据集内）</h2>
+  <div class="kpis">
+    <div class="kpi"><span>样本量</span><b>30,000</b><i>行 × 28 列</i></div>
+    <div class="kpi"><span>时间跨度</span><b>18 个月</b><i>2025-01 ~ 2026-06</i></div>
+    <div class="kpi"><span>复合型岗位月薪</span><b>14,081</b><i>基础岗 2,809 元</i></div>
+    <div class="kpi"><span>月薪溢价率</span><b>401.2%</b><i>约 5.0 倍</i></div>
+    <div class="kpi"><span>增长斜率</span><b>503.6</b><i>元/季；基础岗 +7.6</i></div>
+    <div class="kpi"><span>远程办公率</span><b>77.1%</b><i>基础岗 0%</i></div>
+  </div>
+
+  <h2>技术要点</h2>
+  <div class="grid">
+    <div class="card">
+      <h3>图表要做交叉验证</h3>
+      <p>KPI 条给结论、柱状图给绝对量、雷达图给结构 —— 三个视角互相印证，而不是三张同义图。</p>
+    </div>
+    <div class="card">
+      <h3>聚合全在 Python 端</h3>
+      <p>时薪/日薪/月收入均值、溢价率、成长潜力均值、远程办公率都由 pandas 算完再注入，前端只负责画。</p>
+    </div>
+    <div class="card">
+      <h3>占位符而非 f-string</h3>
+      <p>HTML 模板里写 <code>__COMP_MONTH__</code> 这类占位符最后统一替换 —— 直接拼 f-string 会被 CSS/JS 的花括号冲垮。</p>
+    </div>
+    <div class="card">
+      <h3>中文不被转义</h3>
+      <p>注入 JS 时用 <code>json.dumps(..., ensure_ascii=False)</code>，否则中文全变成 <code>\uXXXX</code>。</p>
+    </div>
+    <div class="card">
+      <h3>让它"活"起来</h3>
+      <p>KPI 数字用缓动函数做滚动动画、雷达图做呼吸效果、柱状图轮播高亮 —— 这些细节决定「专业还是不专业」。</p>
+    </div>
+    <div class="card">
+      <h3>主动标注数据边界</h3>
+      <p>数据集自身的口径字段被原样写进页面顶部，而不是把模拟数据当市场事实陈述。</p>
+    </div>
+  </div>
+
+  <h2>生成流程</h2>
+  <ul class="flow">
+    <li><strong>读数据</strong> — pandas 读入 30,000 行 CSV，按 <code>技能方向</code> 字段切出复合型与基础服务两组。</li>
+    <li><strong>算指标</strong> — 分组求均值：时薪、参考日薪、预计月收入、成长潜力、技能门槛、热度指数、远程办公率。</li>
+    <li><strong>算趋势</strong> — 按季度聚合月薪均值，用线性拟合求出 18 个月的增长斜率。</li>
+    <li><strong>注入模板</strong> — 指标转 JSON 塞进 HTML 模板的占位符，中文用 <code>ensure_ascii=False</code> 保持可读。</li>
+    <li><strong>渲染图表</strong> — ECharts 画柱状图与雷达图，另加缓动数字动画与呼吸效果。</li>
+  </ul>
+
+  <h2>关键代码结构</h2>
+  <div class="code">
+<span class="c"># 生成可视化大屏.py —— 分组聚合（节选，真实写法）</span>
+df   = pd.read_csv(CSV, encoding=<span class="s">'utf-8-sig'</span>)
+comp = df[df[<span class="s">'技能方向'</span>] == <span class="s">'Python+AIGC'</span>]   <span class="c"># 复合型组</span>
+base = df[df[<span class="s">'技能方向'</span>] == <span class="s">'基础服务'</span>]      <span class="c"># 基础对照组</span>
+
+comp_month = <span class="k">round</span>(comp[<span class="s">'预计月收入_元'</span>].mean(), 1)   <span class="c"># 14081.1</span>
+base_month = <span class="k">round</span>(base[<span class="s">'预计月收入_元'</span>].mean(), 1)   <span class="c"># 2809.3</span>
+premium_rate = <span class="k">round</span>((comp_month - base_month) / base_month * 100, 1)  <span class="c"># 401.2%</span>
+  </div>
+  <p class="cap">三个数字就是整个页面的结论支点 —— 其余图表都是围绕它们做交叉验证。</p>
+
+  <div class="code">
+<span class="c"># 雷达图六维：复合型 vs 基础服务（0-100 归一化）</span>
+compRadar = [<span class="s">90.3, 90.0, 91.6, 77.1, 88.6, 17.9</span>]  <span class="c"># 成长/门槛/热度/远程/可胜任/高考适配</span>
+baseRadar = [<span class="s">40.1, 29.9, 62.8,  0.0, 100.0, 100.0</span>]
+
+<span class="c"># 这张图真正想说的：基础岗在"可胜任率/高考适配率"上满格，</span>
+<span class="c"># 在成长潜力与技能门槛上被压到底 —— 低门槛、人人可入、但天花板封顶。</span>
+  </div>
+  <p class="cap">雷达图的"结构性分化"比任何单个数字都更能解释「值钱在哪」。</p>
+
+  <h2>这个项目教了我什么</h2>
+  <div class="grid">
+    <div class="card">
+      <h3>先定口径，再下结论</h3>
+      <p>数据集的模拟属性被我写到了页面最显眼处，而不是藏在角落。结论带着边界一起说，才经得起追问。</p>
+    </div>
+    <div class="card">
+      <h3>可视化是论证不是装饰</h3>
+      <p>每张图都要能回答一个具体问题，否则就是在凑版面。</p>
+    </div>
+  </div>
+
+  <footer>
+    王思洋 · 数据分析可视化作品 ·
+    <a href="https://gitee.com/simonwangsy/a-new-beginning" target="_blank" rel="noopener">源码仓库</a>
+  </footer>
+</div>
+</body>
+</html>
