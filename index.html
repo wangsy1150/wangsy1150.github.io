@@ -6,9 +6,11 @@
     <meta name="description" content="Python 数据采集作品集" />
     <title>王思洋 · Python 数据采集与 AI 开发作品集</title>
     <link rel="icon" type="image/svg+xml" href="favicon.svg" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <!-- 字体已本地化到 fonts/（见 style.css 的 @font-face），
+         不再依赖 fonts.googleapis.com —— 国内直连 Google Fonts 曾导致首访等 25 秒。
+         预加载正文最常用的 400 字重；500/600/700 由 CSS 按需加载。 -->
+    <link rel="preload" href="fonts/NotoSansSC-400-subset.woff2" as="font"
+          type="font/woff2" crossorigin />
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>

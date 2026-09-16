@@ -1,3 +1,62 @@
+/* ===== 字体本地化（替代 fonts.googleapis.com） =====
+   Noto Sans SC 子集：只保留本站用到的字符 + 常用字兜底，16.9 MB → 1.06 MB。
+   按 400 / 500 / 600 / 700 四个静态字重分别提供。
+   为什么不用可变字体（一个文件管 100~900）？
+     实测在 Edge/Chrome 下，font-weight:100 900 的 @font-face 中文渲染会静默回退
+     到系统字体（用截图像素比对验证：可变字体渲染结果与「不存在的字体」逐像素相同，
+     而静态字重渲染结果的字形粗细肉眼可见地按字重递增）。
+     根因并非写法问题，而是该浏览器不支持可变字体 @font-face。
+   字重覆盖：800 未单独提供，由 700 顶上（标题场景视觉几乎无差）。 */
+@font-face {
+  font-family: "Noto Sans SC";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("fonts/NotoSansSC-400-subset.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Noto Sans SC";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("fonts/NotoSansSC-500-subset.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Noto Sans SC";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("fonts/NotoSansSC-600-subset.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Noto Sans SC";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("fonts/NotoSansSC-700-subset.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Noto Sans SC";
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url("fonts/NotoSansSC-700-subset.woff2") format("woff2");
+}
+@font-face {
+  font-family: "DM Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("fonts/DMMono-Regular-subset.woff2") format("woff2");
+}
+@font-face {
+  font-family: "DM Mono";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("fonts/DMMono-Medium-subset.woff2") format("woff2");
+}
+
 /* ===== 高级感 · Premium Minimal ===== */
 :root {
   --bg: #f4f7fa;
@@ -49,6 +108,9 @@ html { scroll-behavior: smooth; }
 body {
   color: var(--text);
   font-family: var(--font-sans);
+  /* 显式声明 400：本地可变字体的默认 wght 是 100（极细），
+     不写这一行，正文会细得发虚 */
+  font-weight: 400;
   font-size: 16px;
   line-height: 1.75;
   -webkit-font-smoothing: antialiased;

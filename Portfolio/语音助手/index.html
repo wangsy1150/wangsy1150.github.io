@@ -5,9 +5,24 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>语音交互助手 · 项目详情</title>
 <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+<link rel="preload" href="../../fonts/NotoSansSC-400-subset.woff2" as="font"
+      type="font/woff2" crossorigin>
 <style>
+  /* 字体本地化：与首页统一用 Noto Sans SC 子集（16.9MB → 505KB） */
+  /* 静态字重子集（该浏览器不支持可变字体 @font-face，改用 4 个静态字重） */
+  @font-face{font-family:"Noto Sans SC";font-style:normal;font-weight:400;
+    font-display:swap;src:url("../../fonts/NotoSansSC-400-subset.woff2") format("woff2")}
+  @font-face{font-family:"Noto Sans SC";font-style:normal;font-weight:500;
+    font-display:swap;src:url("../../fonts/NotoSansSC-500-subset.woff2") format("woff2")}
+  @font-face{font-family:"Noto Sans SC";font-style:normal;font-weight:600;
+    font-display:swap;src:url("../../fonts/NotoSansSC-600-subset.woff2") format("woff2")}
+  @font-face{font-family:"Noto Sans SC";font-style:normal;font-weight:700;
+    font-display:swap;src:url("../../fonts/NotoSansSC-700-subset.woff2") format("woff2")}
+  @font-face{font-family:"Noto Sans SC";font-style:normal;font-weight:800;
+    font-display:swap;src:url("../../fonts/NotoSansSC-700-subset.woff2") format("woff2")}
   *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:"Microsoft YaHei","PingFang SC",Arial,sans-serif;
+  body{font-family:"Noto Sans SC","Microsoft YaHei","PingFang SC",Arial,sans-serif;
+    font-weight:400;
     color:#eae6f5;background:#0d0a17;line-height:1.75;overflow-x:hidden}
   .glow{position:fixed;inset:0;pointer-events:none;z-index:0;
     background:
