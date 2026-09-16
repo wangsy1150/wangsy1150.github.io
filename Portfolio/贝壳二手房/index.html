@@ -67,6 +67,38 @@
     border-radius:14px;overflow:hidden;transition:border-color .25s,transform .25s}
   .shot:hover{border-color:rgba(139,92,246,.42);transform:translateY(-2px)}
   .shot img{display:block;width:100%;height:auto}
+  /* Excel 截图是白底 + 宽扁（2536×254），直接铺满会被压到 90px 高、字看不清。
+     改成：按原比例显示在可横向滚动的容器里，点击可全屏放大。 */
+  .shot-shot{background:#fff;padding:14px;border-bottom:1px solid rgba(139,92,246,.18)}
+  .shot-scroll{overflow-x:auto;overflow-y:hidden;cursor:zoom-in;
+    scrollbar-width:thin;scrollbar-color:rgba(139,92,246,.45) transparent}
+  .shot-scroll::-webkit-scrollbar{height:8px}
+  .shot-scroll::-webkit-scrollbar-track{background:rgba(139,92,246,.08);border-radius:4px}
+  .shot-scroll::-webkit-scrollbar-thumb{background:rgba(139,92,246,.45);border-radius:4px}
+  .shot-scroll img{width:auto;max-width:none;height:254px;
+    border:1px solid #d8d3e6;image-rendering:-webkit-optimize-contrast}
+  .shot-hint{display:flex;align-items:center;gap:6px;margin-top:9px;
+    font-size:11.5px;color:#8b83a8}
+  .shot-hint b{color:#c4b5fd;font-weight:600}
+
+  /* ---------- 灯箱（点击放大） ---------- */
+  .lb{position:fixed;inset:0;z-index:999;display:none;
+    background:rgba(8,5,16,.94);backdrop-filter:blur(4px);
+    align-items:center;justify-content:center;padding:32px}
+  .lb.on{display:flex}
+  .lb-inner{max-width:100%;max-height:100%;overflow:auto;background:#fff;
+    border-radius:10px;padding:18px;box-shadow:0 24px 80px rgba(0,0,0,.6)}
+  .lb-inner img{display:block;max-width:none;image-rendering:-webkit-optimize-contrast}
+  .lb-x{position:fixed;top:20px;right:26px;width:42px;height:42px;border-radius:50%;
+    background:rgba(139,92,246,.22);border:1px solid rgba(139,92,246,.5);
+    color:#e9e3ff;font-size:22px;line-height:1;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;transition:background .2s}
+  .lb-x:hover{background:rgba(139,92,246,.42)}
+  .lb-tip{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);
+    font-size:12.5px;color:#a89ec9;letter-spacing:.02em}
+  .lb-tip kbd{font-family:Consolas,Monaco,monospace;font-size:11.5px;color:#c9bff0;
+    background:rgba(139,92,246,.18);border:1px solid rgba(139,92,246,.3);
+    border-radius:4px;padding:1px 6px;margin:0 2px}
   .shot-body{padding:15px 20px 18px}
   .shot-body h4{font-size:14.5px;color:#ddd6f3;margin-bottom:7px;font-weight:600}
   .shot-body p{font-size:13.5px;color:#a89ec9;margin:0}
@@ -145,7 +177,17 @@
 
   <div class="shots">
     <div class="shot">
-      <img src="shots/01-交付表结构示意.png" alt="交付表字段结构示意：8 个字段的表格视图">
+      <div class="shot-shot">
+        <div class="shot-scroll" id="a6Shot" role="button" tabindex="0"
+             aria-label="点击放大查看交付表结构示意图">
+          <img src="shots/01-交付表结构示意.png"
+               alt="交付表字段结构示意：Excel 中 A1:H7 共 8 个字段的表格视图">
+        </div>
+        <div class="shot-hint">
+          <span>↔</span>
+          <span>表格较宽，可<b>横向滚动</b>；点击图片<b>全屏放大</b></span>
+        </div>
+      </div>
       <div class="shot-body">
         <h4><span class="shot-num demo">示意</span>交付物长什么样：8 个字段的表格视图</h4>
         <p><b>此图为字段结构示意，非真实采集结果</b>——表内数据是为展示列宽与字段顺序而构造的示例值，
@@ -153,6 +195,15 @@
         一次落成表格，图片列随后会被替换为嵌入图片，对方打开就能逐行核对。</p>
       </div>
     </div>
+  </div>
+
+  <!-- 灯箱：点图放大 -->
+  <div class="lb" id="a6Lightbox" role="dialog" aria-modal="true" aria-label="交付表结构示意（放大）">
+    <button class="lb-x" id="a6LbClose" aria-label="关闭">✕</button>
+    <div class="lb-inner">
+      <img id="a6LbImg" src="shots/01-交付表结构示意.png" alt="">
+    </div>
+    <div class="lb-tip">按 <kbd>Esc</kbd> 或点击空白处关闭 · 按住 <kbd>Ctrl</kbd> 滚轮可缩放</div>
   </div>
 
   <h2>技术要点</h2>
@@ -270,5 +321,55 @@ add_images_to_excel(<span class="s">'终版交付.xlsx'</span>, df[<span class="
     <a href="https://gitee.com/simonwangsy/a-new-beginning" target="_blank" rel="noopener">源码仓库</a>
   </footer>
 </div>
+
+<script>
+/* 交付表示意图：点击放大（自包含灯箱，不依赖任何外部库——避免 CDN 挂了整页失效） */
+(function () {
+  var trigger = document.getElementById('a6Shot');
+  var box     = document.getElementById('a6Lightbox');
+  var closeBtn= document.getElementById('a6LbClose');
+  if (!trigger || !box) return;
+
+  var lastFocus = null;
+
+  function open() {
+    lastFocus = document.activeElement;
+    box.classList.add('on');
+    document.body.style.overflow = 'hidden';   // 锁住背景滚动
+    // 放大后按原始像素显示，超出屏幕则靠 .lb-inner 的 auto 滚动
+    var im = document.getElementById('a6LbImg');
+    im.style.width = im.naturalWidth + 'px';
+    closeBtn.focus();
+  }
+
+  function close() {
+    box.classList.remove('on');
+    document.body.style.overflow = '';
+    if (lastFocus && lastFocus.focus) lastFocus.focus();  // 焦点还给触发元素（无障碍）
+  }
+
+  trigger.addEventListener('click', open);
+  trigger.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); }
+  });
+
+  closeBtn.addEventListener('click', close);
+  // 点空白处关闭（点图片本身不关）
+  box.addEventListener('click', function (e) {
+    if (e.target === box) close();
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && box.classList.contains('on')) close();
+  });
+
+  // 图片还没加载完就点开时，naturalWidth 是 0 —— 加载完再补一次宽度
+  var lbImg = document.getElementById('a6LbImg');
+  if (lbImg && !lbImg.complete) {
+    lbImg.addEventListener('load', function () {
+      if (box.classList.contains('on')) lbImg.style.width = lbImg.naturalWidth + 'px';
+    });
+  }
+})();
+</script>
 </body>
 </html>
