@@ -33,9 +33,10 @@ const portfolio = {
     { category: "automation", number: "13", title: "抖音点赞工具", description: "使用python自动化完成的抖音点赞工具，能完成自动点赞自动收藏等操作，可以批量完成。", tags: ["python", "Drissionpage", "xpath"], link: "Portfolio/抖音点赞工具.html", accent: "mint", bgImage: "Portfolio/抖音点赞工具.png" },
     { category: "automation", number: "14", title: "多平台价格监控", description: "使用python脚本完成对各商城数据商品的监控，达到目标价格进行微信提醒。", tags: ["python", "Drissionpage", "xpath"], link: "Portfolio/多平台价格监控.html", accent: "mint", bgImage: "Portfolio/多平台价格监控.png" },
     { category: "creative", number: "15", title: "文章搭建模版", description: "各种热门类型文章的搭建模版，包括但不限于技术博客、学习路线、技术介绍等。", tags: ["csdn", "文章模版"], link: "Portfolio/个人文章搭建模版.html", accent: "mint", bgImage: "Portfolio/bgimgs/csdn.png"},
-    { category: "crawler", number: "16", title: "贝壳二手房数据采集", description: "爬虫采集贝壳二手房数据，保存Excel文件", tags: ["requests", "xpath","反爬策略"], link: "Portfolio/贝壳二手房/index.html", accent: "mint", bgImage: "Portfolio/bgimgs/贝壳二手房.png"},
+    { category: "crawler", number: "16", title: "贝壳二手房数据采集", description: "按交付标准做的二手房采集：滚动懒加载滚到底、人机验证按类型分流、相对路径取字段，最后把图片嵌进 Excel 一起交付。", tags: ["DrissionPage", "XPath", "反爬策略"], link: "Portfolio/贝壳二手房/index.html", accent: "mint", bgImage: "Portfolio/bgimgs/贝壳二手房.png"},
     { category: "analysis", number: "17", title: "csv自动化大屏", description: "csv数据可视化大屏，支持数据筛选、图表切换。", tags: ["pandas", "pyecharts","Excel"], link: "Portfolio/csv自动化大屏/CSV自动大屏.html", accent: "coral", bgImage: "Portfolio/bgimgs/数据大屏.png"},
     { category: "creative", number: "18", title: "炫酷项目展示", description: "AIGC技术项目展示，展示AIGC技术项目，包括但不限于AI绘画、AI写作、AI编程等。", tags: ["AIGC", "提示词","python"], link: "Portfolio/炫酷项目展示.html", accent: "coral", bgImage: "Portfolio/bgimgs/AIGC.png"},
     { category: "ai", number: "19", title: "语音交互助手", description: "对着麦克风说话 → DeepSeek 思考 → edge-tts 朗读的本地语音 Agent：查不查本地知识库由模型自己决定，查不到就如实回答，整个决策过程全部可见。", tags: ["Python", "Flask", "Function Calling"], link: "Portfolio/语音助手/index.html", accent: "purple", bgImage: "Portfolio/bgimgs/语音助手.png"},
+    { category: "analysis", number: "20", title: "兼职岗位技能溢价分析大屏", description: "把「复合技能更值钱」这句感觉变成一组数字：KPI 概览条 + 薪资柱状图 + 成长潜力雷达图三视角交叉验证，月薪溢价 401.2%。", tags: ["pandas", "ECharts", "数据可视化"], link: "Portfolio/兼职岗位分析/index.html", accent: "purple", bgImage: "Portfolio/bgimgs/兼职岗位分析.png" },
   ]
 };
