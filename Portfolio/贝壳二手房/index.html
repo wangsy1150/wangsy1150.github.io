@@ -67,12 +67,6 @@
     border-radius:14px;overflow:hidden;transition:border-color .25s,transform .25s}
   .shot:hover{border-color:rgba(139,92,246,.42);transform:translateY(-2px)}
   .shot img{display:block;width:100%;height:auto}
-  /* 图还没到位时用占位框顶上，避免页面出现一个破图图标 */
-  .shot-ph{padding:44px 20px;text-align:center;background:
-      repeating-linear-gradient(45deg,rgba(139,92,246,.05) 0 10px,transparent 10px 20px);
-    border-bottom:1px dashed rgba(139,92,246,.22)}
-  .shot-ph b{display:block;font-size:14px;color:#c4b5fd;margin-bottom:6px;font-weight:600}
-  .shot-ph span{font-size:12.5px;color:#7c739e}
   .shot-body{padding:15px 20px 18px}
   .shot-body h4{font-size:14.5px;color:#ddd6f3;margin-bottom:7px;font-weight:600}
   .shot-body p{font-size:13.5px;color:#a89ec9;margin:0}
@@ -151,15 +145,7 @@
 
   <div class="shots">
     <div class="shot">
-      <!-- 图待补：库里没有真实采集截图，这张是「交付表结构示意」。
-           文件到位后把下面的 .shot-ph 换成：
-           <img src="shots/01-交付表结构示意.png" alt="交付表字段结构示意：8 个字段的表格视图">
-           即把 .shot-ph 整块删掉、解注释 img 一行即可。 -->
-      <!-- <img src="shots/01-交付表结构示意.png" alt="交付表字段结构示意：8 个字段的表格视图"> -->
-      <div class="shot-ph">
-        <b>示意图待补</b>
-        <span>运行 <code>make_sample_a6.py</code> 生成的 8 字段示意表截图</span>
-      </div>
+      <img src="shots/01-交付表结构示意.png" alt="交付表字段结构示意：8 个字段的表格视图">
       <div class="shot-body">
         <h4><span class="shot-num demo">示意</span>交付物长什么样：8 个字段的表格视图</h4>
         <p><b>此图为字段结构示意，非真实采集结果</b>——表内数据是为展示列宽与字段顺序而构造的示例值，
