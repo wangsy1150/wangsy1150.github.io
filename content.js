@@ -13,9 +13,9 @@ const portfolio = {
   gitee: "https://gitee.com/simonwangsy/a-new-beginning",
   resumeUrl: "",
   studyHours: "120+",
-  skillCount: "08",
+  skillCount: "09",
   about: "我正在系统学习 Python 数据采集与自动化。每个项目都从一个具体问题出发，完成从抓取、清洗到可视化展示的完整流程。",
-  skills: ["Python", "Requests", "Beautiful Soup", "DrissionPage", "Pandas", "SQL","asyncio","crawl4ai"],
+  skills: ["Python", "Requests", "Beautiful Soup", "DrissionPage", "Pandas", "SQL", "Flask", "asyncio", "crawl4ai"],
   projects: [
       //analysis：数据分析，crawler：爬虫，creative：创意  automation：自动化分类
     { category: "analysis", number: "01", title: "闲鱼显卡价格趋势", description: "多月份闲鱼显卡商品数据可视化看板，呈现各品牌价格走势、在售数量与市场热度对比。", tags: ["ECharts", "Data Viz", "价格分析"], link: "Portfolio/价格趋势.html", accent: "blue", bgImage: "Portfolio/bgimgs/显卡价格趋势.png" },
