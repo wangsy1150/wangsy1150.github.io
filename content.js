@@ -38,5 +38,8 @@ const portfolio = {
     { category: "creative", number: "18", title: "炫酷项目展示", description: "AIGC技术项目展示，展示AIGC技术项目，包括但不限于AI绘画、AI写作、AI编程等。", tags: ["AIGC", "提示词","python"], link: "Portfolio/炫酷项目展示.html", accent: "coral", bgImage: "Portfolio/bgimgs/AIGC.png"},
     { category: "ai", number: "19", title: "语音交互助手", description: "对着麦克风说话 → DeepSeek 思考 → edge-tts 朗读的本地语音 Agent：查不查本地知识库由模型自己决定，查不到就如实回答，整个决策过程全部可见。", tags: ["Python", "Flask", "Function Calling"], link: "Portfolio/语音助手/index.html", accent: "purple", bgImage: "Portfolio/bgimgs/语音助手.png"},
     { category: "analysis", number: "20", title: "兼职岗位技能溢价分析大屏", description: "把「复合技能更值钱」这句感觉变成一组数字：KPI 概览条 + 薪资柱状图 + 成长潜力雷达图三视角交叉验证，月薪溢价 401.2%。", tags: ["pandas", "ECharts", "数据可视化"], link: "Portfolio/兼职岗位分析/index.html", accent: "purple", bgImage: "Portfolio/bgimgs/兼职岗位分析.png" },
+    { category: "creative", number: "21", title: "波奇酱桌面宠物", description: "常驻 Windows 桌面的小挂件：无边框、置顶、色键透明。三态系统（正常/饿/生气）配饱食度衰减，久不理她会主动开口催饭。Python + Tkinter 单进程实现，常驻约 30 MB。", tags: ["Python", "Tkinter", "桌面应用"], link: "Portfolio/桌宠/index.html", accent: "pink", bgImage: "Portfolio/bgimgs/波奇酱桌面宠物.png" },
+    { category: "creative", number: "22", title: "跳一跳", description: "单文件 HTML5 游戏：按住蓄力、松手起跳，蓄力越久跳得越远。含手动与自动两种模式，方块间距与落地判定都重做过。", tags: ["JavaScript", "Canvas", "游戏"], link: "Portfolio/跳一跳.html", accent: "cyan", bgImage: "Portfolio/bgimgs/跳一跳.png" },
+    { category: "web", number: "23", title: "思洋个人管理台", description: "把写死的静态待办页面原地改造成 Flask + SQLite 多用户应用：9 类业务的字段与排序收在一张注册表里描述，五套 CRUD 共用一套实现，已部署到云服务器常驻。", tags: ["Flask", "SQLAlchemy", "多用户"], link: "Portfolio/思洋管理台/index.html", accent: "blue", bgImage: "Portfolio/bgimgs/思洋个人管理台.png" },
   ]
 };

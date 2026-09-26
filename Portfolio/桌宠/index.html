@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>波奇酱桌面宠物 · 项目详情</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+<link rel="preload" href="../../fonts/NotoSansSC-400-subset.woff2" as="font"
+      type="font/woff2" crossorigin>
+<style>
+  @font-face{font-family:"Noto Sans SC";font-style:normal;font-weight:400;
+    font-display:swap;src:url("../../fonts/NotoSansSC-400-subset.woff2") format("woff2")}
+  @font-face{font-family:"Noto Sans SC";font-style:normal;font-weight:500;
+    font-display:swap;src:url("../../fonts/NotoSansSC-500-subset.woff2") format("woff2")}
+  @font-face{font-family:"Noto Sans SC";font-style:normal;font-weight:600;
+    font-display:swap;src:url("../../fonts/NotoSansSC-600-subset.woff2") format("woff2")}
+  @font-face{font-family:"Noto Sans SC";font-style:normal;font-weight:700;
+    font-display:swap;src:url("../../fonts/NotoSansSC-700-subset.woff2") format("woff2")}
+  @font-face{font-family:"Noto Sans SC";font-style:normal;font-weight:800;
+    font-display:swap;src:url("../../fonts/NotoSansSC-700-subset.woff2") format("woff2")}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"Noto Sans SC","Microsoft YaHei","PingFang SC",Arial,sans-serif;
+    font-weight:400;color:#eae6f5;background:#0d0a17;line-height:1.75;overflow-x:hidden}
+  .glow{position:fixed;inset:0;pointer-events:none;z-index:0;
+    background:
+      radial-gradient(circle at 18% 6%, rgba(139,92,246,.26), transparent 45%),
+      radial-gradient(circle at 84% 14%, rgba(236,72,153,.16), transparent 40%),
+      radial-gradient(circle at 50% 96%, rgba(56,189,248,.14), transparent 45%)}
+  .wrap{position:relative;z-index:1;max-width:960px;margin:0 auto;padding:56px 24px 96px}
+  .back{display:inline-flex;align-items:center;gap:8px;color:#a89ec9;text-decoration:none;
+    font-size:14px;margin-bottom:36px;transition:color .2s}
+  .back:hover{color:#c4b5fd}
+  .num{display:inline-block;font-size:13px;letter-spacing:.18em;color:#8b7fc7;
+    border:1px solid rgba(139,92,246,.35);border-radius:999px;padding:5px 14px;margin-bottom:18px}
+  h1{font-size:clamp(28px,4.6vw,44px);line-height:1.25;font-weight:800;
+    background:linear-gradient(120deg,#c4b5fd 0%,#a78bfa 40%,#f0abfc 100%);
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:16px}
+  .lede{font-size:17px;color:#b9b0d6;max-width:680px;margin-bottom:30px}
+  .tags{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:46px}
+  .tag{font-size:12.5px;padding:5px 13px;border-radius:999px;
+    background:rgba(139,92,246,.14);border:1px solid rgba(139,92,246,.32);color:#c9bff0}
+  h2{font-size:20px;color:#ddd6f3;margin:0 0 16px;padding-left:14px;position:relative}
+  h2::before{content:"";position:absolute;left:0;top:5px;bottom:5px;width:3px;
+    border-radius:2px;background:linear-gradient(180deg,#a78bfa,#f0abfc)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:46px}
+  .card{background:rgba(255,255,255,.035);border:1px solid rgba(139,92,246,.18);
+    border-radius:13px;padding:18px 20px}
+  .card h3{font-size:14px;color:#a78bfa;margin-bottom:8px}
+  .card p{font-size:14px;color:#b3aacd;margin:0}
+  .card code{font-family:Consolas,Monaco,monospace;font-size:12.5px;color:#c9bff0;
+    background:rgba(139,92,246,.16);border-radius:4px;padding:1px 5px}
+  ul.flow{list-style:none;counter-reset:step;margin-bottom:46px}
+  ul.flow li{position:relative;padding-left:32px;margin-bottom:16px;font-size:14.5px;color:#b8afd3}
+  ul.flow li::before{content:counter(step);counter-increment:step;position:absolute;left:0;top:1px;
+    width:21px;height:21px;border-radius:50%;font-size:12px;font-weight:700;color:#0d0a17;
+    text-align:center;line-height:21px;background:linear-gradient(135deg,#a78bfa,#f0abfc)}
+  ul.flow li strong{color:#ddd6f3;font-weight:600}
+  .code{background:#120f1f;border:1px solid rgba(139,92,246,.2);border-radius:12px;
+    padding:18px 20px;font-family:Consolas,Monaco,monospace;font-size:13px;color:#c9d6f5;
+    overflow-x:auto;margin-bottom:46px;line-height:1.7}
+  .code .c{color:#6f6690}.code .k{color:#c4b5fd}.code .s{color:#7dd3fc}
+  .cap{font-size:12.5px;color:#6f6690;margin:-36px 0 46px}
+
+  /* ---------- 三态素材 ---------- */
+  .states{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-bottom:20px}
+  .state{background:rgba(255,255,255,.035);border:1px solid rgba(139,92,246,.18);
+    border-radius:14px;padding:22px 14px 18px;text-align:center;
+    transition:border-color .25s,transform .25s}
+  .state:hover{border-color:rgba(240,171,252,.45);transform:translateY(-3px)}
+  .state img{display:block;width:132px;height:132px;margin:0 auto 14px;
+    image-rendering:auto;filter:drop-shadow(0 8px 18px rgba(0,0,0,.5))}
+  .state b{display:block;font-size:15px;color:#ddd6f3;margin-bottom:5px;font-weight:600}
+  .state span{font-size:12.5px;color:#8b7fc7;font-family:Consolas,Monaco,monospace}
+  .state-note{font-size:12.5px;color:#6f6690;margin-bottom:46px}
+
+  /* ---------- 版本表 ---------- */
+  table{width:100%;border-collapse:collapse;margin-bottom:46px;font-size:14px}
+  th,td{text-align:left;padding:11px 14px;border-bottom:1px solid rgba(139,92,246,.16)}
+  th{color:#a78bfa;font-weight:600;font-size:13px;letter-spacing:.04em}
+  td{color:#b8afd3}
+  td:first-child{color:#ddd6f3;font-weight:600;white-space:nowrap}
+  code.mono{font-family:Consolas,Monaco,monospace;font-size:12.5px;color:#c9bff0;
+    background:rgba(139,92,246,.16);border-radius:4px;padding:1px 5px}
+
+  footer{text-align:center;font-size:13px;color:#6f6690;padding-top:36px;
+    border-top:1px solid rgba(139,92,246,.14)}
+  footer a{color:#a78bfa;text-decoration:none}
+  @media(max-width:560px){.states{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="glow"></div>
+<div class="wrap">
+  <a class="back" href="../index.html">← 返回作品集</a>
+  <div class="num">PROJECT 21 · 创意作品</div>
+  <h1>波奇酱桌面宠物</h1>
+  <p class="lede">一只常驻 Windows 桌面的小挂件：<strong style="color:#ddd6f3">无边框、置顶、色键透明</strong>。
+  她会饿、会生气、会被摸头，也会在你久不理她的时候主动开口。用 Python + Tkinter 单进程实现 ——
+  <strong style="color:#ddd6f3">不依赖浏览器，也不依赖 Electron</strong>，常驻内存约 30 MB。</p>
+  <div class="tags">
+    <span class="tag">Python</span>
+    <span class="tag">Tkinter</span>
+    <span class="tag">色键透明</span>
+    <span class="tag">桌面应用</span>
+    <span class="tag">1016 行</span>
+  </div>
+
+  <h2>项目背景</h2>
+  <p style="font-size:15px;color:#b8afd3;margin-bottom:46px">
+    在桌面上放一只猫，常见做法是 Electron —— 为了一个挂件塞进一整个浏览器内核。这个项目走了另一条路：
+    用 Python 标准库自带的 <code class="mono">tkinter</code>，单进程常驻。代价是两件麻烦事得自己扛：
+    系统<strong style="color:#ddd6f3">不支持逐像素透明</strong>（只能色键抠图），以及无边框窗口的
+    <strong style="color:#ddd6f3">尺寸、位置、点击区域全部要手算</strong>。3.0 版把这两件事都处理干净了。
+  </p>
+
+  <h2>三种状态，三张素材</h2>
+  <div class="states">
+    <div class="state">
+      <img src="shots/state_normal.png" alt="正常状态">
+      <b>正常</b><span>饱食度 &gt; 30</span>
+    </div>
+    <div class="state">
+      <img src="shots/state_hungry.png" alt="饥饿状态">
+      <b>饿了</b><span>≤ 30</span>
+    </div>
+    <div class="state">
+      <img src="shots/state_angry.png" alt="生气状态">
+      <b>生气</b><span>== 0</span>
+    </div>
+  </div>
+  <p class="state-note">
+    源素材的背景是纯品红 <code class="mono">#FF00FF</code>，图片里并没有 alpha 通道 ——
+    屏幕上看到「透明」，是因为程序把这个颜色声明成了透明的结果。
+  </p>
+
+  <h2>技术要点</h2>
+  <div class="grid">
+    <div class="card">
+      <h3>色键透明，不是 alpha</h3>
+      <p>tkinter 只认<strong>精确颜色</strong>。做法是素材背景刷品红、窗口底色也设成品红、再把它声明为 <code>transparentcolor</code>。差一个色号就会露边。</p>
+    </div>
+    <div class="card">
+      <h3>窗口紧贴角色本体</h3>
+      <p>2.0 的窗口固定 220×172，而角色只占 55×132 —— 那圈「看不见」的透明区域仍然<strong>吃掉鼠标点击、挡住桌面图标</strong>。3.0 改成按角色实际宽高反推窗口尺寸。</p>
+    </div>
+    <div class="card">
+      <h3>一个常量控全局</h3>
+      <p>想调大小只改 <code>PET_TARGET_H</code>（当前 232，2.0 是 132），窗口尺寸、坐标、边距全部跟着算，不用手改一堆常量。</p>
+    </div>
+    <div class="card">
+      <h3>为什么要清两次边</h3>
+      <p>缩放会把品红和角色边缘混成脏边。在<strong>原始尺寸</strong>清只需 3px 半径；留到放大 1.8 倍后再清，就得用 16px —— 而那个半径会误伤角色内部的粉色。</p>
+    </div>
+    <div class="card">
+      <h3>放大用 BICUBIC</h3>
+      <p>LANCZOS 的核有负旁瓣，<strong>放大</strong>时会在强边缘产生明显振铃。这里是放大不是缩小，所以用 BICUBIC。</p>
+    </div>
+    <div class="card">
+      <h3>贴边吸附 + 多屏</h3>
+      <p>拖到屏幕边缘会停靠过去；拖到副屏之后，不会再被「随机走动」按主屏边界拽回主屏。</p>
+    </div>
+  </div>
+
+  <h2>从一张素材到桌面上的一只猫</h2>
+  <ul class="flow">
+    <li><strong>读素材</strong> — 打开状态图，先清一遍轮廓外的色键污染（半径 3px）。</li>
+    <li><strong>裁到角色本体</strong> — 不再贴进固定方框，角色有多宽图就有多宽。</li>
+    <li><strong>等比放大</strong> — 缩放到 <code>PET_TARGET_H</code>（232px 高），宽度按原比例算，绝不拉伸变形。</li>
+    <li><strong>再去一次绿边</strong> — 处理放大新产生的过渡带，这时候半径小也很轻松。</li>
+    <li><strong>围一圈品红边</strong> — 保证轮廓外有背景色可清，再整体清一次。</li>
+    <li><strong>反推窗口尺寸</strong> — 按成品图片宽高算窗口大小，创建无边框置顶窗口，底色同样设为品红。</li>
+    <li><strong>主循环</strong> — 饱食度每 5 秒 -5；每 1.5 秒随机走一小步；每 30 分钟提醒喝水休息。</li>
+  </ul>
+
+  <h2>关键代码结构</h2>
+  <div class="code">
+<span class="c"># pet.py —— 色键与尺寸：想整体调大小，只改 PET_TARGET_H 就够了</span>
+<span class="k">KEY_COLOR</span> = <span class="s">"#FF00FF"</span>       <span class="c"># 色键：图片背景和窗口底色都用它</span>
+
+<span class="c"># ---------- 尺寸：想整体调大小，只改 PET_TARGET_H 就够了 ----------</span>
+<span class="k">PET_TARGET_H</span> = <span class="s">232</span>          <span class="c"># ★ 角色在屏幕上的高度（像素）。2.0 是 132</span>
+<span class="k">PET_MARGIN</span> = <span class="s">5</span>              <span class="c"># 角色四周留的品红边距（也保证轮廓外有背景可以清边）</span>
+  </div>
+
+  <div class="code">
+<span class="c"># pet.py —— create_bubble_window()：无边框 + 置顶 + 品红色键透明</span>
+win = tk.Toplevel(parent)
+win.overrideredirect(<span class="k">True</span>)                       <span class="c"># 去掉标题栏与边框</span>
+win.attributes(<span class="s">"-topmost"</span>, <span class="k">True</span>)                 <span class="c"># 永远在最前面</span>
+win.configure(bg=KEY_COLOR)                      <span class="c"># 底色 = 品红，和素材背景完全一致</span>
+<span class="k">try</span>:
+    win.attributes(<span class="s">"-transparentcolor"</span>, KEY_COLOR)   <span class="c"># 声明品红为透明色</span>
+<span class="k">except</span> tk.TclError:
+    <span class="k">pass</span>
+  </div>
+  <p class="cap">透明不是「图片带透明通道」，而是「这个颜色不画」。所以 <code class="mono">Label</code> / <code class="mono">Canvas</code> 的 bg 必须和 KEY_COLOR 完全一致。</p>
+
+  <h2>版本演进</h2>
+  <table>
+    <tr><th>版本</th><th>行数</th><th>主要变化</th></tr>
+    <tr><td>1.0</td><td>463</td><td>基础形态：透明窗口、拖动、随机走动、点击互动、定时提醒</td></tr>
+    <tr><td>2.0</td><td>710</td><td>三态系统、饱食度、气泡窗口</td></tr>
+    <tr><td>3.0</td><td>1016</td><td>窗口紧贴角色、动作反馈、悬停、贴边吸附、多屏修复</td></tr>
+  </table>
+
+  <h2>怎么运行</h2>
+  <div class="code">
+<span class="c"># 需要带 tkinter 的 Python（Windows 官方安装包默认带）</span>
+pip install -r requirements.txt
+python pet.py
+  </div>
+  <p class="cap">素材放在 <code class="mono">zhuochong/</code>，脚本用 <code class="mono">__file__</code> 所在目录去找 —— 整份目录一起挪动不会失效。按 <code class="mono">Esc</code> 退出。</p>
+
+  <footer>
+    王思洋 · 桌面应用作品 ·
+    <a href="https://github.com/wangsy1150/bochi-desktop-pet" target="_blank" rel="noopener">GitHub 源码仓库</a>
+  </footer>
+</div>
+</body>
+</html>

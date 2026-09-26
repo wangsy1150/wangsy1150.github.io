@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>思洋个人管理台 · 项目详情</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+<link rel="preload" href="../../fonts/NotoSansSC-400-subset.woff2" as="font"
+      type="font/woff2" crossorigin>
+<style>
+  @font-face{font-family:"Noto Sans SC";font-style:normal;font-weight:400;
+    font-display:swap;src:url("../../fonts/NotoSansSC-400-subset.woff2") format("woff2")}
+  @font-face{font-family:"Noto Sans SC";font-style:normal;font-weight:500;
+    font-display:swap;src:url("../../fonts/NotoSansSC-500-subset.woff2") format("woff2")}
+  @font-face{font-family:"Noto Sans SC";font-style:normal;font-weight:600;
+    font-display:swap;src:url("../../fonts/NotoSansSC-600-subset.woff2") format("woff2")}
+  @font-face{font-family:"Noto Sans SC";font-style:normal;font-weight:700;
+    font-display:swap;src:url("../../fonts/NotoSansSC-700-subset.woff2") format("woff2")}
+  @font-face{font-family:"Noto Sans SC";font-style:normal;font-weight:800;
+    font-display:swap;src:url("../../fonts/NotoSansSC-700-subset.woff2") format("woff2")}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"Noto Sans SC","Microsoft YaHei","PingFang SC",Arial,sans-serif;
+    font-weight:400;color:#eae6f5;background:#0d0a17;line-height:1.75;overflow-x:hidden}
+  .glow{position:fixed;inset:0;pointer-events:none;z-index:0;
+    background:
+      radial-gradient(circle at 18% 6%, rgba(139,92,246,.26), transparent 45%),
+      radial-gradient(circle at 84% 14%, rgba(56,189,248,.16), transparent 40%),
+      radial-gradient(circle at 50% 96%, rgba(139,92,246,.14), transparent 45%)}
+  .wrap{position:relative;z-index:1;max-width:960px;margin:0 auto;padding:56px 24px 96px}
+  .back{display:inline-flex;align-items:center;gap:8px;color:#a89ec9;text-decoration:none;
+    font-size:14px;margin-bottom:36px;transition:color .2s}
+  .back:hover{color:#c4b5fd}
+  .num{display:inline-block;font-size:13px;letter-spacing:.18em;color:#8b7fc7;
+    border:1px solid rgba(139,92,246,.35);border-radius:999px;padding:5px 14px;margin-bottom:18px}
+  h1{font-size:clamp(28px,4.6vw,44px);line-height:1.25;font-weight:800;
+    background:linear-gradient(120deg,#c4b5fd 0%,#a78bfa 40%,#7dd3fc 100%);
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:16px}
+  .lede{font-size:17px;color:#b9b0d6;max-width:680px;margin-bottom:30px}
+  .tags{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:46px}
+  .tag{font-size:12.5px;padding:5px 13px;border-radius:999px;
+    background:rgba(139,92,246,.14);border:1px solid rgba(139,92,246,.32);color:#c9bff0}
+  h2{font-size:20px;color:#ddd6f3;margin:0 0 16px;padding-left:14px;position:relative}
+  h2::before{content:"";position:absolute;left:0;top:5px;bottom:5px;width:3px;
+    border-radius:2px;background:linear-gradient(180deg,#a78bfa,#38bdf8)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:46px}
+  .card{background:rgba(255,255,255,.035);border:1px solid rgba(139,92,246,.18);
+    border-radius:13px;padding:18px 20px}
+  .card h3{font-size:14px;color:#a78bfa;margin-bottom:8px}
+  .card p{font-size:14px;color:#b3aacd;margin:0}
+  .card code{font-family:Consolas,Monaco,monospace;font-size:12.5px;color:#c9bff0;
+    background:rgba(139,92,246,.16);border-radius:4px;padding:1px 5px}
+  ul.flow{list-style:none;counter-reset:step;margin-bottom:46px}
+  ul.flow li{position:relative;padding-left:32px;margin-bottom:16px;font-size:14.5px;color:#b8afd3}
+  ul.flow li::before{content:counter(step);counter-increment:step;position:absolute;left:0;top:1px;
+    width:21px;height:21px;border-radius:50%;font-size:12px;font-weight:700;color:#0d0a17;
+    text-align:center;line-height:21px;background:linear-gradient(135deg,#a78bfa,#7dd3fc)}
+  ul.flow li strong{color:#ddd6f3;font-weight:600}
+  .code{background:#120f1f;border:1px solid rgba(139,92,246,.2);border-radius:12px;
+    padding:18px 20px;font-family:Consolas,Monaco,monospace;font-size:13px;color:#c9d6f5;
+    overflow-x:auto;margin-bottom:46px;line-height:1.7}
+  .code .c{color:#6f6690}.code .k{color:#c4b5fd}.code .s{color:#7dd3fc}
+  .cap{font-size:12.5px;color:#6f6690;margin:-36px 0 46px}
+  table{width:100%;border-collapse:collapse;margin-bottom:46px;font-size:14px}
+  th,td{text-align:left;padding:11px 14px;border-bottom:1px solid rgba(139,92,246,.16)}
+  th{color:#a78bfa;font-weight:600;font-size:13px;letter-spacing:.04em}
+  td{color:#b8afd3}
+  td:first-child{color:#ddd6f3;white-space:nowrap}
+  code.mono{font-family:Consolas,Monaco,monospace;font-size:12.5px;color:#c9bff0;
+    background:rgba(139,92,246,.16);border-radius:4px;padding:1px 5px}
+  .badge{display:inline-block;font-size:11.5px;padding:2px 9px;border-radius:999px;
+    background:rgba(56,189,248,.14);border:1px solid rgba(56,189,248,.34);color:#7dd3fc;
+    margin-left:8px;vertical-align:2px}
+  footer{text-align:center;font-size:13px;color:#6f6690;padding-top:36px;
+    border-top:1px solid rgba(139,92,246,.14)}
+  footer a{color:#a78bfa;text-decoration:none}
+  @media(max-width:640px){table{font-size:13px}th,td{padding:9px 10px}}
+</style>
+</head>
+<body>
+<div class="glow"></div>
+<div class="wrap">
+  <a class="back" href="../index.html">← 返回作品集</a>
+  <div class="num">PROJECT 23 · Web 应用</div>
+  <h1>思洋个人管理台</h1>
+  <p class="lede">把一套写死的静态待办页面，<strong style="color:#ddd6f3">原地改造成</strong> Flask + SQLite 的多用户 Web 应用。
+  原有 HTML 结构、CSS 规则、JS 交互逻辑<strong style="color:#ddd6f3">全部保留</strong>，
+  换掉的只是底下那层数据 —— 所以视觉与交互跟原型完全一致。</p>
+  <div class="tags">
+    <span class="tag">Python</span>
+    <span class="tag">Flask</span>
+    <span class="tag">SQLAlchemy</span>
+    <span class="tag">SQLite</span>
+    <span class="tag">多用户隔离</span>
+    <span class="tag">原生 JS</span>
+  </div>
+
+  <h2>项目背景</h2>
+  <p style="font-size:15px;color:#b8afd3;margin-bottom:46px">
+    起点是一个纯静态页面：数据以常量数组写在 JS 里，<strong style="color:#ddd6f3">刷新即还原</strong>，
+    没有用户概念，也没有后端。真正要练的不是「写个 CRUD」，而是
+    <strong style="color:#ddd6f3">原地改造的克制</strong> —— 在已经跑通的界面上做增量，
+    而不是推倒重写。9 个业务列表（每日计划 / 待办 / 语录 / 运动 / 饮食 / 打卡 / 媒体 / 备忘 / 金句）
+    的字段定义、必填项、排序规则，全部收在一张注册表里描述。
+  </p>
+
+  <h2>改了什么</h2>
+  <table>
+    <tr><th>项</th><th>改造前</th><th>改造后</th></tr>
+    <tr><td>数据存储</td><td>JS 里的常量数组，刷新还原</td><td>SQLite 文件落盘持久化</td></tr>
+    <tr><td>数据访问</td><td>直接读内存对象</td><td>Flask-SQLAlchemy 完整 CRUD</td></tr>
+    <tr><td>用户体系</td><td>无</td><td><code class="mono">users</code> 表 + 注册 / 登录 / 退出，密码哈希存储</td></tr>
+    <tr><td>数据归属</td><td>无</td><td>每张业务表带 <code class="mono">user_id</code> 外键，多用户天然隔离</td></tr>
+    <tr><td>运行方式</td><td><code class="mono">app.run()</code> 开发服务器</td><td>gunicorn + systemd 常驻，开机自启</td></tr>
+    <tr><td>接口</td><td>只有读取</td><td>获取全部 / 按 id 查 / 新增 / 修改 / 删除，五套齐全</td></tr>
+  </table>
+
+  <h2>技术要点</h2>
+  <div class="grid">
+    <div class="card">
+      <h3>一个注册表撑起 9 个列表</h3>
+      <p>新增一个列表只需加一条配置，<strong>五套 CRUD 接口一行都不用改</strong>。</p>
+    </div>
+    <div class="card">
+      <h3>多用户隔离在数据层</h3>
+      <p>业务表统一继承带 <code>user_id</code> 的抽象基类，查询自动收敛到当前登录用户，不是靠接口层记得加条件。</p>
+    </div>
+    <div class="card">
+      <h3>排序交给数据库</h3>
+      <p>每日计划把 <code>"07:00 – 07:40"</code> 的起始时间换算成「当天第几分钟」存成派生列，<code>ORDER BY</code> 直接排，不用把数据全查出来在 Python 里排。</p>
+    </div>
+    <div class="card">
+      <h3>密码只存哈希</h3>
+      <p><code>to_dict()</code> 是专门给前端的版本，注释写明「绝不含 password_hash」—— 序列化边界就是安全边界。</p>
+    </div>
+    <div class="card">
+      <h3>接口契约对齐前端</h3>
+      <p>对外暴露的 id 一律 <code>str()</code> 一次。前端 id 来自 DOM 属性、天生是字符串，两边严格相等才匹配得上。</p>
+    </div>
+    <div class="card">
+      <h3>真部署，不只是本地跑通</h3>
+      <p>已部署到 Ubuntu 云服务器：gunicorn 单进程 + systemd 常驻开机自启，含云安全组放行与完整排查记录。</p>
+    </div>
+  </div>
+
+  <h2>一个注册表撑起 9 个业务列表</h2>
+  <div class="code">
+<span class="c"># app.py —— LIST_REGISTRY：字段类型、必填、默认值、排序集中描述</span>
+<span class="k">LIST_REGISTRY</span> = {
+    <span class="s">"plans"</span>: {
+        <span class="s">"model"</span>: Plan,
+        <span class="s">"title"</span>: <span class="s">"每日计划"</span>,
+        <span class="s">"fields"</span>: {<span class="s">"time"</span>: <span class="s">"str"</span>, <span class="s">"task"</span>: <span class="s">"str"</span>, <span class="s">"tag"</span>: <span class="s">"str"</span>},
+        <span class="s">"required"</span>: [<span class="s">"time"</span>, <span class="s">"task"</span>],
+        <span class="s">"defaults"</span>: {<span class="s">"tag"</span>: <span class="s">"未分类"</span>},
+        <span class="c"># 需求第 9 条：每日计划按时间升序。start_minutes 是 time 的派生列，</span>
+        <span class="c"># 同类时间再按 id 升序，保证顺序稳定（不会每次刷新换个样）。</span>
+        <span class="s">"order"</span>: (<span class="s">"start_minutes"</span>, <span class="s">"asc"</span>),
+    },
+    <span class="s">"todos"</span>: {
+        <span class="s">"model"</span>: Todo,
+        <span class="s">"title"</span>: <span class="s">"待办清单"</span>,
+        <span class="s">"fields"</span>: {<span class="s">"text"</span>: <span class="s">"str"</span>, <span class="s">"done"</span>: <span class="s">"bool"</span>},
+        <span class="s">"required"</span>: [<span class="s">"text"</span>],
+        <span class="s">"order"</span>: (<span class="s">"id"</span>, <span class="s">"desc"</span>),
+    },
+    <span class="c"># ... 其余 7 个同构</span>
+}
+  </div>
+  <p class="cap">9 个列表共用同一套增删改查实现，差异全部由这张表描述 —— 这也是「原地改造」能成立的前提。</p>
+
+  <h2>踩过的坑：id 为什么必须是字符串</h2>
+  <div class="code">
+<span class="c"># app.py —— 源码里的原始注释（节选）</span>
+<span class="c"># ⚠️ 关于 to_dict() 里为什么写 str(self.id) —— 别改回 self.id</span>
+<span class="c">#</span>
+<span class="c"># 数据库主键是 Integer，直接输出会变成 JSON 数字（"id": 8）。</span>
+<span class="c"># 但前端 app.js 里所有 id 都是从 DOM 属性上读回来的：</span>
+<span class="c">#</span>
+<span class="c">#     editing = { id: btn.dataset.id }        // ← 一定是字符串 "8"</span>
+<span class="c">#     data[list].filter(x => x.id === id)      // ← 严格相等，数字 8 永远匹配不上</span>
+<span class="c">#</span>
+<span class="c"># 也就是说「字符串 id」才是前后端之间既有的约定。后端给数字，就会出现：</span>
+<span class="c"># 点「编辑」没反应、点「删除」不进入确认态 —— 而且不报任何错，最难查。</span>
+
+<span class="k">def</span> to_dict(self):
+    <span class="k">return</span> {
+        <span class="s">"id"</span>: str(self.id),        <span class="c"># ← 对外一律字符串</span>
+        <span class="s">"time"</span>: self.time,
+        <span class="s">"task"</span>: self.task,
+    }
+  </div>
+  <p class="cap">前端因此一行都不用改。注意：只影响「发出去给浏览器」的数据，后端内部（路由 <code class="mono">&lt;int:item_id&gt;</code>、外键 <code class="mono">user_id</code>）走的仍然是整数。</p>
+
+  <h2>接口一览</h2>
+  <table>
+    <tr><th>方法</th><th>路径</th><th>说明</th></tr>
+    <tr><td>GET</td><td><code class="mono">/</code></td><td>首页。未登录 → 302 跳 <code class="mono">/login</code></td></tr>
+    <tr><td>POST</td><td><code class="mono">/api/auth/register</code></td><td>注册并自动登录（用户名 2–20 位、密码 ≥6 位、重名拒绝）</td></tr>
+    <tr><td>POST</td><td><code class="mono">/api/auth/login</code></td><td>登录，写入 session</td></tr>
+    <tr><td>GET</td><td><code class="mono">/api/auth/me</code></td><td>返回当前登录用户；未登录 401</td></tr>
+    <tr><td>GET</td><td><code class="mono">/api/data</code></td><td>一次拿全：引导信息 + 所有列表 + 语录</td></tr>
+    <tr><td>GET<br>POST<br>PUT<br>DELETE</td><td><code class="mono">/api/&lt;list_name&gt;[/&lt;id&gt;]</code></td><td>9 个列表共用：获取全部 / 单查 / 新增 / 修改 / 删除</td></tr>
+  </table>
+
+  <h2>部署与运行</h2>
+  <ul class="flow">
+    <li><strong>本地启动</strong> — <code>pip install -r requirements.txt</code> 后 <code>python app.py</code>，首次启动自动建表。</li>
+    <li><strong>配密钥</strong> — <code>SECRET_KEY</code> 必须设，否则拿到源码就能伪造登录态；<code>FLASK_DEBUG</code> 生产必须为 0。</li>
+    <li><strong>云服务器</strong> — sync 代码 → 建 venv → 装依赖 → gunicorn 单进程启动。</li>
+    <li><strong>systemd 常驻</strong> — 写成服务单元，开机自启，进程挂了自动拉起。</li>
+    <li><strong>云安全组放行</strong> — 这一步在服务器里改不了，必须去云控制台放行端口。</li>
+  </ul>
+  <div class="code">
+<span class="c"># ⚠️ 建表是「模块级」执行的，所以部署时必须单进程</span>
+gunicorn -w <span class="s">1</span> -b <span class="s">0.0.0.0:5000</span> app:app
+
+<span class="c"># 多 worker 会并发建表撞车 → sqlite3.OperationalError: table already exists</span>
+<span class="c"># SQLite 本身是库级写锁，单进程也更合适</span>
+  </div>
+  <p class="cap">接口自测：<code class="mono">test_api.py</code> 覆盖登录态、五套 CRUD、排序、多用户隔离。<span class="badge">跑完会真的写数据</span>删掉 <code class="mono">simon.db</code> 重启即可恢复干净。</p>
+
+  <footer>
+    王思洋 · 全栈 Web 应用作品 ·
+    <a href="https://github.com/wangsy1150/siyang-manager" target="_blank" rel="noopener">GitHub 源码仓库</a>
+  </footer>
+</div>
+</body>
+</html>

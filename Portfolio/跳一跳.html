@@ -1,0 +1,1135 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>跳一跳</title>
+  <style>
+    /* ============ 全局变量与基础重置（下一轮改配色只动这里） ============ */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --text-main: #3d4270;        /* 主文字色 */
+      --text-light: #8a8fb8;       /* 次要文字色 */
+      --glass-bg: rgba(255, 255, 255, 0.38);   /* 毛玻璃底色 */
+      --glass-border: rgba(255, 255, 255, 0.6);/* 毛玻璃描边 */
+      --glass-shadow: 0 8px 32px rgba(85, 95, 185, 0.18); /* 玻璃阴影 */
+      --radius-lg: 24px;
+      --radius-md: 16px;
+    }
+
+    html, body { height: 100%; }
+
+    body {
+      font-family: "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif;
+      /* 背景：浅蓝 → 淡紫 柔和渐变，fixed 保证滚动时不断裂 */
+      background: linear-gradient(160deg, #bfe3ff 0%, #d4d8ff 45%, #ecdaff 100%);
+      background-attachment: fixed;
+      color: var(--text-main);
+      overflow-x: hidden;
+    }
+
+    /* ============ 页面切换控制：只显示带 active 类的页面 ============ */
+    .page { display: none; }
+    .page.active { display: flex; }
+
+    /* ============ 毛玻璃通用效果 ============ */
+    .glass {
+      background: var(--glass-bg);
+      -webkit-backdrop-filter: blur(16px);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--glass-shadow);
+      border-radius: var(--radius-lg);
+    }
+
+    /* ============ 通用按钮：圆角 + 毛玻璃 + 阴影 ============ */
+    .btn {
+      border: 1px solid var(--glass-border);
+      border-radius: 999px;
+      cursor: pointer;
+      font-family: inherit;
+      font-weight: 700;
+      color: var(--text-main);
+      background: linear-gradient(135deg, rgba(255,255,255,.6), rgba(255,255,255,.3));
+      -webkit-backdrop-filter: blur(14px);
+      backdrop-filter: blur(14px);
+      box-shadow: 0 8px 24px rgba(85, 95, 185, 0.22);
+      transition: transform .25s ease, box-shadow .25s ease, background .25s ease;
+    }
+    .btn:hover {
+      transform: translateY(-3px);
+      background: linear-gradient(135deg, rgba(255,255,255,.75), rgba(255,255,255,.45));
+      box-shadow: 0 12px 30px rgba(85, 95, 185, 0.32);
+    }
+    .btn:active { transform: translateY(0) scale(.97); }
+
+    /* ============ 欢迎页 ============ */
+    #welcome-page.active {
+      position: relative;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      min-height: 100vh;
+      min-height: 100dvh;
+      padding: 24px;
+      overflow: hidden;
+    }
+
+    /* 装饰：漂浮泡泡 */
+    .bubble {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.28);
+      -webkit-backdrop-filter: blur(6px);
+      backdrop-filter: blur(6px);
+      box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.5);
+      animation: bubbleFloat 7s ease-in-out infinite;
+      pointer-events: none;
+    }
+    .bubble:nth-child(1) { width: 120px; height: 120px; top: 12%; left: 10%; }
+    .bubble:nth-child(2) { width: 70px;  height: 70px;  top: 20%; right: 14%; animation-delay: -2s; }
+    .bubble:nth-child(3) { width: 46px;  height: 46px;  bottom: 24%; left: 18%; animation-delay: -4s; }
+    .bubble:nth-child(4) { width: 90px;  height: 90px;  bottom: 14%; right: 10%; animation-delay: -1s; }
+    .bubble:nth-child(5) { width: 28px;  height: 28px;  top: 46%; left: 6%;  animation-delay: -5s; }
+
+    @keyframes bubbleFloat {
+      0%, 100% { transform: translateY(0); }
+      50%      { transform: translateY(-26px); }
+    }
+
+    /* 游戏标题：渐变文字 + 光晕 */
+    .game-title {
+      font-size: clamp(56px, 14vw, 116px);
+      font-weight: 800;
+      letter-spacing: .12em;
+      background: linear-gradient(135deg, #4a6cf7 0%, #8f6cf7 50%, #c96cf7 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      filter: drop-shadow(0 8px 20px rgba(96, 105, 220, .35));
+      user-select: none;
+    }
+
+    .game-slogan {
+      font-size: clamp(15px, 2.5vw, 18px);
+      color: var(--text-light);
+      letter-spacing: .35em;
+      text-indent: .35em; /* 抵消末字字距，视觉居中 */
+    }
+
+    /* 开始游戏按钮 */
+    .btn-start {
+      margin-top: 26px;
+      padding: 17px 62px;
+      font-size: clamp(18px, 3vw, 23px);
+    }
+
+    /* ============ 游戏主页布局 ============ */
+    #game-page.active {
+      flex-direction: column;
+      min-height: 100vh;
+      min-height: 100dvh;
+    }
+
+    .game-layout {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      width: 100%;
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 24px;
+      flex: 1;
+    }
+
+    /* 左侧：游戏画面区外壳 */
+    .stage-wrap {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* 游戏画面区：5 : 6 宽高比（再次加宽，前方视野更大，玩家 + 三块都从容在框内） */
+    .game-stage {
+      width: min(100%, calc((100vh - 96px) * 5 / 6), 600px);
+      width: min(100%, calc((100dvh - 96px) * 5 / 6), 600px);
+      aspect-ratio: 5 / 6;
+      padding: 14px;
+      display: flex;
+    }
+
+    /* 游戏画布：占满画面区；5:6 逻辑坐标与 DPR 适配由脚本处理 */
+    #game-canvas {
+      flex: 1;
+      width: 100%;
+      height: 100%;
+      border-radius: var(--radius-md);
+      display: block;
+      background: rgba(255, 255, 255, 0.18);
+    }
+
+    /* ============ 右侧：排行榜区域（占位） ============ */
+    .leaderboard {
+      width: 300px;
+      flex-shrink: 0;
+      padding: 20px;
+      align-self: flex-start;
+      position: sticky;
+      top: 24px;
+    }
+    .lb-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .lb-header h2 { font-size: 20px; }
+
+    /* 展开 / 收起按钮 */
+    .lb-toggle { padding: 6px 16px; font-size: 13px; }
+
+    /* 排行榜主体：收起时高度过渡为 0，实现平滑折叠 */
+    .lb-body {
+      max-height: 480px;
+      opacity: 1;
+      overflow: hidden;
+      margin-top: 16px;
+      transition: max-height .35s ease, opacity .3s ease, margin-top .35s ease;
+    }
+    .leaderboard.collapsed .lb-body { max-height: 0; opacity: 0; margin-top: 0; }
+
+    /* 条目列表 / 排名徽章 / 清空记录按钮样式 */
+    .lb-list { list-style: none; }
+    .lb-empty {
+      padding: 34px 0;
+      text-align: center;
+      color: var(--text-light);
+      font-size: 14px;
+      letter-spacing: .1em;
+    }
+    .lb-footer {
+      margin-top: 14px;
+      display: flex;
+      justify-content: flex-end;
+    }
+    .btn-clear {
+      padding: 5px 14px;
+      font-size: 12px;
+      color: #a25a86;
+    }
+    .lb-item {
+      display: flex;
+      align-items: center;
+      padding: 10px 8px;
+      border-radius: 12px;
+      margin-bottom: 6px;
+      background: rgba(255, 255, 255, 0.32);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+    }
+    .lb-rank {
+      flex: 0 0 34px;
+      font-weight: 800;
+      font-size: 18px;
+      text-align: center;
+      color: var(--text-light);
+      letter-spacing: .02em;
+    }
+    /* 前三名金/银/铜徽章 */
+    .lb-rank.gold   { color: #e6a817; text-shadow: 0 1px 3px rgba(230,168,23,.35); }
+    .lb-rank.gold::before   { content: '🥇 '; margin-right: 2px; }
+    .lb-rank.silver { color: #8a93a8; text-shadow: 0 1px 3px rgba(138,147,168,.3); }
+    .lb-rank.silver::before { content: '🥈 '; margin-right: 2px; }
+    .lb-rank.bronze { color: #c17a4a; text-shadow: 0 1px 3px rgba(193,122,74,.3); }
+    .lb-rank.bronze::before { content: '🥉 '; margin-right: 2px; }
+
+    .lb-info {
+      flex: 1;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .lb-round {
+      font-size: 12px;
+      color: var(--text-light);
+      letter-spacing: .05em;
+    }
+    .lb-score {
+      font-weight: 800;
+      font-size: 20px;
+      background: linear-gradient(135deg, #4a6cf7, #c96cf7);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    /* ============ 右下角：挂机按钮（占位 + 自动模式切换） ============ */
+    .afk-btn {
+      position: fixed;
+      right: 22px;
+      bottom: 22px;
+      width: 66px;
+      height: 66px;
+      border-radius: 50%;
+      font-size: 15px;
+      z-index: 60;
+      color: var(--text-main);
+    }
+    /* 自动模式开启时按钮变绿色系毛玻璃 */
+    .afk-btn.active {
+      background: linear-gradient(135deg, rgba(210,255,220,.75), rgba(170,230,190,.55));
+      border-color: rgba(140,210,160,.8);
+      color: #2e6a47;
+      box-shadow: 0 8px 24px rgba(80,160,110,0.3);
+    }
+    /* 左下角：挂机中状态提示（自动模式开启且不在结束状态时显示） */
+    .afk-tip {
+      position: fixed;
+      left: 22px;
+      bottom: 22px;
+      padding: 10px 18px;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 14px;
+      color: #2e6a47;
+      background: linear-gradient(135deg, rgba(210,255,220,.7), rgba(170,230,190,.5));
+      -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(140,210,160,.7);
+      box-shadow: 0 6px 18px rgba(80,160,110,0.25);
+      z-index: 60;
+      display: none;
+      user-select: none;
+      pointer-events: none;
+    }
+    .afk-tip.show { display: inline-flex; align-items: center; gap: 6px; }
+    .afk-tip::before {
+      content: '';
+      display: inline-block;
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: #35b366;
+      box-shadow: 0 0 0 0 rgba(53,179,102,.6);
+      animation: afk-pulse 1.4s infinite;
+    }
+    @keyframes afk-pulse {
+      0%   { box-shadow: 0 0 0 0 rgba(53,179,102,.55); }
+      70%  { box-shadow: 0 0 0 10px rgba(53,179,102,0); }
+      100% { box-shadow: 0 0 0 0 rgba(53,179,102,0); }
+    }
+    @media (max-width: 768px) {
+      .afk-btn { width: 58px; height: 58px; right: 14px; bottom: 14px; font-size: 14px; }
+      .afk-tip { left: 14px; bottom: 86px; padding: 8px 14px; font-size: 13px; }
+    }
+
+    /* ============ 游戏结束弹窗（占位，默认隐藏） ============ */
+    .modal {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: rgba(70, 75, 140, 0.32);
+      -webkit-backdrop-filter: blur(8px);
+      backdrop-filter: blur(8px);
+    }
+    /* 给弹窗加 hidden 类即可隐藏 */
+    .modal.hidden { display: none; }
+
+    .modal-content {
+      padding: 42px 50px;
+      text-align: center;
+      width: min(100%, 380px);
+    }
+    .modal-content h2 { font-size: 26px; margin-bottom: 12px; }
+    .modal-tip { color: var(--text-light); font-size: 14px; margin-bottom: 14px; }
+    .modal-score {
+      font-size: 44px;
+      font-weight: 800;
+      background: linear-gradient(135deg, #4a6cf7, #c96cf7);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      line-height: 1.1;
+      margin-bottom: 26px;
+    }
+    #btn-restart { padding: 12px 40px; font-size: 17px; }
+
+    /* ============ 移动端适配：窄屏改为上下堆叠 ============ */
+    @media (max-width: 768px) {
+      .game-layout { flex-direction: column; padding: 16px; gap: 16px; }
+
+      /* 手机上画面区按屏宽缩放，比例仍为 2:3 */
+      .game-stage { width: min(94vw, 480px); }
+
+      .leaderboard { width: 100%; position: static; }
+
+      .afk-btn { width: 58px; height: 58px; right: 14px; bottom: 14px; font-size: 14px; }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- ================= 欢迎页（默认显示） ================= -->
+  <section id="welcome-page" class="page active">
+    <!-- 装饰泡泡 -->
+    <span class="bubble"></span>
+    <span class="bubble"></span>
+    <span class="bubble"></span>
+    <span class="bubble"></span>
+    <span class="bubble"></span>
+
+    <!-- 游戏标题与口号 -->
+    <h1 class="game-title">跳一跳</h1>
+    <p class="game-slogan">看准时机 · 一跳到底</p>
+
+    <!-- 开始游戏按钮：点击后进入游戏主页 -->
+    <button id="btn-start" class="btn btn-start">开始游戏</button>
+  </section>
+
+  <!-- ================= 游戏主页（点击"开始游戏"后才显示） ================= -->
+  <section id="game-page" class="page">
+    <div class="game-layout">
+      <!-- 左侧：游戏画面区（2:3 占比，下一轮在此放入 canvas） -->
+      <div class="stage-wrap">
+        <div class="game-stage glass">
+          <!-- Canvas 画布：脚本里用它绘制角色、方块与云朵 -->
+          <canvas id="game-canvas"></canvas>
+        </div>
+      </div>
+
+      <!-- 右侧：排行榜（localStorage 持久化；不挡游戏画面，可展开 / 收起） -->
+      <aside id="leaderboard" class="leaderboard glass">
+        <div class="lb-header">
+          <h2>排行榜</h2>
+          <button id="btn-lb-toggle" class="btn lb-toggle">收起</button>
+        </div>
+
+        <div id="lb-body" class="lb-body">
+          <ul id="lb-list" class="lb-list">
+            <!-- 脚本渲染：条目 / 暂无记录 -->
+            <li class="lb-empty">暂无记录</li>
+          </ul>
+          <!-- 清空记录按钮：只在有记录时显示 -->
+          <div id="lb-footer" class="lb-footer" style="display:none">
+            <button id="btn-lb-clear" class="btn btn-clear">清空记录</button>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <!-- 右下角：挂机按钮（切换自动模式） -->
+    <button id="btn-afk" class="btn afk-btn" title="自动玩开关">挂机</button>
+
+    <!-- 左下角：自动模式运行时提示 -->
+    <div id="afk-tip" class="afk-tip">挂机中</div>
+
+    <!-- 游戏结束弹窗：显示本局得分与重新开始按钮 -->
+    <div id="modal-gameover" class="modal hidden">
+      <div class="modal-content glass">
+        <h2>游戏结束</h2>
+        <p class="modal-tip">本局得分</p>
+        <div id="modal-score" class="modal-score">0</div>
+        <button id="btn-restart" class="btn">重新开始</button>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    /* ============ 页面切换：欢迎页 → 游戏主页（仅壳子跳转，无任何玩法逻辑） ============ */
+    const welcomePage = document.getElementById('welcome-page');
+    const gamePage = document.getElementById('game-page');
+
+    document.getElementById('btn-start').addEventListener('click', () => {
+      welcomePage.classList.remove('active'); // 隐藏欢迎页
+      gamePage.classList.add('active');       // 显示游戏主页
+      if (!gameInited) {                      // 首次进入：初始化画布并启动帧循环
+        gameInited = true;
+        initGame();
+        requestAnimationFrame(gameLoop);
+      } else {
+        resizeCanvas();                       // 再次进入：校正画布尺寸
+      }
+    });
+
+    /* ============ 排行榜：展开 / 收起切换 + localStorage 持久化 ============ */
+    const leaderboard = document.getElementById('leaderboard');
+    const lbToggle = document.getElementById('btn-lb-toggle');
+    lbToggle.addEventListener('click', () => {
+      leaderboard.classList.toggle('collapsed');
+      lbToggle.textContent = leaderboard.classList.contains('collapsed') ? '展开' : '收起';
+    });
+
+    /* ============================================================
+       排行榜持久化（localStorage + JSON）
+       存储键：tiaotiao_records
+       数据结构：{ version:1, totalRounds:number, list:[{score,round}] }
+       排序规则：score 降序 → round（第几次挑战）升序；最多 10 条，超出自动删除最低分
+       ============================================================ */
+    const LB_KEY = 'tiaotiao_records';
+    const lbListEl = document.getElementById('lb-list');
+    const lbFooterEl = document.getElementById('lb-footer');
+    const btnLbClear = document.getElementById('btn-lb-clear');
+
+    // 读取本地记录（异常安全：JSON 解析失败时回退到默认空表）
+    function lbLoad() {
+      try {
+        const raw = localStorage.getItem(LB_KEY);
+        if (!raw) return { version: 1, totalRounds: 0, list: [] };
+        const obj = JSON.parse(raw);
+        if (!obj || typeof obj !== 'object') return { version: 1, totalRounds: 0, list: [] };
+        return {
+          version: obj.version || 1,
+          totalRounds: Number.isFinite(obj.totalRounds) ? obj.totalRounds : 0,
+          list: Array.isArray(obj.list) ? obj.list : []
+        };
+      } catch (e) { return { version: 1, totalRounds: 0, list: [] }; }
+    }
+    function lbSave(data) {
+      try { localStorage.setItem(LB_KEY, JSON.stringify(data)); return true; }
+      catch (e) { return false; }
+    }
+    // 排序：分数高到低；同分按 round（第几次挑战）从小到大（玩得早排前）
+    function lbSort(list) {
+      return list.slice().sort((a, b) => (b.score - a.score) || (a.round - b.round));
+    }
+    // 追加一条成绩：totalRounds +1 → 入表 → 排序 → 截前10条（超出自动删最低分）
+    function lbAddRecord(s) {
+      const data = lbLoad();
+      data.totalRounds = (data.totalRounds || 0) + 1;
+      data.list.push({ score: s, round: data.totalRounds });
+      data.list = lbSort(data.list).slice(0, 10);
+      lbSave(data);
+      return data;
+    }
+    // 渲染榜单 UI：前三名金 / 银 / 铜徽章 + 排名 + 第几次挑战 + 积分
+    function lbRender() {
+      const data = lbLoad();
+      lbListEl.innerHTML = '';
+      if (!data.list.length) {
+        const empty = document.createElement('li');
+        empty.className = 'lb-empty';
+        empty.textContent = '暂无记录';
+        lbListEl.appendChild(empty);
+        lbFooterEl.style.display = 'none';
+        return;
+      }
+      data.list.forEach((rec, idx) => {
+        const li = document.createElement('li');
+        li.className = 'lb-item';
+        const rank = document.createElement('div');
+        const medal = idx === 0 ? 'gold' : idx === 1 ? 'silver' : idx === 2 ? 'bronze' : '';
+        rank.className = 'lb-rank ' + medal;
+        rank.textContent = idx + 1;
+        const info = document.createElement('div');
+        info.className = 'lb-info';
+        const roundSpan = document.createElement('span');
+        roundSpan.className = 'lb-round';
+        roundSpan.textContent = '第 ' + rec.round + ' 次挑战';
+        const scoreSpan = document.createElement('span');
+        scoreSpan.className = 'lb-score';
+        scoreSpan.textContent = rec.score + ' 分';
+        info.appendChild(roundSpan);
+        info.appendChild(scoreSpan);
+        li.appendChild(rank);
+        li.appendChild(info);
+        lbListEl.appendChild(li);
+      });
+      lbFooterEl.style.display = 'flex';
+    }
+    // 清空记录：先弹 window.confirm 二次确认，确认后才删
+    btnLbClear.addEventListener('click', () => {
+      const ok = window.confirm('确定要清空排行榜记录吗？此操作不可恢复。');
+      if (!ok) return;
+      lbSave({ version: 1, totalRounds: 0, list: [] });
+      lbRender();
+    });
+    // 首次进入页面（欢迎页时）就渲染一次，用户一进主界面就看到上次的成绩
+    lbRender();
+
+    /* ============ 挂机按钮：独立自动模块 AutoPilot 在下文中绑定 ============ */
+
+    /* ============================================================
+       游戏主逻辑（完整玩法：蓄力 → 跳跃 → 判定 → 镜头 → 结束）
+       状态机：STAND 站着 / CHARGE 蓄力 / JUMP 跳跃 / LAND 落地回弹 / OVER 结束
+       ============================================================ */
+    const GAME_W = 500, GAME_H = 600;       // 5:6 逻辑坐标系（与 CSS aspect-ratio 一致，不变形）
+    const canvas = document.getElementById('game-canvas');
+    const ctx = canvas.getContext('2d');
+    let gameInited = false;                 // 标记画布与输入监听是否已初始化
+    const modal = document.getElementById('modal-gameover');
+    const modalScore = document.getElementById('modal-score');
+    document.getElementById('btn-restart').addEventListener('click', () => {
+      modal.classList.add('hidden');
+      resetGame();
+    });
+
+    // ---- 全局游戏状态 ----
+    const blocks = [];                      // 方块数组，index 越小越旧
+    const clouds = [];
+    const player = {
+      x: 0, y: 0,                           // 世界坐标系的脚底位置（真实判定坐标）
+      vx: 0, vy: 0,                         // 跳跃速度（世界坐标 / 毫秒）
+      dir: 1,                               // 起跳水平方向：1 向右 -1 向左
+      squash: 1,                            // 身体垂直缩放比（蓄力下压 / 落地回弹用）
+      landing: { t: 0 }                     // 落地回弹状态：t 回弹时间(ms)
+    };
+    let cameraX = 0, cameraY = 0;           // 镜头在世界坐标中的偏移：渲染 = 世界 - camera
+    let camTargetX = 0, camTargetY = 0;     // 镜头缓动目标
+    let state = 'STAND';                    // 状态机，严格互斥
+    let charge = 0;                         // 蓄力值 0~1
+    let score = 0;
+    let showTip = true;                     // 首次进入显示操作提示，得分>1 后消失
+    /* 跳跃距离的三档（世界坐标 px）。语义：相邻两块「中心到中心」的水平距离。
+       🔴 旧版把 GAP 当成「半宽+gap+半宽」去算中心距，真实中心距被放大约 100~150px，
+          导致蓄满力也跳不到下一块。
+       🔴 关键设计：MAX_JUMP_GAP(满蓄力) 必须明显大于 GAP_FAR(最大间距) ——
+          留出的余量用来补救"落点偏离方块中心"的情况。
+          最坏情况：落点偏到上一块最边缘(半宽 65px)，需要 GAP_FAR + 65 ≤ MAX_JUMP_GAP。
+          实测 170 + 7(抖动) + 65 = 242 ≤ 245 ✅ 即使落在最边缘也一定跳得到。 */
+    const GAP_NEAR = 105, GAP_MID = 140, GAP_FAR = 170;
+    const MAX_JUMP_GAP = 245;                         // 满蓄力时的水平位移上限
+    const MIN_JUMP_GAP = 70;                          // 蓄力极短时的最小水平位移
+    /* 蓄力 0→1 映射到位移 [MIN_JUMP_GAP, MAX_JUMP_GAP]，分段线性且处处连续
+       （旧版在 c=0 与 c=0.66 处有 30px / 25px 的突跳，蓄力条手感会"卡一下"） */
+    function gapFromCharge(c) {
+      if (c <= 0) return MIN_JUMP_GAP;
+      if (c < 0.33) return MIN_JUMP_GAP + (GAP_MID - MIN_JUMP_GAP) * (c / 0.33);
+      if (c < 0.66) return GAP_MID + (GAP_FAR - GAP_MID) * ((c - 0.33) / 0.33);
+      return GAP_FAR + (MAX_JUMP_GAP - GAP_FAR) * ((c - 0.66) / 0.34);
+    }
+
+    /* ---------- 画布尺寸 + DPR 适配，并映射回 500×600 逻辑坐标 ---------- */
+    function resizeCanvas() {
+      const dpr = window.devicePixelRatio || 1;
+      const r = canvas.getBoundingClientRect();
+      canvas.width = Math.round(r.width * dpr);
+      canvas.height = Math.round(r.height * dpr);
+      ctx.setTransform(canvas.width / GAME_W, 0, 0, canvas.height / GAME_H, 0, 0);
+    }
+    window.addEventListener('resize', resizeCanvas);
+
+    /* ---------- 生成一个新方块 ----------
+       🔴 核心修复 1（间距）：以「上一块的中心」为基准按 GAP_* 递增中心距 ——
+          位置自然向右递进，且最大间距 GAP_FAR 远小于满蓄力位移 MAX_JUMP_GAP，
+          落点偏离时还能靠多蓄一点救回来。
+          （旧版按 last.w/2 + gap + w/2 算中心距，被系统性放大约 100~150px，蓄满力也跳不到。）
+       🔴 核心修复 2（高度）：所有方块顶面保持同一水平线 newY = last.y。
+          旧版 dy 恒为负（新块总比上一块高 30~75px），而落地判定用的是旧块顶面高度，
+          于是小人每次都陷进新方块内部 30~75px（实测平均 59.3px）。
+          现在只让柱高 h 随机，视觉上仍是高低错落，但顶面齐平。 */
+    function spawnNextBlock() {
+      const last = blocks[blocks.length - 1];
+      const w = 95 + Math.random() * 35;             // 宽 95~130
+      const h = 90 + Math.random() * 50;             // 柱高随机（只影响底边，不影响顶面）
+
+      // 基准 = 上一块的中心（位置自然递进）。
+      // 不能用 player.x —— resetGame 会连发生成多块，此时落点没变，几块会叠在一起。
+      const lastCenterX = last.x + last.w / 2;
+      const baseGap = [GAP_NEAR, GAP_MID, GAP_FAR][Math.floor(Math.random() * 3)];
+      const gap = baseGap + (Math.random() - 0.5) * 14;
+      let newCenterX = lastCenterX + gap;
+
+      // 兜底：保证不与上一块重叠（间距本身已 ≥ GAP_NEAR，这里防浮点/极端情况）
+      const noOverlapX = last.x + last.w + 6 + w / 2;
+      if (newCenterX < noOverlapX) newCenterX = noOverlapX;
+
+      blocks.push({
+        x: newCenterX - w / 2,
+        y: last.y,                                   // 顶面与上一块同一水平线（不再"莫名升高"）
+        w, h,
+        hue: Math.floor(Math.random() * 360),
+        slideOut: null
+      });
+    }
+
+    /* ---------- 初始化 / 重新开始 ---------- */
+    function resetGame() {
+      resizeCanvas();
+      blocks.length = 0;
+      score = 0;
+      charge = 0;
+      cameraX = 0; cameraY = 0;
+      camTargetX = 0; camTargetY = 0;
+      showTip = true;
+      state = 'STAND';
+
+      // 第一块：放在画面左侧约 20% 位置（玩家仍在画面内部，不贴边也不超出）
+      const w0 = 130, h0 = 110;
+      const firstX = GAME_W * 0.20 - w0 / 2;
+      const firstY = GAME_H - 150;
+      blocks.push({ x: firstX, y: firstY, w: w0, h: h0, hue: 210, slideOut: null });
+
+      // 先把小人放到第一块顶面中心，再预生成后续方块 ——
+      // 顺序本身不依赖 player.x（生成以「上一块中心」为基准），这样写只是为了先定好初始站位。
+      const f = blocks[0];
+      player.x = f.x + f.w / 2;
+      player.y = f.y;
+      player.vx = player.vy = 0;
+      player.squash = 1;
+      player.landing.t = 0;
+
+      // 预生成 3 块：画面中同时可见 blocks[0]（当前）、blocks[1]（下一块）、blocks[2]（再下一块）
+      for (let i = 0; i < 3; i++) spawnNextBlock();
+
+      // 云朵初始化
+      clouds.length = 0;
+      for (let i = 0; i < 5; i++) {
+        clouds.push({
+          x: Math.random() * (GAME_W + 300),
+          y: 30 + Math.random() * 240,
+          scale: 0.6 + Math.random() * 0.8,
+          speed: 0.1 + Math.random() * 0.25
+        });
+      }
+      // 重新开始后，若自动模式曾开启过（被玩家手动暂停前是开着的），则自动续跑
+      if (typeof AutoPilot !== 'undefined') AutoPilot.onReset();
+    }
+
+    /* ---------- 输入处理：鼠标 / 触屏 / 键盘空格 三种，统一调用开始/结束蓄力 ---------- */
+    function bindInputs() {
+      const stage = document.querySelector('.game-stage');
+      // 人工优先：玩家任何手动操作都立即暂停自动模式，把控制权还给玩家
+      const yieldControl = () => { if (typeof AutoPilot !== 'undefined' && AutoPilot.running) AutoPilot.pause('user'); };
+      const startCharge = (e) => {
+        if (state !== 'STAND') return;
+        if (e.cancelable) e.preventDefault();
+        yieldControl();
+        state = 'CHARGE';
+        charge = 0;
+      };
+      const endCharge = (e) => {
+        if (state !== 'CHARGE') return;
+        if (e.cancelable) e.preventDefault();
+        yieldControl();
+        launchJump(charge);
+      };
+      stage.addEventListener('mousedown', startCharge);
+      window.addEventListener('mouseup', endCharge);
+      stage.addEventListener('touchstart', startCharge, { passive: false });
+      window.addEventListener('touchend', endCharge, { passive: false });
+      // 键盘空格键
+      window.addEventListener('keydown', (e) => {
+        if (e.code === 'Space' && !e.repeat && state === 'STAND') {
+          e.preventDefault();
+          yieldControl();
+          state = 'CHARGE';
+          charge = 0;
+        }
+      });
+      window.addEventListener('keyup', (e) => {
+        if (e.code === 'Space' && state === 'CHARGE') {
+          e.preventDefault();
+          yieldControl();
+          launchJump(charge);
+        }
+      });
+    }
+
+    /* ---------- 按蓄力值启动跳跃：计算抛物线初速度 ---------- */
+    function launchJump(c) {
+      state = 'JUMP';
+      player.squash = 1;
+      player.dir = 1;
+      // 实际水平跳距 = 蓄力映射，但保证不超过 MAX_JUMP_GAP，也不低于 MIN_JUMP_GAP
+      const dist = Math.max(MIN_JUMP_GAP, Math.min(MAX_JUMP_GAP, gapFromCharge(c)));
+      const jumpTime = 520;
+      player.vx = player.dir * dist / jumpTime;        // 水平匀速：v = s / t
+      const peakHeight = 95;
+      const g = (8 * peakHeight) / (jumpTime * jumpTime);
+      player.vy = -g * jumpTime / 2;
+      player._gravity = g;
+      player._jumpT = 0;
+    }
+
+    /* ---------- 获取"当前站立方块" = 第一块在滑出动画前 ---------- */
+    function getCurrentBlock() { return blocks[0]; }
+
+    /* ---------- 每帧物理 + 状态更新 ---------- */
+    function stepPhysics(dt) {
+      // 蓄力阶段：小人被压缩；charge 随时间累积上限 1
+      if (state === 'CHARGE') {
+        charge = Math.min(1, charge + dt / 1400);     // 1.4 秒蓄满
+        player.squash = 1 - charge * 0.35;            // 最多压到 65% 高度
+      }
+      // 跳跃阶段：按水平匀速 + 垂直匀加速积分，直到 y 回到原起跳高度附近
+      else if (state === 'JUMP') {
+        player._jumpT += dt;
+        player.x += player.vx * dt;
+        player.vy += player._gravity * dt;
+        player.y += player.vy * dt;
+        // 落地：当 vy>0（下落）且脚底 y >= 第一块所在高度
+        if (player.vy > 0 && player.y >= blocks[0].y) {
+          player.y = blocks[0].y;                      // 吸到顶面上
+          handleLanding();
+        }
+        // 防止超长时间积分不落地 + 飞出画布：都直接判定为游戏结束，保证玩家始终在界面内
+        const screenX = player.x - cameraX;
+        if (player._jumpT > 800 || screenX < -80 || screenX > GAME_W + 80) endGame();
+      }
+      // 落地回弹：t 增加，按正弦回弹，220ms 后进入 STAND
+      else if (state === 'LAND') {
+        player.landing.t += dt;
+        const p = player.landing.t / 220;
+        player.squash = p < 0.3 ? (1 - 0.3 * p / 0.3) : (1 + 0.15 * (1 - (p - 0.3) / 0.7));
+        if (p >= 1) { player.squash = 1; state = 'STAND'; }
+      }
+      // 方块滑出：被跳过的最旧方块在得分后立即被标记 slideOut，做向左淡出并移除
+      for (let i = blocks.length - 1; i >= 0; i--) {
+        const b = blocks[i];
+        if (b.slideOut) {
+          b.slideOut.t += dt;
+          const p = Math.min(1, b.slideOut.t / 400);
+          b.x -= p * 220 * (dt / 400) + 0.5;           // 朝屏幕左侧滑，越滑越快
+          b._alpha = 1 - p;
+          if (p >= 1) blocks.splice(i, 1);
+        } else {
+          b._alpha = 1;
+        }
+      }
+      // 镜头缓动：锚点 = 当前块 → 第三块中前方；玩家固定在画面左侧 ~20%，保证玩家始终在框内且三块都可见
+      const anchor0 = blocks[0];
+      const anchor2 = blocks[Math.min(2, blocks.length - 1)];
+      const anchorX = (anchor0.x + anchor2.x + anchor2.w) / 2;
+      camTargetX = anchorX - GAME_W * 0.5;
+      camTargetY = anchor0.y - GAME_H * 0.62;
+      // 镜头下界限制：不让镜头把玩家顶出画面顶部或底部（保证玩家一定在游戏界面内）
+      const playerInScreenX = player.x - camTargetX;
+      if (playerInScreenX < 20) camTargetX = player.x - 20;
+      if (playerInScreenX > GAME_W - 40) camTargetX = player.x - (GAME_W - 40);
+      cameraX += (camTargetX - cameraX) * Math.min(1, dt / 240);
+      cameraY += (camTargetY - cameraY) * Math.min(1, dt / 240);
+      // 云朵随镜头反向微动（视差）并循环飘动
+      clouds.forEach((c) => {
+        c.x += c.speed * (dt / 16);
+        if (c.x - cameraX * 0.25 - 80 > GAME_W) c.x -= GAME_W + 160;
+        if (c.x - cameraX * 0.25 + 80 < 0) c.x += GAME_W + 160;
+      });
+    }
+
+    /* ---------- 落地判定：以"当前真实世界坐标"为准 ---------- */
+    function handleLanding() {
+      const current = blocks[0];
+      const next = blocks[1];
+      // 只能跳上"下一块"（blocks[1]）才算得分；跳到更远或旧块都结束游戏
+      const onNext = next && player.x >= next.x && player.x <= next.x + next.w;
+      if (onNext) {
+        score += 1;
+        if (score > 1) showTip = false;
+        // 把"上一块"标记为滑出（保留一小段时间后消失）
+        current.slideOut = { t: 0 };
+        // ✅ 明确把小人吸附到"落上的那一块"的顶面（顶面已齐平，语义也更清晰）
+        player.y = next.y;
+        // 立即补生成新的目标方块（画面中永远同时有当前 + 下一块 + 候补）
+        spawnNextBlock();
+        state = 'LAND';
+        player.landing.t = 0;
+      } else {
+        // 跳到其他地方（脚下没有任何方块顶面覆盖）= 直接结束
+        const onCurrent = player.x >= current.x && player.x <= current.x + current.w;
+        if (!onCurrent) endGame();
+        else { state = 'LAND'; player.landing.t = 0; }
+      }
+    }
+
+    /* ---------- 结束游戏 ---------- */
+    function endGame() {
+      state = 'OVER';
+      // 每局结束自动保存成绩（分数 + 第几次挑战）并刷新排行榜显示
+      lbAddRecord(score);
+      lbRender();
+      modalScore.textContent = score;
+      modal.classList.remove('hidden');
+      // 失败后自动停止自动模式（符合红线要求）
+      if (typeof AutoPilot !== 'undefined' && AutoPilot.running) AutoPilot.stop('gameover');
+    }
+
+    /* ========== 渲染 ========== */
+    function drawSky() {
+      const g = ctx.createLinearGradient(0, 0, 0, GAME_H);
+      g.addColorStop(0, '#cfe8ff');
+      g.addColorStop(1, '#e9e2ff');
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, GAME_W, GAME_H);
+    }
+
+    function drawCloud(c) {
+      const px = c.x - cameraX * 0.25;
+      const py = c.y - cameraY * 0.1;
+      ctx.save();
+      ctx.translate(px, py);
+      ctx.scale(c.scale, c.scale);
+      ctx.fillStyle = 'rgba(255,255,255,0.85)';
+      ctx.beginPath();
+      ctx.arc(0, 0, 22, 0, Math.PI * 2);
+      ctx.arc(22, -6, 18, 0, Math.PI * 2);
+      ctx.arc(44, 0, 20, 0, Math.PI * 2);
+      ctx.arc(20, 8, 20, 0, Math.PI * 2);
+      ctx.arc(40, 10, 16, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function drawBlock(b) {
+      const x = b.x - cameraX, y = b.y - cameraY;
+      if (b._alpha != null && b._alpha < 1) ctx.globalAlpha = Math.max(0, b._alpha);
+      // 地面影子
+      ctx.beginPath();
+      ctx.ellipse(x + b.w / 2, y + b.h + 4, b.w * 0.55, 10, 0, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(60,70,140,0.18)';
+      ctx.fill();
+      // 主体渐变：上亮下暗
+      const g = ctx.createLinearGradient(0, y, 0, y + b.h);
+      g.addColorStop(0, 'hsl(' + b.hue + ',70%,72%)');
+      g.addColorStop(1, 'hsl(' + b.hue + ',70%,42%)');
+      ctx.fillStyle = g;
+      ctx.fillRect(x, y, b.w, b.h);
+      // 顶面高光
+      ctx.fillStyle = 'hsl(' + b.hue + ',80%,82%)';
+      ctx.fillRect(x, y, b.w, 4);
+      ctx.globalAlpha = 1;
+    }
+
+    /* ★★★ 画小人的函数：圆脑袋 + 矩形身体，支持蓄力压缩 / 落地回弹 squash ★★★ */
+    function drawPlayer(x, y, squash) {
+      const bodyW = 26, bodyH = 40, headR = 14;
+      const px = x - cameraX, py = y - cameraY;
+      const h = bodyH * squash;
+      ctx.save();
+      ctx.translate(px, py);
+      // 身体（按 squash 垂直缩放，宽度微增保持体积感）
+      ctx.fillStyle = '#5b6ee1';
+      ctx.fillRect(-bodyW / 2 - bodyW * (1 - squash) * 0.3, -h, bodyW * (1 + (1 - squash) * 0.6), h);
+      // 脑袋（y 方向也跟着身体底部下沉）
+      ctx.fillStyle = '#4a4a5a';
+      ctx.beginPath();
+      ctx.arc(0, -h - headR * squash, headR, 0, Math.PI * 2);
+      ctx.fill();
+      // 眼睛
+      ctx.fillStyle = '#fff';
+      ctx.beginPath();
+      ctx.arc(-5, -h - headR * squash - 2, 2.5, 0, Math.PI * 2);
+      ctx.arc(5, -h - headR * squash - 2, 2.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    /* ---------- 蓄力条 / 分数 / 操作提示 HUD ---------- */
+    function drawHud() {
+      // 左上：实时得分
+      ctx.fillStyle = 'rgba(58, 66, 120, 0.78)';
+      ctx.font = 'bold 22px "PingFang SC", sans-serif';
+      ctx.fillText('分数  ' + score, 18, 36);
+
+      // 蓄力条（蓄力中显示在脚底下方；白色进度条）
+      if (state === 'CHARGE') {
+        const bx = player.x - cameraX - 55;
+        const by = player.y - cameraY + 26;
+        ctx.fillStyle = 'rgba(255,255,255,0.55)';
+        ctx.fillRect(bx, by, 110, 10);
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(bx, by, 110 * charge, 10);
+        ctx.strokeStyle = 'rgba(90,100,180,0.4)';
+        ctx.strokeRect(bx + 0.5, by + 0.5, 109, 9);
+      }
+
+      // 首次进入：操作提示 / 左下角"挂机中"
+      if (showTip) {
+        ctx.fillStyle = 'rgba(58, 66, 120, 0.65)';
+        ctx.font = '14px "PingFang SC", sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('按住鼠标 / 触屏 / 空格键 蓄力，松开跳跃', GAME_W / 2, GAME_H - 30);
+        ctx.textAlign = 'start';
+      }
+      // 画布左下角也同步显示"挂机中"，手机全屏时更醒目
+      if (typeof AutoPilot !== 'undefined' && AutoPilot.running && state !== 'OVER') {
+        ctx.fillStyle = 'rgba(46, 106, 71, 0.85)';
+        ctx.font = 'bold 14px "PingFang SC", sans-serif';
+        ctx.fillText('挂机中', 18, GAME_H - 18);
+      }
+    }
+
+    /* ---------- 帧循环 ---------- */
+    let lastT = 0;
+    function gameLoop(ts) {
+      const dt = lastT ? Math.min(48, ts - lastT) : 16;
+      lastT = ts;
+      if (state !== 'OVER') stepPhysics(dt);
+      drawSky();
+      clouds.forEach(drawCloud);
+      blocks.forEach(drawBlock);
+      drawPlayer(player.x, player.y, player.squash);
+      drawHud();
+      requestAnimationFrame(gameLoop);
+    }
+
+    /* ---------- 启动入口 ---------- */
+    function initGame() {
+      bindInputs();
+      resetGame();
+    }
+    /* ============================================================
+       ★ AutoPilot 自动玩模块（独立封装，不侵入原手动逻辑）
+       - 只读取公开状态：state, charge, player, blocks
+       - 只调用公开函数：launchJump(c)；并直接写入 state/charge 模拟按住/松手
+       - 距离分档查表 + 90% 保守策略 + 落地动画结束再跳下一次
+       - 失败自动停止；重新开始自动续跑；玩家手动操作立即让权；关闭时干净清理
+       ============================================================ */
+    const AutoPilot = (function () {
+      const CHARGE_MS_FULL = 1400;                 // 蓄满时间（与 stepPhysics 的 dt/1400 保持一致）
+      const SAFETY_RATIO = 0.97;                   // 保守策略：宁可跳近落中央，也不要跳太远飞出去
+
+      /* 反查蓄力：用 gapFromCharge 的精确逆函数，而不是硬编码档位表 ——
+         间距规则一改，挂机自动跟着准（旧版查表是按旧档位设计的，改间距后必然失准）。 */
+      function chargeForDist(d) {
+        d = Math.max(MIN_JUMP_GAP, Math.min(MAX_JUMP_GAP, d));
+        if (d <= GAP_MID) return (d - MIN_JUMP_GAP) / (GAP_MID - MIN_JUMP_GAP) * 0.33;
+        if (d <= GAP_FAR) return 0.33 + (d - GAP_MID) / (GAP_FAR - GAP_MID) * 0.33;
+        return 0.66 + (d - GAP_FAR) / (MAX_JUMP_GAP - GAP_FAR) * 0.34;
+      }
+
+      let running = false;             // 对外：是否处于自动运行中
+      let wasRunning = false;          // 重新开始时的"开关状态"记忆
+      let timers = new Set();          // 所有 setTimeout 的 ID，清理时一次清完
+      const afkTip = document.getElementById('afk-tip');
+      const btnAfk  = document.getElementById('btn-afk');
+
+      function setTimer(fn, ms) {
+        const id = setTimeout(() => { timers.delete(id); fn(); }, ms);
+        timers.add(id);
+        return id;
+      }
+      function clearAllTimers() {
+        timers.forEach((id) => clearTimeout(id));
+        timers.clear();
+      }
+
+      function updateUI() {
+        if (running && state !== 'OVER') {
+          afkTip.classList.add('show');
+          btnAfk.classList.add('active');
+          btnAfk.textContent = '运行';
+        } else {
+          afkTip.classList.remove('show');
+          btnAfk.classList.remove('active');
+          btnAfk.textContent = wasRunning ? '待机' : '挂机';
+        }
+      }
+
+      /* 计算蓄力比例：按「玩家真实落点 → 下一块中心」的水平距离反查蓄力。
+         ⚠️ 索引必须跳过"正在滑出"的旧块 —— 落地回弹(LAND 只有 220ms)比旧块滑出(400ms)先结束，
+            所以刚进入 STAND 时 blocks[0] 可能还是那块正在左滑的旧方块。
+            用 findIndex 找"第一个没有 slideOut 标记的块"，它才是小人真正站的块。 */
+      function pickChargeRatio() {
+        const curIdx = blocks.findIndex((b) => !b.slideOut);
+        if (curIdx < 0) return 0.25;
+        const nxt = blocks[curIdx + 1];
+        if (!nxt) return 0.25;
+        const dist = (nxt.x + nxt.w / 2) - player.x;
+        return Math.max(0.05, Math.min(1, chargeForDist(dist) * SAFETY_RATIO));
+      }
+
+      /* 运行主循环：每次落地动画结束 → 看距离 → 模拟按住蓄力 → 延时松手起跳 → 等待跳跃动画 → 递归 */
+      function scheduleNextJump() {
+        if (!running) return;
+        if (state === 'OVER') return stop('gameover');
+
+        // 必须等状态变成 STAND（落地回弹结束）才跳下一次
+        if (state !== 'STAND') {
+          setTimer(scheduleNextJump, 30);
+          return;
+        }
+        if (blocks.length < 2) { setTimer(scheduleNextJump, 50); return; }
+
+        const ratio = pickChargeRatio();
+        const holdMs = Math.round(ratio * CHARGE_MS_FULL);
+        // Step 1: 模拟"按住蓄力"（直接改全局 state/charge 即可，与手动逻辑一致）
+        if (state !== 'STAND') { setTimer(scheduleNextJump, 30); return; }
+        state = 'CHARGE';
+        charge = 0;
+        // Step 2: 用 setInterval 推 charge 增长，与手动蓄力的公式 (dt/1400) 保持同步
+        const tickMs = 16;
+        const chargeStart = performance.now();
+        const ticker = () => {
+          if (!running) { clearAllTimers(); return; }
+          const elapsed = performance.now() - chargeStart;
+          charge = Math.min(1, elapsed / CHARGE_MS_FULL);
+          if (elapsed < holdMs) {
+            const id = setTimeout(ticker, tickMs);
+            timers.add(id);
+          } else {
+            charge = Math.min(1, holdMs / CHARGE_MS_FULL);
+            // Step 3: "松手" → 直接调用 launchJump(charge)，与手动松手的路径完全一致
+            if (state === 'CHARGE') launchJump(charge);
+            // Step 4: 等状态回到 STAND（跳跃 + 落地回弹都结束），再安排下一跳
+            waitUntilStand(() => scheduleNextJump());
+          }
+        };
+        ticker();
+      }
+
+      function waitUntilStand(cb) {
+        if (!running) return;
+        if (state === 'OVER') return stop('gameover');
+        if (state === 'STAND') return cb();
+        setTimer(() => waitUntilStand(cb), 25);
+      }
+
+      /* 对外 API：start / stop / pause / onReset */
+      function start() {
+        if (running) return;
+        // 如果当前处于 OVER，先自动点一次"重新开始"（更顺手）
+        if (state === 'OVER') {
+          modal.classList.add('hidden');
+          resetGame();
+        }
+        running = true;
+        wasRunning = true;
+        clearAllTimers();
+        updateUI();
+        scheduleNextJump();
+      }
+      function stop(reason) {
+        if (!running && reason !== 'gameover') wasRunning = false;
+        running = false;
+        clearAllTimers();
+        if (state === 'CHARGE') {
+          // 停止时若正在蓄力，先把这一次跳跃发出去（避免卡在蓄力状态）
+          try { launchJump(Math.min(1, charge)); } catch (e) {}
+          state = 'STAND';
+          charge = 0;
+        }
+        updateUI();
+      }
+      function pause(reason) {
+        if (!running) return;
+        running = false;
+        clearAllTimers();
+        updateUI();
+      }
+      // 重新开始后，如果本来就是开着的（不是被玩家手动打断/失败停机），自动续跑
+      function onReset() {
+        if (wasRunning) { running = false; start(); }
+        updateUI();
+      }
+
+      // 右下角按钮：点击切换
+      btnAfk.addEventListener('click', () => {
+        if (running) stop('button');
+        else start();
+      });
+      updateUI();
+
+      return {
+        get running() { return running; },
+        start, stop, pause, onReset
+      };
+    })();
+  </script>
+</body>
+</html>

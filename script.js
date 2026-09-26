@@ -141,7 +141,7 @@ function prepareAnimations() {
   });
 }
 
-const labels = { crawler: "爬虫采集", automation: "自动化", analysis: "数据分析", creative: "创意作品", ai: "AI 应用" };
+const labels = { crawler: "爬虫采集", automation: "自动化", analysis: "数据分析", creative: "创意作品", ai: "AI 应用", web: "Web 应用" };
 const grid = document.getElementById("project-grid");
 const renderProjects = (category = "all") => {
   const projects = category === "all" ? portfolio.projects : portfolio.projects.filter((project) => project.category === category);
