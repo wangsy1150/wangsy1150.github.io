@@ -4,10 +4,30 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>波奇酱桌面宠物 · 项目详情</title>
-<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg?v=2">
 <link rel="preload" href="../../fonts/NotoSansSC-400-subset.woff2" as="font"
       type="font/woff2" crossorigin>
 <style>
+  /* ============================================================
+     配色：近白底 / 近黑字 / 浅蓝主色 / 粉-红点缀
+     ============================================================ */
+  :root{
+    --bg:#FBFCFE;
+    --ink:#1A1D24;
+    --ink2:#525B6B;
+    --ink3:#8B95A6;
+    --blue:#4FA8E8;
+    --blue-d:#2E8BD0;
+    --blue-s:#EAF5FD;
+    --pink:#FF8FB1;
+    --pink-d:#E0568A;
+    --pink-s:#FFF0F5;
+    --red:#E8455F;
+    --red-d:#C9304A;
+    --red-s:#FFEBEE;
+    --line:#E4EBF5;
+  }
+
   @font-face{font-family:"Noto Sans SC";font-style:normal;font-weight:400;
     font-display:swap;src:url("../../fonts/NotoSansSC-400-subset.woff2") format("woff2")}
   @font-face{font-family:"Noto Sans SC";font-style:normal;font-weight:500;
@@ -18,85 +38,261 @@
     font-display:swap;src:url("../../fonts/NotoSansSC-700-subset.woff2") format("woff2")}
   @font-face{font-family:"Noto Sans SC";font-style:normal;font-weight:800;
     font-display:swap;src:url("../../fonts/NotoSansSC-700-subset.woff2") format("woff2")}
+
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:"Noto Sans SC","Microsoft YaHei","PingFang SC",Arial,sans-serif;
-    font-weight:400;color:#eae6f5;background:#0d0a17;line-height:1.75;overflow-x:hidden}
+    font-weight:400;color:var(--ink);background:var(--bg);line-height:1.75;overflow-x:hidden}
   .glow{position:fixed;inset:0;pointer-events:none;z-index:0;
     background:
-      radial-gradient(circle at 18% 6%, rgba(139,92,246,.26), transparent 45%),
-      radial-gradient(circle at 84% 14%, rgba(236,72,153,.16), transparent 40%),
-      radial-gradient(circle at 50% 96%, rgba(56,189,248,.14), transparent 45%)}
-  .wrap{position:relative;z-index:1;max-width:960px;margin:0 auto;padding:56px 24px 96px}
-  .back{display:inline-flex;align-items:center;gap:8px;color:#a89ec9;text-decoration:none;
-    font-size:14px;margin-bottom:36px;transition:color .2s}
-  .back:hover{color:#c4b5fd}
-  .num{display:inline-block;font-size:13px;letter-spacing:.18em;color:#8b7fc7;
-    border:1px solid rgba(139,92,246,.35);border-radius:999px;padding:5px 14px;margin-bottom:18px}
-  h1{font-size:clamp(28px,4.6vw,44px);line-height:1.25;font-weight:800;
-    background:linear-gradient(120deg,#c4b5fd 0%,#a78bfa 40%,#f0abfc 100%);
-    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:16px}
-  .lede{font-size:17px;color:#b9b0d6;max-width:680px;margin-bottom:30px}
-  .tags{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:46px}
-  .tag{font-size:12.5px;padding:5px 13px;border-radius:999px;
-    background:rgba(139,92,246,.14);border:1px solid rgba(139,92,246,.32);color:#c9bff0}
-  h2{font-size:20px;color:#ddd6f3;margin:0 0 16px;padding-left:14px;position:relative}
-  h2::before{content:"";position:absolute;left:0;top:5px;bottom:5px;width:3px;
-    border-radius:2px;background:linear-gradient(180deg,#a78bfa,#f0abfc)}
-  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:46px}
-  .card{background:rgba(255,255,255,.035);border:1px solid rgba(139,92,246,.18);
-    border-radius:13px;padding:18px 20px}
-  .card h3{font-size:14px;color:#a78bfa;margin-bottom:8px}
-  .card p{font-size:14px;color:#b3aacd;margin:0}
-  .card code{font-family:Consolas,Monaco,monospace;font-size:12.5px;color:#c9bff0;
-    background:rgba(139,92,246,.16);border-radius:4px;padding:1px 5px}
-  ul.flow{list-style:none;counter-reset:step;margin-bottom:46px}
-  ul.flow li{position:relative;padding-left:32px;margin-bottom:16px;font-size:14.5px;color:#b8afd3}
-  ul.flow li::before{content:counter(step);counter-increment:step;position:absolute;left:0;top:1px;
-    width:21px;height:21px;border-radius:50%;font-size:12px;font-weight:700;color:#0d0a17;
-    text-align:center;line-height:21px;background:linear-gradient(135deg,#a78bfa,#f0abfc)}
-  ul.flow li strong{color:#ddd6f3;font-weight:600}
-  .code{background:#120f1f;border:1px solid rgba(139,92,246,.2);border-radius:12px;
-    padding:18px 20px;font-family:Consolas,Monaco,monospace;font-size:13px;color:#c9d6f5;
-    overflow-x:auto;margin-bottom:46px;line-height:1.7}
-  .code .c{color:#6f6690}.code .k{color:#c4b5fd}.code .s{color:#7dd3fc}
-  .cap{font-size:12.5px;color:#6f6690;margin:-36px 0 46px}
+      radial-gradient(circle at 8% 0%, rgba(79,168,232,.20), transparent 42%),
+      radial-gradient(circle at 94% 4%, rgba(232,69,95,.15), transparent 40%),
+      radial-gradient(circle at 50% 102%, rgba(79,168,232,.09), transparent 46%)}
+  .wrap{position:relative;z-index:1;max-width:min(1600px,100%);margin:0 auto;padding:56px clamp(16px,3vw,40px) 96px}
+
+  .back{display:flex;align-items:center;gap:8px;color:var(--ink3);text-decoration:none;
+    font-size:14px;margin-bottom:34px;transition:color .2s}
+  .back:hover{color:var(--blue-d)}
+  .num{display:inline-block;font-size:12.5px;font-weight:600;letter-spacing:.14em;
+    color:#fff;background:linear-gradient(100deg,#3E9FE0 0%,#E8455F 72%,#D62F4A 100%);
+    border-radius:999px;padding:6px 16px;margin-bottom:16px;
+    box-shadow:0 8px 22px rgba(214,47,74,.32)}
+
+  h1{position:relative;font-size:clamp(28px,4.6vw,44px);line-height:1.25;font-weight:800;
+    color:var(--ink);margin-bottom:14px;letter-spacing:-.01em}
+  h1::after{content:"";display:inline-block;width:11px;height:11px;border-radius:3px;
+    background:var(--red);margin-left:12px;vertical-align:.22em;
+    box-shadow:0 3px 10px rgba(232,69,95,.45)}
+
+  .lede{font-size:17px;color:var(--ink2);max-width:690px;margin-bottom:26px}
+  .lede strong{color:var(--ink);font-weight:600;
+    background:linear-gradient(transparent 60%, rgba(232,69,95,.22) 60%);
+    padding:0 2px;border-radius:2px}
+
+  .tags{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:32px}
+  .tag{font-size:12.5px;padding:6px 14px;border-radius:999px;
+    background:#fff;border:1px solid var(--line);color:var(--ink2);
+    box-shadow:0 1px 2px rgba(26,29,36,.04)}
+  .tag:nth-child(3n+1){border-color:#D6EAF8;color:var(--blue-d);background:var(--blue-s)}
+  .tag:nth-child(3n+2){border-color:#FBD0D7;color:var(--red-d);background:var(--red-s)}
+
+  h2{font-size:20px;color:var(--ink);margin:0 0 18px;padding-left:15px;position:relative;
+    font-weight:700}
+  h2::before{content:"";position:absolute;left:0;top:6px;bottom:6px;width:4px;
+    border-radius:3px;background:linear-gradient(180deg,var(--blue),var(--red))}
+
+  /* ============================================================
+     首屏：可交互的桌面场景（素材是波奇酱本人）
+     ============================================================ */
+  .scene-wrap{margin:0 0 40px;border:1px solid var(--line);border-radius:20px;
+    background:#fff;overflow:hidden;
+    box-shadow:0 22px 60px rgba(79,168,232,.15), 0 4px 14px rgba(26,29,36,.05)}
+
+  .scene-head{display:flex;align-items:center;gap:8px;padding:11px 16px;
+    background:linear-gradient(90deg,#F7FBFE,#FEF6F7);border-bottom:1px solid var(--line)}
+  .scene-head .dot{width:9px;height:9px;border-radius:50%}
+  .scene-head .dot:nth-child(1){background:#FFC9D9}
+  .scene-head .dot:nth-child(2){background:#CFE8F9}
+  .scene-head .dot:nth-child(3){background:#D9E6F2}
+  .scene-head .t{font-size:12.5px;color:var(--ink3);margin-left:6px}
+  .scene-head .lv{margin-left:auto;font-size:12px;font-weight:700;color:#fff;
+    background:linear-gradient(100deg,var(--blue),var(--red));border-radius:999px;
+    padding:3px 12px;white-space:nowrap}
+
+  .desk{position:relative;height:292px;overflow:hidden;
+    background:linear-gradient(180deg,#E9F4FD 0%,#F6FAFE 58%,#FBFCFE 100%)}
+  /* 房间里的光：右上暖红、左上百蓝 */
+  .desk .sun{position:absolute;top:-56px;right:-40px;width:250px;height:250px;border-radius:50%;
+    background:radial-gradient(circle, rgba(232,69,95,.20), rgba(232,69,95,0) 68%)}
+  .desk .sun2{position:absolute;top:-70px;left:-60px;width:280px;height:280px;border-radius:50%;
+    background:radial-gradient(circle, rgba(79,168,232,.22), rgba(79,168,232,0) 68%)}
+  /* 桌面（地板） */
+  .desk .floor{position:absolute;left:0;right:0;bottom:0;height:66px;
+    background:
+      repeating-linear-gradient(90deg, rgba(46,139,208,.05) 0 3px, transparent 3px 46px),
+      linear-gradient(180deg,#DFEBF7,#C9DCEE);
+    border-top:2px solid #B9D3EA;
+    box-shadow:inset 0 10px 22px rgba(46,139,208,.14), 0 -2px 8px rgba(46,139,208,.08)}
+  .desk .floor::after{content:"";position:absolute;left:50%;bottom:14px;transform:translateX(-50%);
+    width:170px;height:14px;border-radius:50%;
+    background:radial-gradient(ellipse, rgba(46,139,208,.16), transparent 72%)}
+
+  /* 墙上的小窗：让场景像房间，不像一块空背景 */
+  .desk .window{position:absolute;right:38px;top:30px;width:104px;height:82px;
+    border-radius:10px;background:linear-gradient(180deg,#BFE3FA,#E8F5FF);
+    border:4px solid #fff;
+    box-shadow:0 6px 18px rgba(46,139,208,.16), inset 0 0 0 1px #D6EAF8}
+  .desk .window::before{content:"";position:absolute;inset:0;border-radius:6px;
+    background:
+      linear-gradient(90deg, transparent 47%, #fff 47%, #fff 53%, transparent 53%),
+      linear-gradient(180deg, transparent 47%, #fff 47%, #fff 53%, transparent 53%)}
+
+  /* 台词气泡 */
+  .bubble{position:absolute;left:50%;bottom:204px;transform:translateX(-50%) translateY(6px) scale(.94);
+    max-width:74%;padding:9px 15px;border-radius:14px;background:#fff;
+    border:1px solid #D6EAF8;font-size:13.5px;color:var(--ink);
+    box-shadow:0 8px 22px rgba(79,168,232,.18);
+    opacity:0;pointer-events:none;transition:opacity .22s,transform .22s;z-index:5;
+    text-align:center}
+  .bubble.on{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}
+  .bubble::after{content:"";position:absolute;left:50%;bottom:-6px;margin-left:-6px;
+    width:12px;height:12px;background:#fff;border-right:1px solid #D6EAF8;
+    border-bottom:1px solid #D6EAF8;transform:rotate(45deg)}
+
+  /* 波奇酱本人 */
+  .pet-holder{position:absolute;left:50%;bottom:46px;transform:translateX(-50%);z-index:3}
+  .pet-holder.walk{animation:walk 5s ease-in-out infinite}
+  @keyframes walk{
+    0%,100%{left:26%}
+    50%{left:74%}
+  }
+  .pet{display:block;width:152px;height:152px;cursor:pointer;
+    filter:drop-shadow(0 10px 14px rgba(46,139,208,.26));
+    transition:filter .2s;
+    animation:breathe 3.4s ease-in-out infinite;
+    -webkit-user-drag:none;user-select:none}
+  @keyframes breathe{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+  .pet:hover{filter:drop-shadow(0 12px 20px rgba(232,69,95,.34))}
+  .pet.is-shake{animation:shake .45s ease-in-out}
+  @keyframes shake{
+    0%,100%{transform:translateX(0) rotate(0)}
+    20%{transform:translateX(-5px) rotate(-3deg)}
+    50%{transform:translateX(5px) rotate(3deg)}
+    80%{transform:translateX(-3px) rotate(-2deg)}
+  }
+  .pet.is-hop{animation:hop .6s ease-out}
+  @keyframes hop{
+    0%,100%{transform:translateY(0)}
+    40%{transform:translateY(-26px)}
+    60%{transform:translateY(-8px)}
+  }
+  .pet-holder.sleeping .pet{animation:none;transform:scale(.94) translateY(4px);
+    filter:drop-shadow(0 4px 8px rgba(46,139,208,.18)) brightness(.96)}
+
+  /* emoji 粒子 */
+  .fx{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:6}
+  .fx span{position:absolute;bottom:136px;font-size:19px;
+    animation:floatUp 1.25s cubic-bezier(.2,.7,.3,1) forwards}
+  @keyframes floatUp{
+    0%{opacity:0;transform:translateY(0) scale(.6)}
+    18%{opacity:1}
+    100%{opacity:0;transform:translateY(-96px) scale(1.3)}
+  }
+
+  /* 数值条 */
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;padding:17px 18px 4px}
+  .stat .lab{display:flex;justify-content:space-between;align-items:baseline;
+    font-size:12px;color:var(--ink3);margin-bottom:6px}
+  .stat .lab b{color:var(--ink);font-weight:700;font-size:13px;font-variant-numeric:tabular-nums}
+  .stat .track{height:7px;border-radius:99px;background:#EDF2F8;overflow:hidden}
+  .stat .fill{height:100%;border-radius:99px;transition:width .45s cubic-bezier(.2,.7,.3,1)}
+  .fill.hunger{background:linear-gradient(90deg,#FFB3C7,#FF8FB1)}
+  .fill.mood{background:linear-gradient(90deg,#8FCBF0,#4FA8E8)}
+  .fill.energy{background:linear-gradient(90deg,#9ED8F5,#6FBCEE)}
+  .fill.bond{background:linear-gradient(90deg,#F07C90,#E8455F)}
+
+  /* 动作按钮 */
+  .acts{display:flex;flex-wrap:wrap;gap:9px;padding:15px 18px 17px;
+    border-top:1px solid var(--line);margin-top:12px}
+  .acts button{font:inherit;font-size:13.5px;padding:9px 16px;border-radius:999px;
+    border:1px solid #D6EAF8;background:#fff;color:var(--ink2);cursor:pointer;
+    display:inline-flex;align-items:center;gap:6px;
+    transition:background .18s,border-color .18s,color .18s,transform .12s}
+  .acts button:hover{background:var(--blue-s);border-color:var(--blue);color:var(--blue-d);
+    transform:translateY(-1px)}
+  .acts button:active{transform:translateY(0) scale(.97)}
+  .acts button.hot{background:linear-gradient(100deg,var(--blue),var(--red));
+    border-color:transparent;color:#fff;
+    box-shadow:0 6px 16px rgba(232,69,95,.26)}
+  .acts button.hot:hover{filter:brightness(1.05);color:#fff}
+  .acts button.on{background:var(--red-s);border-color:#FBD0D7;color:var(--red-d)}
+  .hint{font-size:12.5px;color:var(--ink3);padding:0 18px 16px;margin:0}
 
   /* ---------- 三态素材 ---------- */
-  .states{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-bottom:20px}
-  .state{background:rgba(255,255,255,.035);border:1px solid rgba(139,92,246,.18);
-    border-radius:14px;padding:22px 14px 18px;text-align:center;
-    transition:border-color .25s,transform .25s}
-  .state:hover{border-color:rgba(240,171,252,.45);transform:translateY(-3px)}
-  .state img{display:block;width:132px;height:132px;margin:0 auto 14px;
-    image-rendering:auto;filter:drop-shadow(0 8px 18px rgba(0,0,0,.5))}
-  .state b{display:block;font-size:15px;color:#ddd6f3;margin-bottom:5px;font-weight:600}
-  .state span{font-size:12.5px;color:#8b7fc7;font-family:Consolas,Monaco,monospace}
-  .state-note{font-size:12.5px;color:#6f6690;margin-bottom:46px}
+  .states{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:18px}
+  .state{background:#fff;border:1px solid var(--line);border-radius:16px;
+    padding:20px 14px 16px;text-align:center;
+    box-shadow:0 2px 10px rgba(26,29,36,.045);
+    transition:border-color .25s,transform .25s,box-shadow .25s}
+  .state:hover{border-color:#D6EAF8;transform:translateY(-3px);
+    box-shadow:0 12px 28px rgba(79,168,232,.14)}
+  .state img{display:block;width:126px;height:126px;margin:0 auto 12px;
+    filter:drop-shadow(0 8px 14px rgba(46,139,208,.22))}
+  .state b{display:block;font-size:15px;color:var(--ink);margin-bottom:5px;font-weight:700}
+  .state span{font-size:12.5px;color:var(--blue-d);font-family:Consolas,Monaco,monospace;
+    background:var(--blue-s);border-radius:6px;padding:2px 8px}
+  .state-note{font-size:12.5px;color:var(--ink3);margin-bottom:46px}
+
+  /* ---------- 技术要点 ---------- */
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px;margin-bottom:46px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:19px 21px;
+    box-shadow:0 2px 10px rgba(26,29,36,.045);
+    transition:transform .22s,box-shadow .22s,border-color .22s}
+  .card:hover{transform:translateY(-3px);box-shadow:0 12px 28px rgba(79,168,232,.14);
+    border-color:#D6EAF8}
+  .card h3{font-size:14px;color:var(--blue-d);margin-bottom:9px;font-weight:700}
+  .card p{font-size:14px;color:var(--ink2);margin:0}
+  .card strong{color:var(--ink);font-weight:600}
+  .card code{font-family:Consolas,Monaco,monospace;font-size:12.5px;color:var(--blue-d);
+    background:var(--blue-s);border-radius:5px;padding:1px 6px}
+
+  /* ---------- 流程 ---------- */
+  ul.flow{list-style:none;counter-reset:step;margin-bottom:46px}
+  ul.flow li{position:relative;padding-left:34px;margin-bottom:16px;font-size:14.5px;color:var(--ink2)}
+  ul.flow li::before{content:counter(step);counter-increment:step;position:absolute;left:0;top:2px;
+    width:22px;height:22px;border-radius:50%;font-size:12px;font-weight:700;color:#fff;
+    text-align:center;line-height:22px;
+    background:linear-gradient(135deg,var(--blue),var(--red))}
+  ul.flow li strong{color:var(--ink);font-weight:600}
+  ul.flow code{font-family:Consolas,Monaco,monospace;font-size:12.5px;color:var(--blue-d);
+    background:var(--blue-s);border-radius:5px;padding:1px 6px}
+
+  /* ---------- 代码块：PyCharm Darcula 配色 ---------- */
+  .code{white-space:pre-wrap;word-break:break-word;
+    background:#1E1F22;border:1px solid #2B2D33;border-radius:14px;
+    padding:19px 21px;font-family:Consolas,"Cascadia Code",Monaco,monospace;font-size:13px;
+    color:#BCBEC4;overflow-x:auto;margin-bottom:46px;line-height:1.8;
+    box-shadow:0 10px 28px rgba(26,29,36,.22), inset 0 1px 0 rgba(255,255,255,.045)}
+  .code .c{color:#7A7E85}
+  .code .k{color:#CF8E6D}
+  .code .s{color:#6AAB73}
+  .cap{font-size:12.5px;color:var(--ink3);margin:-36px 0 46px}
+  .cap code{font-family:Consolas,Monaco,monospace;font-size:12px;color:var(--blue-d);
+    background:var(--blue-s);border-radius:5px;padding:1px 6px}
 
   /* ---------- 版本表 ---------- */
-  table{width:100%;border-collapse:collapse;margin-bottom:46px;font-size:14px}
-  th,td{text-align:left;padding:11px 14px;border-bottom:1px solid rgba(139,92,246,.16)}
-  th{color:#a78bfa;font-weight:600;font-size:13px;letter-spacing:.04em}
-  td{color:#b8afd3}
-  td:first-child{color:#ddd6f3;font-weight:600;white-space:nowrap}
-  code.mono{font-family:Consolas,Monaco,monospace;font-size:12.5px;color:#c9bff0;
-    background:rgba(139,92,246,.16);border-radius:4px;padding:1px 5px}
+  table{width:100%;border-collapse:collapse;margin-bottom:46px;font-size:14px;
+    background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  th,td{text-align:left;padding:12px 15px;border-bottom:1px solid var(--line)}
+  tr:last-child td{border-bottom:0}
+  th{color:var(--blue-d);font-weight:700;font-size:13px;letter-spacing:.03em;background:#F7FBFE}
+  td{color:var(--ink2)}
+  td:first-child{color:var(--ink);font-weight:700;white-space:nowrap}
+  code.mono{font-family:Consolas,Monaco,monospace;font-size:12.5px;color:var(--blue-d);
+    background:var(--blue-s);border-radius:5px;padding:1px 6px}
 
-  footer{text-align:center;font-size:13px;color:#6f6690;padding-top:36px;
-    border-top:1px solid rgba(139,92,246,.14)}
-  footer a{color:#a78bfa;text-decoration:none}
-  @media(max-width:560px){.states{grid-template-columns:1fr}}
+  footer{text-align:center;font-size:13px;color:var(--ink3);padding-top:38px;
+    border-top:1px solid var(--line)}
+  footer a{color:var(--blue-d);text-decoration:none;font-weight:600}
+  footer a:hover{color:var(--red-d)}
+
+  @media(max-width:620px){
+    .states{grid-template-columns:1fr}
+    .stats{grid-template-columns:repeat(2,1fr)}
+    .desk{height:268px}
+    .pet{width:132px;height:132px}
+    .bubble{bottom:184px;font-size:13px;max-width:84%}
+  }
 </style>
 </head>
 <body>
 <div class="glow"></div>
 <div class="wrap">
-  <a class="back" href="../index.html">← 返回作品集</a>
-  <div class="num">PROJECT 21 · 创意作品</div>
+  <a class="back" href="../../index.html">← 返回作品集</a>
+  <div class="num">PROJECT 23 · 创意作品</div>
   <h1>波奇酱桌面宠物</h1>
-  <p class="lede">一只常驻 Windows 桌面的小挂件：<strong style="color:#ddd6f3">无边框、置顶、色键透明</strong>。
+  <p class="lede">一只常驻 Windows 桌面的小挂件：<strong>无边框、置顶、色键透明</strong>。
   她会饿、会生气、会被摸头，也会在你久不理她的时候主动开口。用 Python + Tkinter 单进程实现 ——
-  <strong style="color:#ddd6f3">不依赖浏览器，也不依赖 Electron</strong>，常驻内存约 30 MB。</p>
+  <strong>不依赖浏览器，也不依赖 Electron</strong>，常驻内存约 30 MB。</p>
   <div class="tags">
     <span class="tag">Python</span>
     <span class="tag">Tkinter</span>
@@ -105,32 +301,82 @@
     <span class="tag">1016 行</span>
   </div>
 
+  <!-- ============ 首屏：可以直接玩的桌面场景 ============ -->
+  <div class="scene-wrap">
+    <div class="scene-head">
+      <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+      <span class="t">点她一下，或者用下面的按钮喂她、弹吉他、哄她睡觉</span>
+      <span class="lv" id="lvBadge">Lv.1 · 0/50</span>
+    </div>
+
+    <div class="desk" id="desk">
+      <div class="sun"></div>
+      <div class="sun2"></div>
+      <div class="window"></div>
+      <div class="fx" id="fx"></div>
+      <div class="bubble" id="bubble"></div>
+      <div class="pet-holder" id="petHolder">
+        <img class="pet" id="pet" src="pet/bochi_normal.png" alt="波奇酱" title="摸摸她">
+      </div>
+      <div class="floor"></div>
+    </div>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="lab"><span>🍰 饱食度</span><b id="v-hunger">68</b></div>
+        <div class="track"><div class="fill hunger" id="b-hunger" style="width:68%"></div></div>
+      </div>
+      <div class="stat">
+        <div class="lab"><span>💭 心情</span><b id="v-mood">55</b></div>
+        <div class="track"><div class="fill mood" id="b-mood" style="width:55%"></div></div>
+      </div>
+      <div class="stat">
+        <div class="lab"><span>⚡ 精力</span><b id="v-energy">72</b></div>
+        <div class="track"><div class="fill energy" id="b-energy" style="width:72%"></div></div>
+      </div>
+      <div class="stat">
+        <div class="lab"><span>💗 亲密度</span><b id="v-bond">30</b></div>
+        <div class="track"><div class="fill bond" id="b-bond" style="width:30%"></div></div>
+      </div>
+    </div>
+
+    <div class="acts">
+      <button type="button" class="hot" data-act="feed">🍰 喂她</button>
+      <button type="button" data-act="play">🎸 弹吉他</button>
+      <button type="button" data-act="sleep">💤 哄睡</button>
+      <button type="button" data-act="touch">✋ 摸头</button>
+      <button type="button" data-act="walk">🚶 出门</button>
+    </div>
+    <p class="hint">数值每 6 秒自然下滑；进度存在浏览器本地，关掉再开还是这个样子。</p>
+  </div>
+
   <h2>项目背景</h2>
-  <p style="font-size:15px;color:#b8afd3;margin-bottom:46px">
+  <p style="font-size:15px;color:var(--ink2);margin-bottom:46px">
     在桌面上放一只猫，常见做法是 Electron —— 为了一个挂件塞进一整个浏览器内核。这个项目走了另一条路：
     用 Python 标准库自带的 <code class="mono">tkinter</code>，单进程常驻。代价是两件麻烦事得自己扛：
-    系统<strong style="color:#ddd6f3">不支持逐像素透明</strong>（只能色键抠图），以及无边框窗口的
-    <strong style="color:#ddd6f3">尺寸、位置、点击区域全部要手算</strong>。3.0 版把这两件事都处理干净了。
+    系统<strong style="color:var(--ink)">不支持逐像素透明</strong>（只能色键抠图），以及无边框窗口的
+    <strong style="color:var(--ink)">尺寸、位置、点击区域全部要手算</strong>。3.0 版把这两件事都处理干净了。
   </p>
 
   <h2>三种状态，三张素材</h2>
   <div class="states">
     <div class="state">
-      <img src="shots/state_normal.png" alt="正常状态">
+      <img src="pet/bochi_normal.png" alt="正常状态">
       <b>正常</b><span>饱食度 &gt; 30</span>
     </div>
     <div class="state">
-      <img src="shots/state_hungry.png" alt="饥饿状态">
+      <img src="pet/bochi_hungry.png" alt="饥饿状态">
       <b>饿了</b><span>≤ 30</span>
     </div>
     <div class="state">
-      <img src="shots/state_angry.png" alt="生气状态">
+      <img src="pet/bochi_angry.png" alt="生气状态">
       <b>生气</b><span>== 0</span>
     </div>
   </div>
   <p class="state-note">
     源素材的背景是纯品红 <code class="mono">#FF00FF</code>，图片里并没有 alpha 通道 ——
     屏幕上看到「透明」，是因为程序把这个颜色声明成了透明的结果。
+    上面那个场景里用的就是这三张图，把品红抠成透明之后贴到桌面上。
   </p>
 
   <h2>技术要点</h2>
@@ -173,17 +419,14 @@
   </ul>
 
   <h2>关键代码结构</h2>
-  <div class="code">
-<span class="c"># pet.py —— 色键与尺寸：想整体调大小，只改 PET_TARGET_H 就够了</span>
+  <div class="code"><span class="c"># pet.py —— 色键与尺寸：想整体调大小，只改 PET_TARGET_H 就够了</span>
 <span class="k">KEY_COLOR</span> = <span class="s">"#FF00FF"</span>       <span class="c"># 色键：图片背景和窗口底色都用它</span>
 
 <span class="c"># ---------- 尺寸：想整体调大小，只改 PET_TARGET_H 就够了 ----------</span>
 <span class="k">PET_TARGET_H</span> = <span class="s">232</span>          <span class="c"># ★ 角色在屏幕上的高度（像素）。2.0 是 132</span>
-<span class="k">PET_MARGIN</span> = <span class="s">5</span>              <span class="c"># 角色四周留的品红边距（也保证轮廓外有背景可以清边）</span>
-  </div>
+<span class="k">PET_MARGIN</span> = <span class="s">5</span>              <span class="c"># 角色四周留的品红边距（也保证轮廓外有背景可以清边）</span></div>
 
-  <div class="code">
-<span class="c"># pet.py —— create_bubble_window()：无边框 + 置顶 + 品红色键透明</span>
+  <div class="code"><span class="c"># pet.py —— create_bubble_window()：无边框 + 置顶 + 品红色键透明</span>
 win = tk.Toplevel(parent)
 win.overrideredirect(<span class="k">True</span>)                       <span class="c"># 去掉标题栏与边框</span>
 win.attributes(<span class="s">"-topmost"</span>, <span class="k">True</span>)                 <span class="c"># 永远在最前面</span>
@@ -191,9 +434,8 @@ win.configure(bg=KEY_COLOR)                      <span class="c"># 底色 = 品�
 <span class="k">try</span>:
     win.attributes(<span class="s">"-transparentcolor"</span>, KEY_COLOR)   <span class="c"># 声明品红为透明色</span>
 <span class="k">except</span> tk.TclError:
-    <span class="k">pass</span>
-  </div>
-  <p class="cap">透明不是「图片带透明通道」，而是「这个颜色不画」。所以 <code class="mono">Label</code> / <code class="mono">Canvas</code> 的 bg 必须和 KEY_COLOR 完全一致。</p>
+    <span class="k">pass</span></div>
+  <p class="cap">透明不是「图片带透明通道」，而是「这个颜色不画」。所以 <code>Label</code> / <code>Canvas</code> 的 bg 必须和 KEY_COLOR 完全一致。</p>
 
   <h2>版本演进</h2>
   <table>
@@ -204,17 +446,239 @@ win.configure(bg=KEY_COLOR)                      <span class="c"># 底色 = 品�
   </table>
 
   <h2>怎么运行</h2>
-  <div class="code">
-<span class="c"># 需要带 tkinter 的 Python（Windows 官方安装包默认带）</span>
+  <div class="code"><span class="c"># 需要带 tkinter 的 Python（Windows 官方安装包默认带）</span>
 pip install -r requirements.txt
-python pet.py
-  </div>
-  <p class="cap">素材放在 <code class="mono">zhuochong/</code>，脚本用 <code class="mono">__file__</code> 所在目录去找 —— 整份目录一起挪动不会失效。按 <code class="mono">Esc</code> 退出。</p>
+python pet.py</div>
+  <p class="cap">素材放在 <code>zhuochong/</code>，脚本用 <code>__file__</code> 所在目录去找 —— 整份目录一起挪动不会失效。按 <code>Esc</code> 退出。</p>
 
   <footer>
     王思洋 · 桌面应用作品 ·
     <a href="https://github.com/wangsy1150/bochi-desktop-pet" target="_blank" rel="noopener">GitHub 源码仓库</a>
   </footer>
 </div>
+
+<script>
+'use strict';
+/* ============================================================================
+ * 首屏场景：波奇酱的养成数值
+ *
+ * 素材只有三张（正常 / 饿 / 生气），所以额外的状态用 CSS 动作补：
+ * 睡觉=缩小变暗 + 💤，弹吉他=跳一下 + 🎵，摸头=抖一下。
+ * 数值每 6 秒自然下滑，进度写进 localStorage —— 关掉再开还是这个样子。
+ * ========================================================================== */
+
+const SAVE_KEY = 'bochi_pet_v1';
+const DECAY_MS = 6000;
+
+const state = {
+  hunger: 68,     // 饱食度
+  mood: 55,       // 心情
+  energy: 72,     // 精力
+  bond: 30,       // 亲密度
+  exp: 0,         // 经验
+  sleeping: false,
+  walking: false
+};
+
+const el = {
+  pet: document.getElementById('pet'),
+  holder: document.getElementById('petHolder'),
+  bubble: document.getElementById('bubble'),
+  fx: document.getElementById('fx'),
+  lv: document.getElementById('lvBadge'),
+  v: {
+    hunger: document.getElementById('v-hunger'),
+    mood: document.getElementById('v-mood'),
+    energy: document.getElementById('v-energy'),
+    bond: document.getElementById('v-bond')
+  },
+  b: {
+    hunger: document.getElementById('b-hunger'),
+    mood: document.getElementById('b-mood'),
+    energy: document.getElementById('b-energy'),
+    bond: document.getElementById('b-bond')
+  }
+};
+
+/* 台词：按波奇酱的人设写（社恐、慌张、抱着吉他），不是通用宠物台词 */
+const LINES = {
+  touch: ['诶…诶？！', '（缩了一下）', '…谢、谢谢', '（小声）不要突然靠这么近…', '啊、我我我没事'],
+  feed:  ['谢、谢谢…', '（快速吃完）', '好、好吃…', '那个…还有吗'],
+  play:  ['这个 riff 我练了两周！', '（弹了一小段，然后弹错了）', '啊…弹错了…', '吉他是唯一不会拒绝我的'],
+  sleep: ['Zzz…', '（抱着吉他睡着了）', '…再睡五分钟'],
+  wake:  ['…诶？我睡着了？', '（猛地坐起来）'],
+  walk:  ['（躲进壁橱里）', '（在桌面上来回踱步）'],
+  hungry:['肚、肚子叫了…', '（盯着冰箱发呆）', '那个…饭…'],
+  low:   ['我不行的…我真的不行…', '（把脸埋进膝盖）', '…对不起，我又搞砸了']
+};
+
+const PET_IMG = {
+  normal: 'pet/bochi_normal.png',
+  hungry: 'pet/bochi_hungry.png',
+  angry:  'pet/bochi_angry.png'
+};
+
+const clamp = (v) => Math.max(0, Math.min(100, Math.round(v)));
+const rand = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
+/* ---------------- 画面 ---------------- */
+
+function setImg(kind) {
+  const src = PET_IMG[kind] || PET_IMG.normal;
+  if (el.pet.getAttribute('src') !== src) el.pet.src = src;
+}
+
+/** 按当前数值决定用哪张表情 */
+function refreshFace() {
+  if (state.sleeping) { setImg('normal'); return; }
+  if (state.hunger <= 25) { setImg('angry'); return; }
+  if (state.hunger <= 40 || state.mood <= 30) { setImg('hungry'); return; }
+  setImg('normal');
+}
+
+function say(text) {
+  el.bubble.textContent = text;
+  el.bubble.classList.add('on');
+  clearTimeout(say._t);
+  say._t = setTimeout(() => el.bubble.classList.remove('on'), 3400);
+}
+
+/** 飘一个 emoji 上去 */
+function pop(emoji) {
+  const s = document.createElement('span');
+  s.textContent = emoji;
+  s.style.left = (34 + Math.random() * 32) + '%';
+  el.fx.appendChild(s);
+  setTimeout(() => s.remove(), 1300);
+}
+
+/** 播一个一次性动画类 */
+function flash(cls, ms) {
+  el.pet.classList.add(cls);
+  setTimeout(() => el.pet.classList.remove(cls), ms);
+}
+
+function render() {
+  ['hunger', 'mood', 'energy', 'bond'].forEach((k) => {
+    el.v[k].textContent = state[k];
+    el.b[k].style.width = state[k] + '%';
+  });
+  const lv = 1 + Math.floor(state.exp / 50);
+  el.lv.textContent = 'Lv.' + lv + ' · ' + (state.exp % 50) + '/50';
+  refreshFace();
+}
+
+/* ---------------- 存档 ---------------- */
+
+function save() {
+  try { localStorage.setItem(SAVE_KEY, JSON.stringify(state)); } catch (_) { /* 隐私模式 */ }
+}
+
+function load() {
+  try {
+    const raw = localStorage.getItem(SAVE_KEY);
+    if (!raw) return;
+    const d = JSON.parse(raw);
+    ['hunger', 'mood', 'energy', 'bond', 'exp'].forEach((k) => {
+      if (typeof d[k] === 'number') state[k] = clamp(d[k]);
+    });
+    // 睡觉/走路这种临时状态不恢复，避免打开就是睡着的
+  } catch (_) { /* 存的内容坏了就当没有 */ }
+}
+
+/* ---------------- 动作 ---------------- */
+
+const ACTS = {
+  feed() {
+    if (state.sleeping) { say('（睡着了，没反应…）'); return; }
+    state.hunger = clamp(state.hunger + 18);
+    state.mood = clamp(state.mood + 5);
+    state.exp += 8;
+    pop('🍰');
+    say(rand(LINES.feed));
+  },
+  play() {
+    if (state.sleeping) { say('（抱着吉他睡着了…）'); return; }
+    state.mood = clamp(state.mood + 14);
+    state.energy = clamp(state.energy - 7);
+    state.bond = clamp(state.bond + 3);
+    state.exp += 10;
+    flash('is-hop', 620);
+    pop('🎵');
+    say(rand(LINES.play));
+  },
+  sleep() {
+    if (state.sleeping) { say('已经在睡了…'); return; }
+    state.sleeping = true;
+    el.holder.classList.add('sleeping');
+    pop('💤');
+    say(rand(LINES.sleep));
+    setTimeout(() => {
+      state.sleeping = false;
+      state.energy = 100;
+      state.exp += 6;
+      el.holder.classList.remove('sleeping');
+      render(); save();
+      pop('☀️');
+      say(rand(LINES.wake));
+    }, 3200);
+  },
+  touch() {
+    if (state.sleeping) { say('（翻了个身）'); return; }
+    state.bond = clamp(state.bond + 8);
+    state.mood = clamp(state.mood + 6);
+    state.exp += 6;
+    flash('is-shake', 470);
+    pop('✨');
+    say(rand(LINES.touch));
+  },
+  walk() {
+    state.walking = !state.walking;
+    el.holder.classList.toggle('walk', state.walking);
+    pop(state.walking ? '🚶' : '🏠');
+    say(rand(LINES.walk));
+  }
+};
+
+/* ---------------- 绑定 ---------------- */
+
+document.querySelectorAll('[data-act]').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    const name = btn.dataset.act;
+    if (!ACTS[name]) return;
+    ACTS[name]();
+    if (name === 'walk') btn.classList.toggle('on', state.walking);
+    render();
+    save();
+  });
+});
+
+el.pet.addEventListener('click', () => {
+  ACTS.touch();
+  render();
+  save();
+});
+
+/* 每 6 秒自然下滑一点；饿到一定程度会主动开口抱怨 */
+setInterval(() => {
+  if (state.sleeping) {              // 睡觉时只掉饱食度，精力反而慢慢涨
+    state.hunger = clamp(state.hunger - 0.5);
+    state.energy = clamp(state.energy + 1);
+  } else {
+    state.hunger = clamp(state.hunger - 1);
+    state.energy = clamp(state.energy - 1);
+    // 心情跟着饱食度走：饿肚子久了会不高兴
+    if (state.hunger <= 25) state.mood = clamp(state.mood - 1);
+  }
+  if (state.hunger <= 22 && Math.random() < 0.45) say(rand(LINES.hungry));
+  else if (state.mood <= 20 && Math.random() < 0.3) say(rand(LINES.low));
+  render();
+  save();
+}, DECAY_MS);
+
+/* 启动 */
+load();
+render();
+</script>
 </body>
 </html>

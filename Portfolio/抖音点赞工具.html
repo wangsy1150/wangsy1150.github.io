@@ -4,58 +4,283 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>抖音点赞工具 · 项目详情</title>
+<link rel="icon" href="../favicon.svg?v=2" type="image/svg+xml">
 <style>
+  :root{
+    --bg:#FBFCFE; --ink:#1A1D24; --ink2:#525B6B; --ink3:#8B95A6;
+    --blue:#4FA8E8; --blue-d:#2E8BD0; --blue-s:#EAF5FD;
+    --red:#E8455F; --red-d:#C9304A; --red-s:#FFEBEE;
+    --pink:#FF8FB1; --line:#E4EBF5;
+  }
+
+  @font-face{font-family:"Noto Sans SC";font-style:normal;font-weight:400;
+    font-display:swap;src:url("../fonts/NotoSansSC-400-subset.woff2") format("woff2")}
+  @font-face{font-family:"Noto Sans SC";font-style:normal;font-weight:500;
+    font-display:swap;src:url("../fonts/NotoSansSC-500-subset.woff2") format("woff2")}
+  @font-face{font-family:"Noto Sans SC";font-style:normal;font-weight:600;
+    font-display:swap;src:url("../fonts/NotoSansSC-600-subset.woff2") format("woff2")}
+  @font-face{font-family:"Noto Sans SC";font-style:normal;font-weight:700;
+    font-display:swap;src:url("../fonts/NotoSansSC-700-subset.woff2") format("woff2")}
+
   *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:"Microsoft YaHei","PingFang SC",Arial,sans-serif;
-    color:#eae6f5;background:#0d0a17;line-height:1.75;overflow-x:hidden}
+  body{font-family:"Noto Sans SC","Microsoft YaHei","PingFang SC",Arial,sans-serif;
+    color:var(--ink);background:var(--bg);line-height:1.75;overflow-x:hidden}
+
   .glow{position:fixed;inset:0;pointer-events:none;z-index:0;
     background:
-      radial-gradient(circle at 18% 6%, rgba(139,92,246,.26), transparent 45%),
-      radial-gradient(circle at 84% 14%, rgba(56,189,248,.16), transparent 40%),
-      radial-gradient(circle at 50% 96%, rgba(236,72,153,.14), transparent 45%)}
-  .wrap{position:relative;z-index:1;max-width:960px;margin:0 auto;padding:56px 24px 96px}
-  .back{display:inline-flex;align-items:center;gap:8px;color:#a89ec9;text-decoration:none;
-    font-size:14px;margin-bottom:36px;transition:color .2s}
-  .back:hover{color:#c4b5fd}
-  .num{display:inline-block;font-size:13px;letter-spacing:.18em;color:#8b7fc7;
-    border:1px solid rgba(139,92,246,.35);border-radius:999px;padding:5px 14px;margin-bottom:18px}
-  h1{font-size:clamp(28px,4.6vw,44px);line-height:1.25;font-weight:800;
-    background:linear-gradient(120deg,#c4b5fd 0%,#a78bfa 40%,#7dd3fc 100%);
-    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:16px}
-  .lede{font-size:17px;color:#b9b0d6;max-width:660px;margin-bottom:30px}
-  .tags{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:46px}
-  .tag{font-size:12.5px;padding:5px 13px;border-radius:999px;
-    background:rgba(139,92,246,.14);border:1px solid rgba(139,92,246,.32);color:#c9bff0}
-  h2{font-size:20px;color:#ddd6f3;margin:0 0 16px;padding-left:14px;position:relative}
-  h2::before{content:"";position:absolute;left:0;top:5px;bottom:5px;width:3px;
-    border-radius:2px;background:linear-gradient(180deg,#a78bfa,#38bdf8)}
-  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:46px}
-  .card{background:rgba(255,255,255,.035);border:1px solid rgba(139,92,246,.18);
-    border-radius:13px;padding:18px 20px}
-  .card h3{font-size:14px;color:#a78bfa;margin-bottom:8px}
-  .card p{font-size:14px;color:#b3aacd;margin:0}
-  ul.flow{list-style:none;counter-reset:step;margin-bottom:46px}
-  ul.flow li{position:relative;padding-left:32px;margin-bottom:16px;font-size:14.5px;color:#b8afd3}
-  ul.flow li::before{content:counter(step);counter-increment:step;position:absolute;left:0;top:1px;
-    width:21px;height:21px;border-radius:50%;font-size:12px;font-weight:700;color:#0d0a17;
-    text-align:center;line-height:21px;background:linear-gradient(135deg,#a78bfa,#7dd3fc)}
-  ul.flow li strong{color:#ddd6f3;font-weight:600}
-  .code{background:#120f1f;border:1px solid rgba(139,92,246,.2);border-radius:12px;
-    padding:18px 20px;font-family:Consolas,Monaco,monospace;font-size:13px;color:#c9d6f5;
-    overflow-x:auto;margin-bottom:46px;line-height:1.7}
-  .code .c{color:#6f6690}.code .k{color:#c4b5fd}.code .s{color:#7dd3fc}
-  .note{background:rgba(56,189,248,.07);border-left:3px solid #38bdf8;border-radius:8px;
-    padding:14px 18px;font-size:14px;color:#a9c4dd;margin-bottom:46px}
-  footer{text-align:center;font-size:13px;color:#6f6690;padding-top:36px;
-    border-top:1px solid rgba(139,92,246,.14)}
-  footer a{color:#a78bfa;text-decoration:none}
+      radial-gradient(circle at 8% 0%, rgba(79,168,232,.16), transparent 42%),
+      radial-gradient(circle at 94% 4%, rgba(232,69,95,.09), transparent 38%),
+      radial-gradient(circle at 50% 102%, rgba(255,143,177,.05), transparent 46%)}
+
+  .wrap{position:relative;z-index:1;max-width:min(1600px,100%);margin:0 auto;padding:56px clamp(16px,3vw,40px) 96px}
+
+  .back{display:flex;width:fit-content;align-items:center;gap:8px;color:var(--ink3);
+    text-decoration:none;font-size:14px;margin-bottom:34px;transition:color .2s}
+  .back:hover{color:var(--blue-d)}
+
+  .num{display:inline-block;font-size:12.5px;font-weight:600;letter-spacing:.14em;
+    color:#fff;background:linear-gradient(100deg,#3E9FE0 0%,#E8455F 72%,#D62F4A 100%);
+    border-radius:999px;padding:6px 16px;margin-bottom:16px;
+    box-shadow:0 8px 22px rgba(214,47,74,.34)}
+
+  h1{font-size:clamp(26px,3.6vw,38px);line-height:1.28;font-weight:700;
+    color:var(--ink);margin-bottom:14px;letter-spacing:-.01em}
+  h1::after{content:"";display:inline-block;width:11px;height:11px;border-radius:3px;
+    background:var(--red);margin-left:12px;vertical-align:.22em;
+    box-shadow:0 3px 10px rgba(232,69,95,.45)}
+
+  .lede{font-size:17px;color:var(--ink2);max-width:700px;margin-bottom:28px}
+  .lede strong{color:var(--ink);font-weight:600;
+    background:linear-gradient(transparent 60%, rgba(232,69,95,.20) 60%);
+    padding:0 2px;border-radius:2px}
+
+  .tags{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:26px}
+  .tag{font-size:12.5px;padding:6px 14px;border-radius:999px;
+    background:#fff;border:1px solid var(--line);color:var(--ink2);
+    box-shadow:0 1px 2px rgba(26,29,36,.04)}
+  .tag:nth-child(3n+1){border-color:#D6EAF8;color:var(--blue-d);background:var(--blue-s)}
+  .tag:nth-child(3n+2){border-color:#FBD0D7;color:var(--red-d);background:var(--red-s)}
+
+  /* ============================================================
+     舞台：执行过程模拟
+     ============================================================ */
+  .stage{position:relative;background:#fff;border:1px solid var(--line);border-radius:18px;
+    box-shadow:0 14px 40px rgba(26,29,36,.075),0 2px 6px rgba(26,29,36,.03);
+    overflow:hidden;margin-bottom:12px}
+
+  .bar{display:flex;align-items:center;gap:9px;padding:10px 14px;
+    border-bottom:1px solid var(--line);background:#FBFCFE}
+  .dots{display:flex;gap:6px;flex:none}
+  .dots i{width:9px;height:9px;border-radius:50%;display:block}
+  .dots i:nth-child(1){background:#F0A0A8}
+  .dots i:nth-child(2){background:#F2D08A}
+  .dots i:nth-child(3){background:#A6D9B0}
+  .bar .bt{font-size:12px;color:var(--ink3);font-family:Consolas,"Cascadia Code",monospace;
+    letter-spacing:.02em;margin-left:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .bar .sp{flex:1}
+  .badge{font-size:10.5px;padding:3px 9px;border-radius:999px;flex:none;
+    background:var(--red-s);color:var(--red-d);border:1px solid #FBD0D7;font-weight:600;
+    letter-spacing:.02em}
+  .ctl{font:inherit;font-size:11.5px;padding:5px 11px;border-radius:8px;cursor:pointer;flex:none;
+    background:#fff;border:1px solid var(--line);color:var(--ink2);
+    transition:background .16s,border-color .16s,color .16s}
+  .ctl:hover{border-color:#BFDFF6;color:var(--blue-d);background:var(--blue-s)}
+  .ctl.pri{background:linear-gradient(100deg,#3E9FE0,#E8455F);color:#fff;border:0;
+    box-shadow:0 4px 12px rgba(214,47,74,.26)}
+  .ctl.pri:hover{color:#fff;background:linear-gradient(100deg,#3E9FE0,#D62F4A)}
+
+  .pipe{display:grid;grid-template-columns:236px 1fr 212px;height:470px}
+  .col{display:flex;flex-direction:column;min-width:0;padding:12px 13px;overflow:hidden}
+  .col + .col{border-left:1px solid var(--line)}
+  .ch{display:flex;align-items:center;justify-content:space-between;gap:8px;flex:none;
+    font-size:11.5px;font-weight:700;color:var(--ink3);letter-spacing:.06em;
+    margin-bottom:9px;text-transform:uppercase}
+  .ch span{font-weight:500;font-family:Consolas,monospace;letter-spacing:0;text-transform:none}
+
+  /* 左：目标队列 */
+  .qlist{flex:1;overflow-y:auto;scrollbar-width:thin;margin:0 -4px;padding:0 4px}
+  .qi{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:9px;
+    font-size:12px;color:var(--ink2);border:1px solid transparent;
+    transition:background .2s,border-color .2s,color .2s;cursor:default}
+  .qi .ix{font-family:Consolas,monospace;font-size:10.5px;color:#B0B8C6;flex:none;width:16px}
+  .qi .tx{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .qi .tk{flex:none;font-size:10.5px;color:#B0B8C6;font-family:Consolas,monospace}
+  .qi.done{color:var(--ink3)}
+  .qi.done .tk{color:var(--blue-d)}
+  .qi.skip .tx{text-decoration:line-through;text-decoration-color:#CBD3DF}
+  .qi.skip .tk{color:#C2CAD6}
+  .qi.on{background:var(--blue-s);border-color:#D6EAF8;color:var(--ink);font-weight:600}
+  .qi.on .tk{color:var(--red)}
+
+  /* 中：当前作品 */
+  .phone{display:flex;gap:11px;background:#F8FBFF;border:1px solid var(--line);
+    border-radius:14px;padding:11px;flex:1;min-height:150px}
+  .cover{flex:1;min-width:0;border-radius:10px;position:relative;
+    display:flex;flex-direction:column;justify-content:space-between;padding:12px 14px;
+    color:var(--ink);overflow:hidden;transition:background .6s}
+  /* 柔光让空封面不至于是一块死板的纯色 */
+  .cover::before{content:"";position:absolute;inset:0;pointer-events:none;
+    background:
+      radial-gradient(circle at 16% 18%, rgba(255,255,255,.72), transparent 38%),
+      radial-gradient(circle at 84% 82%, rgba(255,255,255,.52), transparent 44%)}
+  .cv-top{display:flex;align-items:center;gap:7px;position:relative;z-index:1}
+  .cv-ava{width:19px;height:19px;border-radius:50%;flex:none;
+    background:rgba(255,255,255,.88);border:1px solid rgba(255,255,255,.98)}
+  .cv-uid{font-size:10.5px;color:var(--ink2);opacity:.72;
+    font-family:Consolas,monospace;letter-spacing:.02em}
+  .cv-play{align-self:center;width:52px;height:52px;border-radius:50%;position:relative;z-index:1;
+    background:rgba(255,255,255,.80);border:1px solid rgba(255,255,255,.98);
+    display:grid;place-items:center;box-shadow:0 6px 20px rgba(26,29,36,.09)}
+  .cv-play::after{content:"";width:0;height:0;margin-left:4px;
+    border-left:14px solid rgba(26,29,36,.42);
+    border-top:8px solid transparent;border-bottom:8px solid transparent}
+  .cv-bot{position:relative;z-index:1}
+  .cover .ct{display:block;font-size:16px;font-weight:700;line-height:1.4}
+  .cover .cd{display:block;font-size:11px;color:var(--ink2);opacity:.8;
+    font-family:Consolas,monospace;margin-top:3px;letter-spacing:.04em}
+  .acts{display:flex;flex-direction:column;gap:6px;justify-content:center;flex:none}
+  .act{width:31px;height:31px;border-radius:50%;border:1px solid var(--line);background:#fff;
+    display:grid;place-items:center;cursor:default;padding:0;transition:all .28s}
+  .act svg{width:15px;height:15px;fill:none;stroke:#B8C1CF;stroke-width:1.9;
+    stroke-linecap:round;stroke-linejoin:round;transition:all .28s}
+  .act.lit{background:var(--red-s);border-color:#FBD0D7;transform:scale(1.06)}
+  .act.lit svg{fill:var(--red);stroke:var(--red)}
+  .act.skip{background:#F2F5F9;border-color:#E1E7F0}
+  .act.skip svg{stroke:#C2CAD6}
+
+  .phases{display:flex;gap:6px;flex:none;margin-top:11px}
+
+  /* 执行明细：普通模式下露两行，全屏时展开，用来填满高度 */
+  .meta{flex:none;margin-top:9px;border:1px solid var(--line);border-radius:11px;
+    background:#FDFEFF;padding:7px 11px;display:flex;flex-direction:column;gap:2px;
+    font-family:Consolas,"Cascadia Code",monospace;font-size:10.5px;overflow:hidden}
+  .mrow{display:flex;gap:9px;align-items:baseline;min-width:0}
+  .mk{flex:none;width:44px;color:#A8B2C1}
+  .mv{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink2)}
+  .mv b{color:var(--red-d);font-weight:700}
+  .mrow.hide{display:none}
+  .phase{flex:1;min-width:0;padding:6px 4px;border-radius:9px;border:1px solid var(--line);
+    background:#FDFEFF;text-align:center;font-size:10.5px;color:var(--ink3);line-height:1.35;
+    transition:all .24s}
+  .phase .pn{font-family:Consolas,monospace;font-size:9.5px;opacity:.7}
+  .phase.on{background:var(--blue-s);border-color:#BFDFF6;color:var(--blue-d);font-weight:700;
+    box-shadow:0 4px 12px rgba(79,168,232,.16)}
+  .phase.done{border-color:#E7EEF7;color:#A8B2C1}
+  .phase.done .pn{color:var(--blue)}
+
+  .delay{flex:none;margin-top:12px;background:#FDFEFF;border:1px solid var(--line);
+    border-radius:11px;padding:9px 12px 11px}
+  .dh{display:flex;align-items:baseline;justify-content:space-between;gap:8px;
+    font-size:11px;color:var(--ink3);margin-bottom:7px}
+  .dh b{font-family:Consolas,monospace;font-size:14px;color:var(--red-d);font-weight:700;
+    letter-spacing:.01em}
+  .dtrack{height:7px;border-radius:999px;background:#EEF3F9;overflow:hidden;position:relative}
+  .dfill{height:100%;width:0;border-radius:999px;
+    background:linear-gradient(90deg,#5FB3EA 0%,#E8455F 100%)}
+
+  /* 右：计数 + 日志 */
+  .st2{display:grid;grid-template-columns:1fr 1fr;gap:7px;flex:none;margin-bottom:11px}
+  .sbox{border:1px solid var(--line);background:#FDFEFF;border-radius:10px;padding:7px 9px 8px}
+  .sbox .v{font-size:19px;font-weight:800;font-family:Consolas,monospace;line-height:1.15;
+    color:var(--ink);letter-spacing:-.02em}
+  .sbox .k{font-size:10px;color:var(--ink3);letter-spacing:.02em;margin-top:1px}
+  .sbox.b{background:var(--blue-s);border-color:#D6EAF8}
+  .sbox.b .v{color:var(--blue-d)}
+  .sbox.r{background:var(--red-s);border-color:#FBD0D7}
+  .sbox.r .v{color:var(--red-d)}
+  .logs{flex:1;overflow-y:auto;scrollbar-width:thin;
+    font-family:Consolas,"Cascadia Code",monospace;font-size:10px;line-height:1.95;
+    color:#A8B2C1;margin:0 -3px;padding:0 3px}
+  .logs div{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .logs div b{color:var(--ink2);font-weight:600}
+  .logs div:first-child{color:var(--ink)}
+
+  /* 全屏 */
+  .stage.fs{position:fixed;inset:0;z-index:9999;border-radius:0;border:0;margin:0;
+    display:flex;flex-direction:column;box-shadow:none}
+  .stage.fs .pipe{flex:1;height:auto}
+  /* 全屏：卡片按接近 16:9 放大，明细展开成 6 行 —— 高度被信息占住，不留大空卡 */
+  .stage.fs .phone{flex:1;min-height:0;margin:auto 0;max-height:420px;
+    width:100%;max-width:780px;align-self:center}
+  .stage.fs .meta{flex:none;gap:6px;padding:12px 15px;font-size:12px;justify-content:flex-start;
+    width:100%;max-width:780px;align-self:center}
+  .stage.fs .mrow.hide{display:flex}
+  .stage.fs .cover .ct{font-size:21px}
+  .stage.fs .cover .cd{font-size:12.5px;margin-top:4px}
+  .stage.fs .cv-play{width:62px;height:62px}
+  .stage.fs .cv-play::after{border-left-width:17px;
+    border-top-width:9px;border-bottom-width:9px;margin-left:4px}
+  .stage.fs .cv-uid{font-size:11.5px}
+  .stage.fs .qlist,.stage.fs .logs{max-height:none}
+  /* 阶段条和延时条跟卡片同宽，别一个满屏一个窄 */
+  .stage.fs .phases,.stage.fs .delay{width:100%;max-width:780px;align-self:center}
+  .stage.fs .ch{width:100%;max-width:780px;align-self:center}
+  body.fs-lock{overflow:hidden}
+
+  .stagehint{font-size:13px;color:var(--ink3);line-height:1.8;margin-bottom:38px}
+  .stagehint strong{color:var(--ink2);font-weight:600}
+
+  h2{font-size:20px;color:var(--ink);margin:38px 0 16px;padding-left:15px;position:relative;
+    font-weight:700}
+  h2::before{content:"";position:absolute;left:0;top:6px;bottom:6px;width:4px;
+    border-radius:3px;background:linear-gradient(180deg,var(--blue),var(--red))}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(198px,1fr));gap:14px;margin-bottom:40px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:15px;padding:18px 20px;
+    box-shadow:0 2px 10px rgba(26,29,36,.045);transition:transform .2s,box-shadow .2s,border-color .2s}
+  .card:hover{transform:translateY(-3px);box-shadow:0 12px 26px rgba(79,168,232,.14);
+    border-color:#D6EAF8}
+  .card h3{font-size:14px;color:var(--blue-d);margin-bottom:8px;font-weight:700}
+  .card p{font-size:13.8px;color:var(--ink2)}
+
+  ul.flow{list-style:none;counter-reset:step;margin-bottom:40px}
+  ul.flow li{position:relative;padding-left:34px;margin-bottom:14px;font-size:14.5px;color:var(--ink2)}
+  ul.flow li::before{content:counter(step);counter-increment:step;position:absolute;left:0;top:2px;
+    width:22px;height:22px;border-radius:50%;font-size:12px;font-weight:700;color:#fff;
+    text-align:center;line-height:22px;
+    background:linear-gradient(140deg,var(--blue) 0%,var(--red) 100%);
+    box-shadow:0 4px 12px rgba(232,69,95,.28)}
+  ul.flow li strong{color:var(--ink);font-weight:600}
+
+  /* 代码块：PyCharm Darcula，和其余页面同一套 */
+  .code{background:#1E1F22;border-radius:14px;padding:17px 20px;
+    font-family:Consolas,"Cascadia Code",Monaco,monospace;font-size:13px;color:#BCBEC4;
+    white-space:pre-wrap;word-break:break-word;overflow-x:auto;margin-bottom:40px;line-height:1.78}
+  .code .c{color:#7A7E85}
+  .code .k{color:#CF8E6D}
+  .code .s{color:#6AAB73}
+  .code .n{color:#2AACB8}
+
+  .note{background:var(--blue-s);border:1px solid #D6EAF8;border-left:3px solid var(--blue);
+    border-radius:10px;padding:14px 18px;font-size:13.8px;color:var(--ink2);margin-bottom:40px}
+  .note strong{color:var(--blue-d)}
+
+  footer{text-align:center;font-size:13px;color:var(--ink3);padding-top:34px;
+    border-top:1px solid var(--line)}
+  footer a{color:var(--blue-d);text-decoration:none}
+  footer a:hover{text-decoration:underline}
+
+  @media(max-width:860px){
+    .pipe{grid-template-columns:1fr;height:auto}
+    .col + .col{border-left:0;border-top:1px solid var(--line)}
+    .qlist{max-height:150px}
+    .logs{max-height:100px}
+    .stage.fs .pipe{overflow-y:auto}
+  }
+  @media(max-width:640px){
+    .wrap{padding:36px 18px 70px}
+    .lede{font-size:15.5px}
+    .bar .bt{display:none}
+    .phases{flex-wrap:wrap}
+    .phase{flex:1 1 44%}
+  }
 </style>
 </head>
 <body>
 <div class="glow"></div>
 <div class="wrap">
   <a class="back" href="../index.html">← 返回作品集</a>
-  <div class="num">PROJECT 13 · 自动化</div>
+  <div class="num">PROJECT 24 · 自动化</div>
   <h1>抖音点赞工具</h1>
   <p class="lede">基于浏览器自动化的抖音批量互动脚本：按目标账号进入作品页，模拟真人节奏完成点赞、收藏等操作，支持批量执行与数量控制。</p>
   <div class="tags">
@@ -65,9 +290,97 @@
     <span class="tag">自动化控制</span>
   </div>
 
+  <!-- ============ 执行过程模拟 ============ -->
+  <div class="stage" id="stage1">
+    <div class="bar">
+      <div class="dots"><i></i><i></i><i></i></div>
+      <div class="bt">douyin_like.py — 执行过程</div>
+      <div class="sp"></div>
+      <span class="badge" id="badge">演示 3× 加速</span>
+      <button class="ctl pri" id="btnPlay">暂停</button>
+      <button class="ctl" id="btnReset">重置</button>
+      <button class="ctl" id="fs1">全屏 ↗</button>
+    </div>
+
+    <div class="pipe">
+      <!-- 左：目标队列 -->
+      <div class="col">
+        <div class="ch">目标队列 <span id="qcount">10 条</span></div>
+        <div class="qlist" id="qlist"></div>
+      </div>
+
+      <!-- 中：当前作品 + 阶段 -->
+      <div class="col">
+        <div class="ch">正在处理 <span id="curIdx">— / 10</span></div>
+        <div class="phone">
+          <div class="cover" id="cover">
+            <div class="cv-top"><span class="cv-ava"></span><span class="cv-uid">@creator_07</span></div>
+            <div class="cv-play"></div>
+            <div class="cv-bot">
+              <span class="ct" id="ct">等待启动</span>
+              <span class="cd" id="cd">—</span>
+            </div>
+          </div>
+          <div class="acts">
+            <button class="act" id="actLike" aria-label="点赞">
+              <svg viewBox="0 0 24 24"><path d="M12 20.5S4.8 16.2 3.1 12.2A4.9 4.9 0 0 1 12 6.9a4.9 4.9 0 0 1 8.9 5.3C19.2 16.2 12 20.5 12 20.5z"/></svg>
+            </button>
+            <button class="act" aria-label="收藏">
+              <svg viewBox="0 0 24 24"><path d="M12 3.4l2.5 5.9 6.4.6-4.8 4.2 1.4 6.3L12 17.2l-5.5 3.2 1.4-6.3L3.1 9.9l6.4-.6z"/></svg>
+            </button>
+            <button class="act" aria-label="分享">
+              <svg viewBox="0 0 24 24"><path d="M4.5 12.5v6.4h15v-6.4M12 3.6v11.2M12 3.6L7.6 8M12 3.6l4.4 4.4"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="meta" id="meta">
+          <div class="mrow hide"><span class="mk">队列</span><span class="mv" id="mQueue">—</span></div>
+          <div class="mrow"><span class="mk">选择器</span>
+            <span class="mv">xpath://div[@data-e2e="like-icon"]</span></div>
+          <div class="mrow"><span class="mk">判定</span><span class="mv" id="mJudge">—</span></div>
+          <div class="mrow hide"><span class="mk">返回</span><span class="mv" id="mRet">—</span></div>
+          <div class="mrow hide"><span class="mk">延时</span>
+            <span class="mv" id="mDelay">random.uniform(1.5, 3.2)</span></div>
+          <div class="mrow hide"><span class="mk">累计</span><span class="mv" id="mTotal">—</span></div>
+        </div>
+
+        <div class="phases" id="phases">          <div class="phase"><div class="pn">1</div>等待渲染</div>
+          <div class="phase"><div class="pn">2</div>判断状态</div>
+          <div class="phase"><div class="pn">3</div>执行点击</div>
+          <div class="phase"><div class="pn">4</div>随机延时</div>
+        </div>
+
+        <div class="delay">
+          <div class="dh">
+            <span>time.sleep(random.uniform(<span style="color:#8B95A6">1.5, 3.2</span>))</span>
+            <b id="dnum">— s</b>
+          </div>
+          <div class="dtrack"><div class="dfill" id="dfill"></div></div>
+        </div>
+      </div>
+
+      <!-- 右：计数 + 日志 -->
+      <div class="col">
+        <div class="st2">
+          <div class="sbox b"><div class="v" id="sLiked">0</div><div class="k">已点赞</div></div>
+          <div class="sbox"><div class="v" id="sSkip">0</div><div class="k">已跳过</div></div>
+          <div class="sbox"><div class="v" id="sTotal">10</div><div class="k">队列总数</div></div>
+          <div class="sbox r"><div class="v" id="sSec">0<small style="font-size:11px;font-weight:600">s</small></div><div class="k">虚拟耗时</div></div>
+        </div>
+        <div class="ch">运行日志</div>
+        <div class="logs" id="logs"></div>
+      </div>
+    </div>
+  </div>
+  <p class="stagehint">
+    上面这条动画是<strong>按代码真实执行顺序</strong>跑的：四个阶段对应下面那段 <code style="font-family:Consolas,monospace;font-size:12.5px;background:#F2F6FB;padding:1px 5px;border-radius:4px">for</code> 循环里的每一行，每次延时的秒数就是 <code style="font-family:Consolas,monospace;font-size:12.5px;background:#F2F6FB;padding:1px 5px;border-radius:4px">random.uniform(1.5, 3.2)</code> 真实摇出来的值。
+    浏览器和按钮都不连抖音，队列是示例数据；<strong>流程和节奏是真的</strong>。为了不让你干等十几秒，动画按 3× 播放，跑完自己重来一遍。
+  </p>
+
   <h2>项目背景</h2>
-  <p style="font-size:15px;color:#b8afd3;margin-bottom:46px">
-    这是一个把「重复手工操作」交给程序的项目。难点不在点击本身，而在<strong style="color:#ddd6f3">如何让自动化不被识别、不误触、不中断</strong>：
+  <p style="font-size:15px;color:var(--ink2);margin-bottom:46px">
+    这是一个把「重复手工操作」交给程序的项目。难点不在点击本身，而在<strong style="color:var(--ink)">如何让自动化不被识别、不误触、不中断</strong>：
     抖音的按钮是动态渲染的，滚动加载会改变元素位置，操作节奏太快会触发风控。
   </p>
 
@@ -101,8 +414,7 @@
   </ul>
 
   <h2>关键代码结构</h2>
-  <div class="code">
-<span class="k">from</span> DrissionPage <span class="k">import</span> ChromiumPage
+  <div class="code"><span class="k">from</span> DrissionPage <span class="k">import</span> ChromiumPage
 <span class="k">import</span> random, time
 
 page = ChromiumPage()          <span class="c"># 接管已登录的浏览器</span>
@@ -114,8 +426,7 @@ page = ChromiumPage()          <span class="c"># 接管已登录的浏览器</sp
     btn = page.ele(<span class="s">'xpath://div[@data-e2e="like-icon"]'</span>)
     <span class="k">if</span> <span class="k">not</span> is_liked(btn):        <span class="c"># 已操作过则跳过</span>
         btn.click()
-        time.sleep(random.uniform(<span class="s">1.5</span>, <span class="s">3.2</span>))  <span class="c"># 随机节奏</span>
-  </div>
+        time.sleep(random.uniform(<span class="n">1.5</span>, <span class="n">3.2</span>))  <span class="c"># 随机节奏</span></div>
 
   <div class="note">
     <strong>说明：</strong>这是一个自动化效率工具的练习项目，用于验证浏览器自动化在动态页面上的稳定性。
@@ -126,5 +437,286 @@ page = ChromiumPage()          <span class="c"># 接管已登录的浏览器</sp
     王思洋 · Python 自动化作品 · <a href="https://gitee.com/simonwangsy/a-new-beginning" target="_blank" rel="noopener">源码仓库</a>
   </footer>
 </div>
+
+<script>
+(function(){
+  'use strict';
+
+  var $ = function(id){ return document.getElementById(id); };
+
+  /* 示例队列：真实运行时由 targets 传入，这里为了演示固定一份。
+     liked=true 表示这条在页面上已经是点赞状态 —— 用来演示「跳过」分支。 */
+  var Q = [
+    { t:'通勤路上的三分钟',     d:'00:47', liked:false, hue:206 },
+    { t:'一个人的周末厨房',     d:'01:12', liked:true,  hue:24  },
+    { t:'猫在家等我下班',       d:'00:23', liked:false, hue:286 },
+    { t:'城市骑行 vlog #7',     d:'02:05', liked:false, hue:158 },
+    { t:'凌晨四点的便利店',     d:'00:38', liked:true,  hue:42  },
+    { t:'把旧相机拍出新颜色',   d:'01:34', liked:false, hue:340 },
+    { t:'雨天窗边的白噪音',     d:'00:59', liked:false, hue:196 },
+    { t:'拆箱 · 二手胶片机',    d:'01:48', liked:false, hue:14  },
+    { t:'楼顶看了一场日落',     d:'00:41', liked:true,  hue:8   },
+    { t:'冰箱里剩下的三种食材', d:'01:06', liked:false, hue:120 }
+  ];
+
+  var SPEED = 3;             /* 演示倍率：真实 sleep 2.4s → 屏幕上 0.8s */
+  var DELAY_MIN = 1.5, DELAY_MAX = 3.2;
+
+  var S = {
+    i:0, liked:0, skip:0, vsec:0,
+    playing:true, gen:0, phase:-1, delay:0
+  };
+
+  function sleep(ms){
+    return new Promise(function(r){ setTimeout(r, ms / SPEED); });
+  }
+
+  /* 真实时长（不加速），用于「跑完停一会儿再重播」 */
+  function sleepReal(ms){
+    return new Promise(function(r){ setTimeout(r, ms); });
+  }
+
+  /* 暂停闸门：按暂停时循环就停在原地等，恢复后从原处继续 ——
+     这样不会像「重跑当前这条」那样把同一条点赞算两次。 */
+  function gate(gen){
+    return new Promise(function(res){
+      (function chk(){
+        if (gen !== S.gen) return res();
+        if (S.playing) return res();
+        setTimeout(chk, 120);
+      })();
+    });
+  }
+
+  function fmt(n, d){
+    var s = n.toFixed(d == null ? 2 : d);
+    return s;
+  }
+
+  /* ---------- 左：队列 ---------- */
+  function buildQueue(){
+    var h = '';
+    for (var k = 0; k < Q.length; k++){
+      h += '<div class="qi" data-k="' + k + '">' +
+           '<span class="ix">' + (k < 9 ? '0' : '') + (k + 1) + '</span>' +
+           '<span class="tx">' + Q[k].t + '</span>' +
+           '<span class="tk" data-tk="' + k + '">' + Q[k].d + '</span></div>';
+    }
+    $('qlist').innerHTML = h;
+  }
+
+  function markQueue(k, cls, tk){
+    var el = $('qlist').querySelector('.qi[data-k="' + k + '"]');
+    if (!el) return;
+    el.className = 'qi' + (cls ? ' ' + cls : '');
+    if (tk) el.querySelector('.tk').textContent = tk;
+  }
+
+  /* ---------- 中：阶段条 ---------- */
+  function setPhase(idx){
+    var ps = $('phases').children;
+    for (var k = 0; k < ps.length; k++){
+      ps[k].className = 'phase' + (k === idx ? ' on' : (k < idx ? ' done' : ''));
+    }
+    S.phase = idx;
+  }
+
+  /* ---------- 中：延时条 ---------- */
+  function showDelay(sec){
+    $('dnum').textContent = fmt(sec) + ' s';
+    var f = $('dfill');
+    f.style.transition = 'none';
+    f.style.width = '0%';
+    /* 强制回流，让 next 帧的 transition 生效 */
+    void f.offsetWidth;
+    f.style.transition = 'width ' + (sec * 1000 / SPEED) + 'ms linear';
+    f.style.width = (sec / DELAY_MAX * 100) + '%';
+  }
+
+  /* ---------- 右：计数 / 日志 ---------- */
+  function paintStats(){
+    $('sLiked').textContent = S.liked;
+    $('sSkip').textContent = S.skip;
+    $('sSec').innerHTML = Math.round(S.vsec) + '<small style="font-size:11px;font-weight:600">s</small>';
+    $('sTotal').textContent = Q.length;
+    $('mTotal').textContent = '赞 ' + S.liked + ' · 跳 ' + S.skip + ' · ' + Math.round(S.vsec) + 's';
+  }
+
+  function log(txt, strong){
+    var box = $('logs');
+    var d = document.createElement('div');
+    if (strong) d.innerHTML = '<b>' + txt + '</b>';
+    else d.textContent = txt;
+    box.insertBefore(d, box.firstChild);
+    while (box.children.length > 40) box.removeChild(box.lastChild);
+  }
+
+  function logClear(){ $('logs').innerHTML = ''; }
+
+  /* ---------- 中：作品卡 ---------- */
+  function coverBg(hue){
+    /* 柔和浅色，跟整站的近白体系一致：不抢眼，但每换一条能看出颜色在变 */
+    return 'linear-gradient(135deg, hsl(' + hue + ',46%,95%) 0%, hsl(' +
+           ((hue + 30) % 360) + ',40%,91%) 100%)';
+  }
+
+  function showCover(it, idx){
+    $('curIdx').textContent = (idx + 1) + ' / ' + Q.length;
+    $('mQueue').textContent = '第 ' + (idx + 1) + ' / ' + Q.length + ' 条';
+    $('cover').style.background = coverBg(it.hue);
+    $('ct').textContent = it.t;
+    $('cd').textContent = '时长 ' + it.d + ' · 第 ' + (idx < 9 ? '0' : '') + (idx + 1) + ' 条';
+    setAct('');
+  }
+
+  function setAct(cls){
+    $('actLike').className = 'act' + (cls ? ' ' + cls : '');
+  }
+
+  /* 执行明细面板 */
+  function setMeta(judge, ret, delay){
+    if (judge !== undefined) $('mJudge').innerHTML = judge;
+    if (ret !== undefined) $('mRet').textContent = ret;
+    if (delay !== undefined) $('mDelay').textContent = delay;
+  }
+  /* ---------- 主循环 ---------- */
+  async function run(){
+    var gen = ++S.gen;
+
+    for (; S.i < Q.length; S.i++){
+      await gate(gen);
+      if (gen !== S.gen) return;
+
+      var it = Q[S.i], k = S.i;
+      markQueue(k, 'on', '…');
+      showCover(it, k);
+      setMeta('读取中…', '—', '—');
+      log('GET ' + (k < 9 ? '0' : '') + (k + 1) + '  ' + it.t);
+      await sleep(120);
+      if (gen !== S.gen) return;
+
+      /* 阶段 1 · 等待渲染 */
+      setPhase(0);
+      await sleep(330 + Math.random() * 160);
+      await gate(gen);
+      if (gen !== S.gen) return;
+
+      /* 阶段 2 · 判断状态 */
+      setPhase(1);
+      await sleep(260);
+      await gate(gen);
+      if (gen !== S.gen) return;
+
+      if (it.liked){
+        setAct('skip');
+        markQueue(k, 'skip done', '跳过');
+        S.skip++;
+        S.vsec += 0.5;              /* 等待 + 判断的固定开销 */
+        paintStats();
+        setMeta('<b>已赞 → 跳过</b>', 'liked: true', '不进入延时');
+        log('  已赞 → 跳过');
+        setPhase(-1);
+        await sleep(220);
+        continue;
+      }
+
+      /* 阶段 3 · 执行点击 */
+      setPhase(2);
+      setMeta('未赞 → 点击', '—', '—');
+      await sleep(300);
+      await gate(gen);
+      if (gen !== S.gen) return;
+      setAct('lit');
+      log('  click() like-icon ✓');
+
+      /* 阶段 4 · 随机延时 */
+      var sec = DELAY_MIN + Math.random() * (DELAY_MAX - DELAY_MIN);
+      S.delay = sec;
+      S.liked++;
+      S.vsec += 0.5 + sec;
+      paintStats();
+      setPhase(3);
+      showDelay(sec);
+      setMeta(undefined, 'clicked ✓', 'sleep(' + fmt(sec) + ')');
+      log('  sleep(' + fmt(sec) + ')');
+      await sleep(sec * 1000);
+      await gate(gen);
+      if (gen !== S.gen) return;
+
+      markQueue(k, 'done', '✓');
+      setPhase(-1);
+      await sleep(90);
+    }
+
+    if (gen === S.gen){
+      setPhase(-1);
+      $('dnum').textContent = '— s';
+      $('dfill').style.transition = 'none';
+      $('dfill').style.width = '0%';
+      log('完成 · 赞 ' + S.liked + ' 跳 ' + S.skip, true);
+      $('btnPlay').textContent = '重跑';
+      S.playing = false;
+
+      /* 停 2.8 秒自动重播 —— 谁点进来都能看到它在动，不用碰按钮 */
+      await sleepReal(2800);
+      if (gen === S.gen && !S.playing) reset();
+    }
+  }
+
+  /* ---------- 控件 ---------- */
+  function reset(){
+    S.gen++;
+    S.i = 0; S.liked = 0; S.skip = 0; S.vsec = 0;
+    S.playing = true; S.phase = -1;
+    buildQueue();
+    paintStats();
+    logClear();
+    setPhase(-1);
+    $('curIdx').textContent = '— / ' + Q.length;
+    $('ct').textContent = '等待启动';
+    $('cd').textContent = '—';
+    $('cover').style.background = 'linear-gradient(135deg,#E8EFF8 0%,#F4F8FD 100%)';
+    setAct('');
+    setMeta('—', '—', '—');
+    $('dnum').textContent = '— s';
+    $('dfill').style.transition = 'none';
+    $('dfill').style.width = '0%';
+    $('btnPlay').textContent = '暂停';
+    log('page = ChromiumPage()  ← 接管已登录浏览器');
+    log('targets 共 ' + Q.length + ' 条，开始执行');
+    setTimeout(function(){ if (S.playing) run(); }, 380);
+  }
+
+  $('btnPlay').addEventListener('click', function(){
+    if (this.textContent === '重跑'){ reset(); return; }
+    S.playing = !S.playing;
+    this.textContent = S.playing ? '暂停' : '继续';
+    /* 不重新起循环：旧循环正停在 gate() 里等这一下 */
+  });
+
+  $('btnReset').addEventListener('click', reset);
+
+  /* 全屏 */
+  (function(){
+    var st = $('stage1'), btn = $('fs1');
+    function set(on){
+      st.classList.toggle('fs', on);
+      document.body.classList.toggle('fs-lock', on);
+      btn.textContent = on ? '退出全屏 ✕' : '全屏 ↗';
+    }
+    btn.addEventListener('click', function(){ set(!st.classList.contains('fs')); });
+    document.addEventListener('keydown', function(e){
+      if (e.key === 'Escape' && st.classList.contains('fs')) set(false);
+    });
+  })();
+
+  /* 打开就跑 */
+  buildQueue();
+  paintStats();
+  log('page = ChromiumPage()  ← 接管已登录浏览器');
+  log('targets 共 ' + Q.length + ' 条，开始执行');
+  setTimeout(function(){ run(); }, 620);
+})();
+</script>
 </body>
 </html>

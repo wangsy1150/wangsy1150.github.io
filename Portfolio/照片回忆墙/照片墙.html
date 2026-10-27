@@ -1,411 +1,587 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>3D回忆照片墙</title>
-  <style>
-    /* ———— 完全保留您的原始样式 ———— */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg?v=2">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3D 回忆照片墙</title>
+<style>
+@font-face{font-family:"Noto Sans SC";font-style:normal;font-weight:400;font-display:swap;
+    src:url("../../fonts/NotoSansSC-400-subset.woff2") format("woff2")}
+@font-face{font-family:"Noto Sans SC";font-style:normal;font-weight:500;font-display:swap;
+    src:url("../../fonts/NotoSansSC-500-subset.woff2") format("woff2")}
+@font-face{font-family:"Noto Sans SC";font-style:normal;font-weight:600;font-display:swap;
+    src:url("../../fonts/NotoSansSC-600-subset.woff2") format("woff2")}
+@font-face{font-family:"Noto Sans SC";font-style:normal;font-weight:700;font-display:swap;
+    src:url("../../fonts/NotoSansSC-700-subset.woff2") format("woff2")}
 
-    body {
-      width: 100vw;
-      height: 100vh;
-      overflow: hidden;
-      background:
-        radial-gradient(circle at 10% 20%, rgba(255,255,255,0.12) 0%, transparent 50%),
-        linear-gradient(180deg, #080b1a 0%, #101530 100%);
-      font-family: "Microsoft Yahei", sans-serif;
-    }
+:root{
+    --bg:#FBFCFE;
+    --ink:#1A1D24;
+    --ink2:#525B6B;
+    --ink3:#8B95A6;
+    --line:#E4EBF5;
+    --red:#E8455F;
+    --blue:#4FA8E8;
+}
 
-    .stars {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      background-image:
-        radial-gradient(2px 2px at 10% 15%, rgba(255,255,255,0.8), transparent),
-        radial-gradient(1px 1px at 25% 35%, rgba(255,255,255,0.6), transparent),
-        radial-gradient(2px 2px at 40% 8%, rgba(255,255,255,0.7), transparent),
-        radial-gradient(1px 1px at 60% 25%, rgba(255,255,255,0.5), transparent),
-        radial-gradient(2px 2px at 75% 10%, rgba(255,255,255,0.6), transparent),
-        radial-gradient(1px 1px at 90% 18%, rgba(255,255,255,0.8), transparent);
-      background-size: 200px 200px;
-    }
+*{margin:0;padding:0;box-sizing:border-box;}
 
-    .stage {
-      position: absolute;
-      left: 50%;
-      top: 45%;
-      width: 1800px;
-      height: 900px;
-      margin-left: -900px;
-      margin-top: -450px;
-      perspective: 1600px;
-      overflow: hidden;
-    }
-    .stage.hidden {
-      display: none;
-    }
+body{
+    min-height:100vh;
+    font-family:"Noto Sans SC","Microsoft YaHei","PingFang SC",Arial,sans-serif;
+    color:var(--ink);
+    background:var(--bg);
+    overflow-x:hidden;
+}
 
-    .wall {
-      width: 100%;
-      height: 100%;
-      position: relative;
-      transform-style: preserve-3d;
-      transform: rotateX(12deg) rotateY(-22deg);
-    }
+.page{
+    width:min(1600px,94vw);
+    margin:0 auto;
+    padding:26px 0 54px;
+}
 
-    .row {
-      position: absolute;
-      left: 0;
-      height: 150px;
-      display: flex;
-      gap: 14px;
-      transform-style: preserve-3d;
-      will-change: transform;
-    }
-    .row-1 { top: 8%; }
-    .row-2 { top: 24%; }
-    .row-3 { top: 40%; }
-    .row-4 { top: 56%; }
+/* ── 统一壳 ── */
+.shell{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    flex-wrap:wrap;
+    margin-bottom:24px;
+}
+.back-link{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    color:var(--ink3);
+    text-decoration:none;
+    font-size:14px;
+    transition:color .2s;
+}
+.back-link:hover{color:var(--blue);}
+.pnum{
+    display:inline-block;
+    font-size:12px;
+    font-weight:700;
+    letter-spacing:.06em;
+    color:#fff;
+    background:linear-gradient(100deg,#3E9FE0 0%,#E8455F 72%,#D62F4A 100%);
+    border-radius:999px;
+    padding:5px 15px;
+    box-shadow:0 6px 18px rgba(214,47,74,.26);
+}
 
-    .pic {
-      position: relative;
-      width: 200px;
-      height: 135px;
-      flex-shrink: 0;
-      border: 5px solid #fff;
-      border-radius: 8px;
-      box-shadow: 0 0 18px rgba(120,200,255,0.55), 0 0 34px rgba(0,0,0,0.45);
-      overflow: hidden;
-      transform-style: preserve-3d;
-      backface-visibility: hidden;
-    }
-    .pic img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
+.hero{margin-bottom:24px;}
+.badge{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding:6px 13px;
+    border:1px solid var(--line);
+    border-radius:999px;
+    background:#fff;
+    color:var(--ink2);
+    font-size:13px;
+}
+h1{
+    margin:14px 0 10px;
+    font-size:clamp(26px,3.6vw,38px);
+    font-weight:700;
+    letter-spacing:-.01em;
+    line-height:1.28;
+}
+h1::after{
+    content:"";
+    display:inline-block;
+    width:10px;height:10px;
+    border-radius:3px;
+    background:var(--red);
+    margin-left:11px;
+    vertical-align:.12em;
+    box-shadow:0 3px 10px rgba(232,69,95,.45);
+}
+.subtitle{
+    color:var(--ink2);
+    font-size:15px;
+    line-height:1.78;
+    max-width:900px;
+}
 
-    .pic .depth {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      transform-style: preserve-3d;
-      transform: translateZ(calc(var(--z) * 1px)) scale(var(--scale));
-    }
-    .row .pic:nth-child(1)  .depth { --z: -80; --scale: 0.55; }
-    .row .pic:nth-child(2)  .depth { --z: -30; --scale: 0.68; }
-    .row .pic:nth-child(3)  .depth { --z: 20;  --scale: 0.82; }
-    .row .pic:nth-child(4)  .depth { --z: 80;  --scale: 1; }
-    .row .pic:nth-child(5)  .depth { --z: 150; --scale: 1.18; }
-    .row .pic:nth-child(6)  .depth { --z: 230; --scale: 1.35; }
-    .row .pic:nth-child(7)  .depth { --z: 320; --scale: 1.5; }
-    .row .pic:nth-child(8)  .depth { --z: 420; --scale: 1.65; }
-    .row .pic:nth-child(9)  .depth { --z: 320; --scale: 1.5; }
-    .row .pic:nth-child(10) .depth { --z: 230; --scale: 1.35; }
-    .row .pic:nth-child(11) .depth { --z: 150; --scale: 1.18; }
-    .row .pic:nth-child(12) .depth { --z: 80;  --scale: 1; }
-    .row .pic:nth-child(13) .depth { --z: 20;  --scale: 0.82; }
-    .row .pic:nth-child(14) .depth { --z: -30; --scale: 0.68; }
-    .row .pic:nth-child(15) .depth { --z: -80; --scale: 0.55; }
+/* ── 展台 ── */
+.stage-box{
+    position:relative;
+    height:640px;
+    border-radius:20px;
+    overflow:hidden;
+    border:1px solid var(--line);
+    background:radial-gradient(120% 92% at 50% 0%,#EAF4FE 0%,#F6FAFE 46%,#FBFCFE 100%);
+    box-shadow:0 20px 60px rgba(26,29,36,.07);
+}
+/* 原来的深色星空，换成浅蓝点阵，像印在纸上的网格 */
+.stage-box::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background-image:radial-gradient(circle,rgba(79,168,232,.20) 1px,transparent 1.2px);
+    background-size:44px 44px;
+    opacity:.55;
+    pointer-events:none;
+}
 
-    .reflection {
-      position: absolute;
-      left: 50%;
-      top: 78%;
-      width: 1800px;
-      height: 380px;
-      margin-left: -900px;
-      perspective: 1600px;
-      transform: rotateX(180deg) translateY(12px);
-      opacity: 0.35;
-      filter: blur(1px);
-      pointer-events: none;
-      overflow: hidden;
-    }
-    .reflection.hidden {
-      display: none;
-    }
-    .reflection .wall { transform: rotateX(12deg) rotateY(-22deg); }
-    .reflection .pic { border-color: rgba(255,255,255,0.85); box-shadow: 0 0 12px rgba(120,200,255,0.35); }
+/* 原来 100vh 定高、绝对定位居中；现在收进固定高度的展台里，
+   top 上提 40px，让四行照片（含 1.65 倍放大）刚好落进 640 高 */
+.stage{
+    position:absolute;
+    left:50%;
+    top:-40px;
+    width:1800px;
+    height:780px;
+    margin-left:-900px;
+    perspective:1600px;
+    overflow:hidden;
+    z-index:2;
+}
+.stage.hidden{display:none;}
 
-    .title {
-      position: absolute;
-      left: 50%;
-      bottom: 120px;
-      transform: translate(-50%, -50%);
-      text-align: center;
-      color: #fff;
-      z-index: 10;
-      pointer-events: none;
-    }
-    .title h1 { font-size: 42px; letter-spacing: 8px; margin-bottom: 8px; text-shadow: 0 0 20px rgba(255,255,255,0.8); }
+.wall{
+    width:100%;
+    height:100%;
+    position:relative;
+    transform-style:preserve-3d;
+    transform:rotateX(12deg) rotateY(-22deg);
+}
 
-    .audio-btn {
-      position: fixed;
-      right: 40px;
-      bottom: 40px;
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.15);
-      border: 2px solid #ffffff80;
-      color: #fff;
-      font-size: 24px;
-      cursor: pointer;
-      backdrop-filter: blur(6px);
-      transition: all 0.3s ease;
-      z-index: 999;
-    }
-    .audio-btn:hover { background: rgba(255,255,255,0.3); transform: scale(1.1); }
+.row{
+    position:absolute;
+    left:0;
+    height:150px;
+    display:flex;
+    gap:14px;
+    transform-style:preserve-3d;
+    will-change:transform;
+}
+.row-1{top:8%;}
+.row-2{top:24%;}
+.row-3{top:40%;}
+.row-4{top:56%;}
 
-    .upload-btn {
-      position: fixed;
-      left: 40px;
-      bottom: 40px;
-      padding: 14px 28px;
-      border-radius: 30px;
-      background: rgba(255,255,255,0.15);
-      border: 2px solid #ffffff80;
-      color: #fff;
-      font-size: 16px;
-      cursor: pointer;
-      backdrop-filter: blur(6px);
-      transition: all 0.3s ease;
-      z-index: 999;
-    }
-    .upload-btn:hover { background: rgba(255,255,255,0.3); transform: scale(1.05); }
+/* 白框在浅底上必须靠影子分离，否则框和背景糊成一片 */
+.pic{
+    position:relative;
+    width:200px;
+    height:135px;
+    flex-shrink:0;
+    border:5px solid #fff;
+    border-radius:12px;
+    background:#fff;
+    box-shadow:0 10px 26px rgba(79,168,232,.18),0 3px 10px rgba(26,29,36,.10);
+    overflow:hidden;
+    transform-style:preserve-3d;
+    backface-visibility:hidden;
+}
+.pic img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+}
 
-    #fileInput { display: none; }
+.pic .depth{
+    position:absolute;
+    width:100%;
+    height:100%;
+    transform-style:preserve-3d;
+    transform:translateZ(calc(var(--z) * 1px)) scale(var(--scale));
+}
 
-    .empty-hint {
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      transform: translate(-50%, -50%);
-      color: rgba(255,255,255,0.5);
-      font-size: 18px;
-      letter-spacing: 4px;
-      z-index: 5;
-      pointer-events: none;
-      text-align: center;
-      line-height: 2;
-      display: none;
-    }
-    .empty-hint.show {
-      display: block;
-    }
-    .empty-hint span {
-      font-size: 48px;
-      display: block;
-      margin-bottom: 10px;
-    }
-  </style>
+/* 倒影：浅底上压到很淡，靠底部渐隐过渡掉 */
+.reflection{
+    position:absolute;
+    left:50%;
+    bottom:-8px;
+    width:1800px;
+    height:210px;
+    margin-left:-900px;
+    perspective:1600px;
+    transform:rotateX(180deg);
+    opacity:.2;
+    filter:blur(1.6px);
+    pointer-events:none;
+    overflow:hidden;
+    z-index:1;
+}
+.reflection.hidden{display:none;}
+.reflection .wall{transform:rotateX(12deg) rotateY(-22deg);}
+.reflection .pic{border-color:rgba(255,255,255,.9);box-shadow:none;}
+
+.fade{
+    position:absolute;
+    left:0;right:0;bottom:0;
+    height:88px;
+    background:linear-gradient(to top,var(--bg) 26%,rgba(251,252,254,0));
+    z-index:4;
+    pointer-events:none;
+}
+
+.stage-tag{
+    position:absolute;
+    left:20px;top:18px;
+    z-index:6;
+    display:inline-flex;
+    align-items:center;
+    gap:9px;
+    padding:8px 16px;
+    border-radius:999px;
+    background:rgba(255,255,255,.92);
+    -webkit-backdrop-filter:blur(10px);
+    backdrop-filter:blur(10px);
+    border:1px solid var(--line);
+    font-size:13px;
+    color:var(--ink2);
+    box-shadow:0 6px 20px rgba(26,29,36,.06);
+}
+.stage-tag .dot{
+    width:7px;height:7px;
+    border-radius:50%;
+    background:var(--red);
+    box-shadow:0 0 0 4px rgba(232,69,95,.14);
+}
+.stage-tag em{
+    font-style:normal;
+    color:var(--ink3);
+}
+
+.empty-hint{
+    position:absolute;
+    left:50%;top:50%;
+    transform:translate(-50%,-50%);
+    color:var(--ink3);
+    font-size:15px;
+    letter-spacing:2px;
+    z-index:5;
+    pointer-events:none;
+    text-align:center;
+    line-height:2;
+    display:none;
+}
+.empty-hint.show{display:block;}.empty-hint span{
+    font-size:42px;
+    display:block;
+    margin-bottom:6px;
+}
+
+/* ── 控制条 ── */
+#fileInput{display:none;}
+.controls{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    flex-wrap:wrap;
+    margin-top:20px;
+}
+.btn{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding:11px 20px;
+    border-radius:999px;
+    border:1px solid var(--line);
+    background:#fff;
+    color:var(--ink);
+    font-size:14px;
+    font-family:inherit;
+    cursor:pointer;
+    transition:border-color .2s,color .2s,transform .2s,box-shadow .2s;
+    box-shadow:0 4px 14px rgba(26,29,36,.05);
+}
+.btn:hover{
+    border-color:rgba(79,168,232,.55);
+    color:var(--blue);
+    transform:translateY(-1px);
+}
+.btn.round{
+    width:44px;height:44px;
+    padding:0;
+    justify-content:center;
+    font-size:18px;
+    border-radius:50%;
+}
+.btn.round.on{
+    background:linear-gradient(100deg,#3E9FE0,#E8455F);
+    border-color:transparent;
+    color:#fff;
+    box-shadow:0 8px 20px rgba(232,69,95,.28);
+}
+.note{
+    font-size:13px;
+    color:var(--ink3);
+    line-height:1.6;
+}
+
+@media (max-width:860px){
+    .stage-box{height:460px;}
+    .stage{height:600px;top:-30px;}
+    .row{height:110px;}
+    .pic{width:146px;height:98px;border-width:4px;border-radius:10px;}
+}
+</style>
 </head>
 <body>
-  <div class="stars"></div>
-
-  <div class="empty-hint" id="emptyHint">
-    <span>🖼️</span>
-    点击左下角「重新选择照片」<br>上传您的回忆
-  </div>
-
-  <div class="title">
-    <h1>我们的故事</h1>
-  </div>
-
-  <div class="stage" id="stageWrap">
-    <div class="wall">
-      <div class="row row-1" id="row1"></div>
-      <div class="row row-2" id="row2"></div>
-      <div class="row row-3" id="row3"></div>
-      <div class="row row-4" id="row4"></div>
+<div class="page">
+    <div class="shell">
+        <a class="back-link" href="../../index.html">← 返回作品集</a>
+        <span class="pnum">PROJECT 17 · 创意视觉</span>
     </div>
-  </div>
 
-  <div class="reflection" id="reflectionWrap">
-    <div class="wall">
-      <div class="row row-1" id="refRow1"></div>
+    <section class="hero">
+        <div class="badge">✦ 零依赖 · 整面墙只用 CSS 3D ✦</div>
+        <h1>3D 回忆照片墙</h1>
+        <p class="subtitle">
+            没用 Three.js，也没碰 WebGL —— 纵深感全是 CSS 撑出来的：外层给一个 <b>perspective</b> 定住视点，每张照片按自己的排位拿到不同的 <b>translateZ</b> 和 <b>scale</b>，越靠前的 Z 越大、放得越开，平铺的 200px 照片就有了前后层次。四行照片错位排开，共用同一个偏移量横向流动，走到一组的宽度就把偏移量补回去，接到无缝。鼠标移进画面自动停下，方便一张张看。
+        </p>
+    </section>
+
+    <div class="stage-box" id="stageBox">
+        <div class="stage" id="stageWrap">
+            <div class="wall">
+                <div class="row row-1" id="row1"></div>
+                <div class="row row-2" id="row2"></div>
+                <div class="row row-3" id="row3"></div>
+                <div class="row row-4" id="row4"></div>
+            </div>
+        </div>
+
+        <div class="reflection" id="reflectionWrap">
+            <div class="wall">
+                <div class="row row-1" id="refRow1"></div>
+            </div>
+        </div>
+
+        <div class="stage-tag"><span class="dot"></span>我们的故事<em id="countTag">—</em></div>
+
+        <div class="empty-hint" id="emptyHint">
+            <span>🖼️</span>
+            这里还没有照片<br>点下面的「换一批照片」选自己的
+        </div>
+
+        <div class="fade"></div>
     </div>
-  </div>
 
-  <input type="file" id="fileInput" accept="image/*" multiple>
-  <button class="upload-btn" id="uploadBtn">📂 重新选择照片</button>
+    <div class="controls">
+        <button class="btn" id="uploadBtn">📂 换一批照片</button>
+        <button class="btn round" id="audioBtn" title="背景音乐">♫</button>
+        <span class="note" id="hintNote"></span>
+    </div>
+</div>
 
-  <audio id="bgMusic" loop preload="auto">
+<input type="file" id="fileInput" accept="image/*" multiple>
+
+<audio id="bgMusic" loop preload="none">
     <source src="bgm.mp3" type="audio/mpeg">
-  </audio>
-  <button class="audio-btn" id="audioBtn">♫</button>
+</audio>
 
-  <script>
-    (function() {
-      // 滚动速度
-      const moveSpeed = 0.8;
-      const singlePicTotalW = 200 + 14;
+<script>
+(function () {
+    const moveSpeed = 0.8;
+    const singlePicTotalW = 200 + 14;
+    const STAGE_W = 1800;
 
-      let offsetX = 0;
-      let isPause = false;
-      let imgList = [];
-      let oneGroupWidth = 0;
-      let hasImages = false;
-      let totalGroups = 15; // 固定组数
-      let rowTotalWidth = 0;
+    // 默认带一套示例照片，打开就有画面
+    const DEFAULT_IMAGES = [
+        '波奇酱/01.jpg', '波奇酱/02.jpg', '波奇酱/03.jpg',
+        '波奇酱/04.jpg', '波奇酱/05.jpg', '波奇酱/06.jpg',
+        '波奇酱/07.jpg', '波奇酱/08.jpg', '波奇酱/09.jpg',
+        '波奇酱/10.jpg', '波奇酱/11.jpg', '波奇酱/12.jpg',
+        '波奇酱/13.jpg', '波奇酱/14.jpg', '波奇酱/15.jpg'
+    ];
 
-      const fileInput = document.getElementById('fileInput');
-      const uploadBtn = document.getElementById('uploadBtn');
-      const rows = [
+    let offsetX = 0;
+    let isPause = false;
+    let imgList = [];
+    let oneGroupWidth = 0;
+    let hasImages = false;
+
+    const fileInput = document.getElementById('fileInput');
+    const uploadBtn = document.getElementById('uploadBtn');
+    const stageBox = document.getElementById('stageBox');
+    const rows = [
         document.getElementById('row1'),
         document.getElementById('row2'),
         document.getElementById('row3'),
         document.getElementById('row4')
-      ];
-      const refRow = document.getElementById('refRow1');
-      const stageWrap = document.getElementById('stageWrap');
-      const reflectionWrap = document.getElementById('reflectionWrap');
-      const emptyHint = document.getElementById('emptyHint');
+    ];
+    const refRow = document.getElementById('refRow1');
+    const stageWrap = document.getElementById('stageWrap');
+    const reflectionWrap = document.getElementById('reflectionWrap');
+    const emptyHint = document.getElementById('emptyHint');
+    const countTag = document.getElementById('countTag');
+    const hintNote = document.getElementById('hintNote');
 
-      function updateVisibility() {
+    const Z_ARR = [-80, -30, 20, 80, 150, 230, 320, 420, 320, 230, 150, 80, 20, -30, -80];
+    const S_ARR = [0.55, 0.68, 0.82, 1, 1.18, 1.35, 1.5, 1.65, 1.5, 1.35, 1.18, 1, 0.82, 0.68, 0.55];
+
+    function updateVisibility() {
         if (hasImages && imgList.length > 0) {
-          stageWrap.classList.remove('hidden');
-          reflectionWrap.classList.remove('hidden');
-          emptyHint.classList.remove('show');
+            stageWrap.classList.remove('hidden');
+            reflectionWrap.classList.remove('hidden');
+            emptyHint.classList.remove('show');
+            countTag.textContent = imgList.length + ' 张';
         } else {
-          stageWrap.classList.add('hidden');
-          reflectionWrap.classList.add('hidden');
-          emptyHint.classList.add('show');
+            stageWrap.classList.add('hidden');
+            reflectionWrap.classList.add('hidden');
+            emptyHint.classList.add('show');
+            countTag.textContent = '空';
         }
-      }
+    }
 
-      // 生成一组图片的HTML（带缓存）
-      let cachedGroupHTML = '';
-      function getGroupHTML() {
-        if (cachedGroupHTML) return cachedGroupHTML;
+    let cachedGroupHTML = [];
+    // 原来四行用的是同一串顺序，同一张照片会在同一列竖着叠四遍。
+    // 这里让每一行错开一段起步（照片本身一份没多、一份没少，只是排列错开），
+    // 同一列上就是四张不同的照片，才像一面墙。
+    function getGroupHTML(rowIdx) {
+        if (cachedGroupHTML[rowIdx]) return cachedGroupHTML[rowIdx];
+        const n = imgList.length;
+        const step = Math.max(1, Math.round(n / 4)) * rowIdx;
         let html = '';
-        imgList.forEach((src, idx) => {
-          const i = idx % 15;
-          const zArr = [-80, -30, 20, 80, 150, 230, 320, 420, 320, 230, 150, 80, 20, -30, -80];
-          const sArr = [0.55, 0.68, 0.82, 1, 1.18, 1.35, 1.5, 1.65, 1.5, 1.35, 1.18, 1, 0.82, 0.68, 0.55];
-          html += `
-            <div class="pic">
-              <div class="depth" style="--z:${zArr[i]};--scale:${sArr[i]}">
-                <img src="${src}" alt="相册">
-              </div>
-            </div>
-          `;
-        });
-        cachedGroupHTML = html;
+        for (let k = 0; k < n; k++) {
+            const src = imgList[(k + step) % n];
+            const i = k % 15;   // 深度跟着「位置」走，不跟着照片走，纵深感才不会乱
+            html += '<div class="pic"><div class="depth" style="--z:' + Z_ARR[i] + ';--scale:' + S_ARR[i] + '">'
+                  + '<img src="' + src + '" alt="照片" decoding="async"></div></div>';
+        }
+        cachedGroupHTML[rowIdx] = html;
         return html;
-      }
+    }
 
-      function buildWall() {
+    // 照片宽度会被媒体查询改（桌面 200 / 手机 146），循环周期必须量实际布局，
+    // 不能写死，否则窄屏上回绕的那一下会跳一格
+    function measureGroupWidth() {
+        const first = rows[0].firstElementChild;
+        if (!first) return imgList.length * singlePicTotalW;
+        const cs = getComputedStyle(rows[0]);
+        const gap = parseFloat(cs.columnGap) || parseFloat(cs.gap) || 0;
+        return imgList.length * (first.offsetWidth + gap);
+    }
+
+    function buildWall() {
         if (!imgList.length) {
-          rows.forEach(row => row.innerHTML = '');
-          refRow.innerHTML = '';
-          oneGroupWidth = 0;
-          rowTotalWidth = 0;
-          cachedGroupHTML = '';
-          return;
+            rows.forEach(row => row.innerHTML = '');
+            refRow.innerHTML = '';
+            oneGroupWidth = 0;
+            cachedGroupHTML = [];
+            return;
         }
 
-        cachedGroupHTML = ''; // 重置缓存
-        oneGroupWidth = imgList.length * singlePicTotalW;
+        cachedGroupHTML = [];
+        const groups = 2;
+        const refHTML = getGroupHTML(0);
 
-        // 固定15组，不增不减
-        const groups = 15;
-        const groupHTML = getGroupHTML();
-
-        rows.forEach(row => {
-          row.innerHTML = '';
-          for (let i = 0; i < groups; i++) {
-            row.insertAdjacentHTML('beforeend', groupHTML);
-          }
+        rows.forEach((row, r) => {
+            const groupHTML = getGroupHTML(r);
+            row.innerHTML = '';
+            for (let i = 0; i < groups; i++) row.insertAdjacentHTML('beforeend', groupHTML);
         });
         refRow.innerHTML = '';
-        for (let i = 0; i < groups; i++) {
-          refRow.insertAdjacentHTML('beforeend', groupHTML);
+        for (let i = 0; i < groups; i++) refRow.insertAdjacentHTML('beforeend', refHTML);
+
+        // 原来固定 15 组（15×15＝225 张/行、1125 个节点）；
+        // 只要铺满「一组宽 + 一个屏宽」就够无缝，2 组就到位了
+        oneGroupWidth = measureGroupWidth();
+        const need = Math.ceil((oneGroupWidth + STAGE_W + 400) / oneGroupWidth);
+        if (need > groups) {
+            rows.forEach((row, r) => {
+                for (let i = groups; i < need; i++) row.insertAdjacentHTML('beforeend', getGroupHTML(r));
+            });
+            for (let i = groups; i < need; i++) refRow.insertAdjacentHTML('beforeend', refHTML);
         }
 
-        rowTotalWidth = groups * oneGroupWidth;
         offsetX = 0;
-        rows.forEach(r => r.style.transform = `translateX(0px)`);
-        refRow.style.transform = `translateX(0px)`;
-      }
+        rows.forEach(r => r.style.transform = 'translateX(0px)');
+        refRow.style.transform = 'translateX(0px)';
+    }
 
-      function refreshWall() {
+    function refreshWall() {
         hasImages = imgList.length > 0;
         updateVisibility();
         buildWall();
-      }
+    }
 
-      // 文件上传
-      fileInput.onchange = e => {
+    fileInput.onchange = e => {
         const files = e.target.files;
         if (!files.length) return;
         imgList.forEach(url => { if (url.startsWith('blob:')) URL.revokeObjectURL(url); });
         imgList = [];
-        for (const f of files) {
-          imgList.push(URL.createObjectURL(f));
-        }
+        for (const f of files) imgList.push(URL.createObjectURL(f));
+        hintNote.textContent = '已换成你选的 ' + imgList.length + ' 张';
         refreshWall();
-      };
+    };
 
-      uploadBtn.onclick = () => fileInput.click();
+    uploadBtn.onclick = () => fileInput.click();
 
-      stageWrap.addEventListener('mouseenter', () => { if (hasImages) isPause = true; });
-      stageWrap.addEventListener('mouseleave', () => { isPause = false; });
+    stageBox.addEventListener('mouseenter', () => { if (hasImages) isPause = true; });
+    stageBox.addEventListener('mouseleave', () => { isPause = false; });
 
-      // ———— 核心：使用translateX循环移动，永不回弹 ————
-      function loop() {
-        if (!isPause && hasImages && oneGroupWidth > 0 && rowTotalWidth > 0) {
-          // 向左移动
-          offsetX -= moveSpeed;
-
-          // 当偏移量超过总宽度时，重置偏移量（无缝循环）
-          if (offsetX <= -rowTotalWidth) {
-            offsetX += rowTotalWidth;
-          }
-
-          // 应用变换
-          rows.forEach(r => r.style.transform = `translateX(${offsetX}px)`);
-          refRow.style.transform = `translateX(${offsetX}px)`;
+    // 原来在 -rowTotalWidth（15 组的宽度）才回绕，等于跑完 48150px 才跳一次，
+    // 跳的那一帧画面是空的；按「一组宽度」回绕，内容周期性完全一致，永远无缝
+    function loop() {
+        if (!isPause && hasImages && oneGroupWidth > 0) {
+            offsetX -= moveSpeed;
+            if (offsetX <= -oneGroupWidth) offsetX += oneGroupWidth;
+            const t = 'translateX(' + offsetX + 'px)';
+            rows.forEach(r => r.style.transform = t);
+            refRow.style.transform = t;
         }
         requestAnimationFrame(loop);
-      }
+    }
 
-      // ———— 初始化：无图片，显示空状态 ————
-      imgList = [];
-      refreshWall();
-      loop();
+    imgList = DEFAULT_IMAGES.slice();
+    hintNote.textContent = '示例照片，可换成你自己的';
+    refreshWall();
+    loop();
 
-      // 背景音乐控制
-      const bgMusic = document.getElementById('bgMusic');
-      const audioBtn = document.getElementById('audioBtn');
-      let playFlag = false;
-      audioBtn.onclick = () => {
+    // 窗口尺寸变了，照片宽度也跟着变，重新量一次循环周期
+    let resizeTimer = null;
+    let lastW = window.innerWidth;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => {
+            if (window.innerWidth === lastW) return;
+            lastW = window.innerWidth;
+            if (!imgList.length) return;
+            oneGroupWidth = measureGroupWidth();
+            const need = Math.ceil((oneGroupWidth + STAGE_W + 400) / oneGroupWidth);
+            const cur = rows[0].children.length / imgList.length;
+            if (need > cur) {
+                rows.forEach((row, r) => {
+                    for (let i = cur; i < need; i++) row.insertAdjacentHTML('beforeend', getGroupHTML(r));
+                });
+                for (let i = cur; i < need; i++) refRow.insertAdjacentHTML('beforeend', getGroupHTML(0));
+            }
+            if (offsetX <= -oneGroupWidth) offsetX %= oneGroupWidth;
+        }, 180);
+    });
+
+    // ── 音乐：只在点按钮时播。原来 body 上挂了 click 自动播放，
+    //    面试官随便点一下页面就开始放歌，这里去掉 ──
+    const bgMusic = document.getElementById('bgMusic');
+    const audioBtn = document.getElementById('audioBtn');
+    let playFlag = false;
+    audioBtn.onclick = () => {
         playFlag = !playFlag;
         if (playFlag) {
-          bgMusic.play().catch(() => {});
-          audioBtn.innerText = '⏸';
+            bgMusic.play().then(() => {
+                audioBtn.innerText = '⏸';
+                audioBtn.classList.add('on');
+            }).catch(() => {
+                playFlag = false;
+            });
         } else {
-          bgMusic.pause();
-          audioBtn.innerText = '♫';
+            bgMusic.pause();
+            audioBtn.innerText = '♫';
+            audioBtn.classList.remove('on');
         }
-      };
-      document.body.addEventListener('click', function autoPlay() {
-        bgMusic.play().then(() => {
-          audioBtn.innerText = '⏸';
-          playFlag = true;
-        }).catch(() => {});
-        document.body.removeEventListener('click', autoPlay, { once: true });
-      });
-    })();
-  </script>
+    };
+})();
+</script>
 </body>
 </html>

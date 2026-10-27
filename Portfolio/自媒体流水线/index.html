@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>自媒体自动运营流水线 · 项目详情</title>
+<link rel="icon" href="../../favicon.svg?v=2" type="image/svg+xml">
+<style>
+  /* ============================================================
+     配色：近白底 / 近黑字 / 浅蓝主色 / 粉点缀 / 红做强调点
+     ============================================================ */
+  :root{
+    --bg:#FBFCFE;
+    --ink:#1A1D24;
+    --ink2:#525B6B;
+    --ink3:#8B95A6;
+    --blue:#4FA8E8;
+    --blue-d:#2E8BD0;
+    --blue-s:#EAF5FD;
+    --pink:#FF8FB1;
+    --pink-d:#E0568A;
+    --pink-s:#FFF0F5;
+    --red:#E8455F;
+    --red-d:#C9304A;
+    --red-s:#FFEBEE;
+    --orange:#FF8A1E;
+    --orange-d:#D96A00;
+    --orange-s:#FFF1DC;
+    --teal:#10B6A6;
+    --teal-d:#0B8578;
+    --teal-s:#E2F8F5;
+    --green:#1F9D55;
+    --line:#E4EBF5;
+  }
+
+  @font-face{font-family:"Noto Sans SC";font-style:normal;font-weight:400;
+    font-display:swap;src:url("../../fonts/NotoSansSC-400-subset.woff2") format("woff2")}
+  @font-face{font-family:"Noto Sans SC";font-style:normal;font-weight:500;
+    font-display:swap;src:url("../../fonts/NotoSansSC-500-subset.woff2") format("woff2")}
+  @font-face{font-family:"Noto Sans SC";font-style:normal;font-weight:600;
+    font-display:swap;src:url("../../fonts/NotoSansSC-600-subset.woff2") format("woff2")}
+  @font-face{font-family:"Noto Sans SC";font-style:normal;font-weight:700;
+    font-display:swap;src:url("../../fonts/NotoSansSC-700-subset.woff2") format("woff2")}
+  @font-face{font-family:"Noto Sans SC";font-style:normal;font-weight:800;
+    font-display:swap;src:url("../../fonts/NotoSansSC-700-subset.woff2") format("woff2")}
+
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"Noto Sans SC","Microsoft YaHei","PingFang SC",Arial,sans-serif;
+    font-weight:400;color:var(--ink);background:var(--bg);line-height:1.75;overflow-x:hidden}
+
+  .glow{position:fixed;inset:0;pointer-events:none;z-index:0;
+    background:
+      radial-gradient(circle at 8% 0%, rgba(79,168,232,.20), transparent 42%),
+      radial-gradient(circle at 94% 4%, rgba(232,69,95,.16), transparent 40%),
+      radial-gradient(circle at 50% 102%, rgba(16,182,166,.09), transparent 46%)}
+
+  .wrap{position:relative;z-index:1;max-width:min(1600px,100%);margin:0 auto;padding:56px clamp(16px,3vw,40px) 96px}
+
+  .back{display:flex;width:fit-content;align-items:center;gap:8px;color:var(--ink3);
+    text-decoration:none;font-size:14px;margin-bottom:34px;transition:color .2s}
+  .back:hover{color:var(--blue-d)}
+
+  .num{display:inline-block;font-size:12.5px;font-weight:600;letter-spacing:.14em;
+    color:#fff;background:linear-gradient(100deg,#3E9FE0 0%,#E8455F 72%,#D62F4A 100%);
+    border-radius:999px;padding:6px 16px;margin-bottom:16px;
+    box-shadow:0 8px 22px rgba(214,47,74,.34)}
+
+  h1{font-size:clamp(28px,4.6vw,44px);line-height:1.25;font-weight:800;
+    color:var(--ink);margin-bottom:14px;letter-spacing:-.01em;position:relative}
+  h1::after{content:"";display:inline-block;width:11px;height:11px;border-radius:3px;
+    background:var(--red);margin-left:12px;vertical-align:.22em;
+    box-shadow:0 3px 10px rgba(232,69,95,.45)}
+
+  .lede{font-size:17px;color:var(--ink2);max-width:760px;margin-bottom:28px}
+  .lede strong{color:var(--ink);font-weight:600;
+    background:linear-gradient(transparent 60%, rgba(232,69,95,.22) 60%);
+    padding:0 2px;border-radius:2px}
+
+  .tags{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:34px}
+  .tag{font-size:12.5px;padding:6px 14px;border-radius:999px;
+    background:#fff;border:1px solid var(--line);color:var(--ink2);
+    box-shadow:0 1px 2px rgba(26,29,36,.04)}
+  .tag:nth-child(3n+1){border-color:#D6EAF8;color:var(--blue-d);background:var(--blue-s)}
+  .tag:nth-child(3n+2){border-color:#FBD0D7;color:var(--red-d);background:var(--red-s)}
+
+  h2{font-size:20px;color:var(--ink);margin:44px 0 18px;padding-left:15px;position:relative;
+    font-weight:700}
+  h2::before{content:"";position:absolute;left:0;top:6px;bottom:6px;width:4px;
+    border-radius:3px;background:linear-gradient(180deg,var(--blue),var(--red))}
+
+  .card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:19px 21px;
+    box-shadow:0 2px 10px rgba(26,29,36,.045);transition:transform .22s,box-shadow .22s,border-color .22s}
+  .card:hover{transform:translateY(-3px);box-shadow:0 12px 28px rgba(79,168,232,.14);
+    border-color:#D6EAF8}
+  .card h3{font-size:14px;color:var(--blue-d);margin-bottom:9px;font-weight:700}
+  .card p{font-size:14px;color:var(--ink2);margin:0}
+
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+
+  /* ---------- 舞台 ---------- */
+  .stage{position:relative;margin:0 0 30px;border-radius:20px;overflow:hidden;
+    border:1px solid var(--line);background:#fff;
+    box-shadow:0 22px 60px rgba(79,168,232,.16), 0 4px 14px rgba(26,29,36,.05)}
+  .stage-bar{display:flex;align-items:center;gap:8px;padding:11px 16px;
+    background:linear-gradient(90deg,#F7FBFE,#FEF7FA);border-bottom:1px solid var(--line)}
+  .stage-dot{width:9px;height:9px;border-radius:50%}
+  .stage-dot:nth-child(1){background:#FFC9D9}
+  .stage-dot:nth-child(2){background:#CFE8F9}
+  .stage-dot:nth-child(3){background:#D9E6F2}
+  .stage-title{font-size:12.5px;color:var(--ink3);margin-left:6px}
+  .stage-live{display:inline-flex;align-items:center;gap:6px;margin-left:8px;
+    font-size:11.5px;font-weight:600;color:var(--red-d)}
+  .stage-live::before{content:"";width:6px;height:6px;border-radius:50%;
+    background:var(--red);box-shadow:0 0 0 3px rgba(232,69,95,.24);
+    animation:livePulse 1.6s ease-in-out infinite}
+  @keyframes livePulse{0%,100%{opacity:1}50%{opacity:.3}}
+  .stage-note{margin-left:auto;font-size:12px;color:var(--ink3);transition:color .3s}
+  .stage-note.pass{color:var(--green);font-weight:700}
+
+  .fs-btn{font:inherit;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;
+    padding:5px 13px;border-radius:999px;border:1px solid #D6EAF8;background:#fff;
+    color:var(--blue-d);margin-left:10px;transition:background .18s,border-color .18s}
+  .fs-btn:hover{background:var(--blue-s);border-color:#B9DDF4}
+  .stage.fs .fs-btn{background:var(--red-s);border-color:#F8C9D0;color:var(--red-d)}
+
+  .stage.fs{position:fixed;inset:0;z-index:9999;margin:0;border:0;border-radius:0;
+    display:flex;flex-direction:column;overflow:auto;background:#fff;box-shadow:none}
+  .stage.fs .stage-bar{border-radius:0;flex:none;position:sticky;top:0;z-index:2}
+  .stage.fs .demo{max-width:1240px;margin:0 auto;width:100%;padding:26px 32px 28px}
+  .stage.fs .pipe{grid-template-columns:260px 1fr;gap:22px}
+  .stage.fs .pane{min-height:calc(100vh - 300px);max-height:none}
+  body.fs-lock{overflow:hidden}
+
+  .demo{padding:20px 22px 20px}
+
+  /* 四色统计块：关键数字要有色块托住 */
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+  .stat{border-radius:12px;padding:11px 14px;border:1px solid var(--line);background:#FDFEFF;
+    transition:transform .2s,box-shadow .2s}
+  .stat .v{font-size:23px;font-weight:800;line-height:1.15;letter-spacing:-.01em;
+    font-variant-numeric:tabular-nums;color:var(--ink)}
+  .stat .v small{font-size:11.5px;font-weight:700;margin-left:2px;opacity:.75}
+  .stat .k{font-size:11.5px;color:var(--ink3);margin-top:3px;font-weight:500}
+  .stat.c1{background:linear-gradient(160deg,#F2F9FE,#E4F2FC);border-color:#CDE7F8}
+  .stat.c1 .v{color:var(--blue-d)}
+  .stat.c2{background:linear-gradient(160deg,#F0FBF9,#DFF6F2);border-color:#BEEBE4}
+  .stat.c2 .v{color:var(--teal-d)}
+  .stat.c3{background:linear-gradient(160deg,#FFEFF2,#FFE3E8);border-color:#F8C9D0}
+  .stat.c3 .v{color:var(--red-d)}
+  .stat.c4{background:linear-gradient(160deg,#FFF7EC,#FFEBD1);border-color:#FFDCB3}
+  .stat.c4 .v{color:var(--orange-d)}
+
+  /* 流水线：左时间线 / 右输出 */
+  .pipe{display:grid;grid-template-columns:214px 1fr;gap:18px;align-items:start}
+  .rail{display:flex;flex-direction:column;gap:7px}
+  .stp{display:flex;gap:10px;align-items:flex-start;padding:9px 11px;border-radius:11px;
+    border:1px solid var(--line);background:#FDFEFF;cursor:pointer;
+    transition:background .18s,border-color .18s,transform .18s;text-align:left;font:inherit}
+  .stp:hover{border-color:#B9DDF4;transform:translateX(2px)}
+  .stp .idx{flex:none;width:22px;height:22px;border-radius:7px;font-size:12px;font-weight:800;
+    display:flex;align-items:center;justify-content:center;
+    background:#EEF3F9;color:var(--ink3);transition:all .25s}
+  .stp .tx2{flex:1;min-width:0}
+  .stp .nm{display:block;font-size:13px;font-weight:600;color:var(--ink2);line-height:1.45}
+  .stp .sub{display:block;font-size:11px;color:var(--ink3);margin-top:1px;line-height:1.45}
+  .stp.done .idx{background:var(--teal-s);color:var(--teal-d)}
+  .stp.done .nm{color:var(--ink)}
+  .stp.on{border-color:#F8C9D0;background:var(--red-s);box-shadow:0 6px 18px rgba(232,69,95,.12)}
+  .stp.on .idx{background:linear-gradient(135deg,var(--blue),var(--red-d));color:#fff;
+    box-shadow:0 4px 12px rgba(214,47,74,.36)}
+  .stp.on .nm{color:var(--red-d)}
+  .rail-mid{display:flex;align-items:center;gap:8px;padding-left:20px}
+  .rail-mid i{width:1px;height:9px;background:#DCE5F0}
+
+  .pane{border:1px solid var(--line);border-radius:14px;background:#FDFEFF;
+    padding:15px 17px;min-height:396px;max-height:474px;overflow-y:auto;scrollbar-width:thin}
+  .pane::-webkit-scrollbar{width:8px}
+  .pane::-webkit-scrollbar-thumb{background:#DCE5F0;border-radius:4px}
+  .pane h4{font-size:13.5px;font-weight:700;color:var(--ink);margin-bottom:4px}
+  .pane .ph{font-size:12px;color:var(--ink3);margin-bottom:12px;line-height:1.65}
+  .pane .ph b{color:var(--ink2)}
+
+  /* 平台卡 */
+  .plats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+  .plat{border-radius:10px;padding:9px 11px;border:1px solid var(--line);background:#fff;
+    font-size:12px;line-height:1.45}
+  .plat .n{font-weight:700;font-size:12.5px;color:var(--ink);display:flex;align-items:center;
+    justify-content:space-between;gap:6px}
+  .plat .n em{font-style:normal;font-size:10.5px;font-weight:700;border-radius:999px;
+    padding:1px 7px}
+  .plat.ok{border-color:#BEEBE4;background:linear-gradient(160deg,#F2FCFA,#E7F8F5)}
+  .plat.ok .n em{background:var(--teal-s);color:var(--teal-d)}
+  .plat.no{border-color:#F1DDE2;background:#FFF7F8}
+  .plat.no .n em{background:var(--red-s);color:var(--red-d)}
+  .plat .num2{font-size:17px;font-weight:800;color:var(--ink);
+    font-variant-numeric:tabular-nums;margin-top:2px}
+  .plat .num2 small{font-size:11px;font-weight:700;opacity:.6;margin-left:2px}
+  .plat.no .num2{color:var(--ink3);font-size:14px}
+  .plat .why{font-size:10.5px;color:var(--ink3);margin-top:2px;line-height:1.45}
+
+  /* 条目列表 */
+  .rows{border:1px solid var(--line);border-radius:11px;background:#fff;overflow:hidden}
+  .row{display:flex;align-items:center;gap:10px;padding:7px 12px;border-bottom:1px solid #F0F4F9}
+  .row:last-child{border-bottom:0}
+  .row:hover{background:#F6FAFE}
+  .row .rk{flex:none;width:26px;font-size:11.5px;font-weight:700;color:var(--ink3);
+    font-variant-numeric:tabular-nums;text-align:right}
+  .row .tx{flex:1;min-width:0;font-size:12.5px;color:var(--ink);white-space:nowrap;
+    overflow:hidden;text-overflow:ellipsis}
+  .row .ht{flex:none;font-size:11.5px;color:var(--ink3);font-variant-numeric:tabular-nums}
+
+  /* 交叉验证表 */
+  .xrow{border:1px solid var(--line);border-radius:11px;background:#fff;padding:9px 12px;
+    margin-bottom:8px}
+  .xrow .top{display:flex;align-items:center;gap:8px;margin-bottom:3px}
+  .xrow .bd{font-size:10.5px;font-weight:700;border-radius:999px;padding:1px 8px;
+    background:#EEF3F9;color:var(--ink2);flex:none}
+  .xrow .bd.w{background:var(--orange-s);color:var(--orange-d)}
+  .xrow .bd.b{background:var(--blue-s);color:var(--blue-d)}
+  .xrow .t1{font-size:12.5px;color:var(--ink);font-weight:600;line-height:1.5}
+  .xrow .t2{font-size:12px;color:var(--ink2);line-height:1.5;padding-left:2px}
+  .xrow .g{font-size:10.5px;color:var(--ink3);margin-top:4px;line-height:1.6;
+    font-family:Consolas,"Cascadia Code",Monaco,monospace}
+  .xrow .g b{color:var(--teal-d);font-weight:700}
+  .xrow.cross{border-color:#BEEBE4;background:linear-gradient(160deg,#FBFFFE,#F1FBF9)}
+  .xrow.self{opacity:.72}
+
+  .verdict{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;
+    border-radius:999px;padding:1px 9px;margin-left:auto;flex:none}
+  .verdict.y{background:var(--teal-s);color:var(--teal-d)}
+  .verdict.n{background:#F1F4F8;color:var(--ink3)}
+
+  /* 选题 */
+  .pick{border:1px solid #F8C9D0;border-radius:13px;padding:13px 15px;
+    background:linear-gradient(160deg,#FFF8F9,#FFEFF2);margin-bottom:11px}
+  .pick .lbl{font-size:11px;font-weight:700;color:var(--red-d);letter-spacing:.08em}
+  .pick .tt{font-size:18px;font-weight:800;color:var(--ink);line-height:1.35;margin:4px 0 8px}
+  .pick .why{display:flex;flex-direction:column;gap:5px}
+  .pick .why div{font-size:12.5px;color:var(--ink2);padding-left:17px;position:relative;line-height:1.6}
+  .pick .why div::before{content:"✓";position:absolute;left:0;top:0;color:var(--teal-d);
+    font-weight:800;font-size:12px}
+  .drop{border:1px solid var(--line);border-radius:11px;background:#fff;padding:8px 12px;
+    margin-bottom:7px;font-size:12px;color:var(--ink2);line-height:1.6}
+  .drop b{color:var(--ink);font-weight:700}
+  .drop span{color:var(--ink3)}
+
+  /* 文章卡 */
+  .art{border:1px solid var(--line);border-radius:12px;background:#fff;padding:13px 15px}
+  .art .at{font-size:15px;font-weight:800;color:var(--ink);line-height:1.4;margin-bottom:6px}
+  .art .am{font-size:11.5px;color:var(--ink3);margin-bottom:9px}
+  .art .ap{font-size:12.5px;color:var(--ink2);line-height:1.75;margin-bottom:5px}
+  .art .ah{font-size:12.5px;font-weight:700;color:var(--blue-d);margin:8px 0 4px}
+  .art .more{font-size:11.5px;color:var(--blue-d);cursor:pointer;font-weight:600;
+    background:none;border:0;font-family:inherit;padding:0;margin-top:6px}
+  .art .more:hover{text-decoration:underline}
+
+  .checks{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+  .ck{display:flex;align-items:center;gap:9px;font-size:12px;padding:6px 11px;
+    border-radius:9px;border:1px solid var(--line);background:#fff}
+  .ck .i{flex:none;width:16px;height:16px;border-radius:5px;display:flex;align-items:center;
+    justify-content:center;font-size:10px;font-weight:800;background:var(--teal-s);color:var(--teal-d)}
+  .ck .i.bad{background:var(--red-s);color:var(--red-d)}
+  .ck .k{flex:1;color:var(--ink2)}
+  .ck .v{font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
+
+  /* 代码块：PyCharm Darcula */
+  .code{font-family:Consolas,"Cascadia Code",Monaco,monospace;font-size:12px;line-height:1.7;
+    background:#1E1F22;color:#BCBEC4;border-radius:11px;padding:12px 14px;
+    white-space:pre-wrap;word-break:break-word;overflow-x:hidden;margin-top:8px}
+  .code .k{color:#CF8E6D}
+  .code .s{color:#6AAB73}
+  .code .c{color:#7A7E85}
+  .code .f{color:#56A8F5}
+
+  .cmdnote{font-size:11.5px;color:var(--ink3);margin-top:8px;line-height:1.7}
+  .badge-draft{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:700;
+    color:var(--orange-d);background:var(--orange-s);border:1px solid #FFDCB3;
+    border-radius:999px;padding:4px 13px;margin-top:11px}
+
+  .btn{font:inherit;font-size:13px;font-weight:600;cursor:pointer;padding:8px 18px;
+    border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--ink2);
+    transition:all .18s}
+  .btn:hover{border-color:#B9DDF4;color:var(--blue-d)}
+  .btn.pri{background:linear-gradient(100deg,var(--blue),var(--red-d));border:0;color:#fff;
+    box-shadow:0 8px 20px rgba(214,47,74,.28)}
+  .btn.pri:hover{filter:brightness(1.05);color:#fff}
+  .tools{display:flex;flex-wrap:wrap;gap:9px;align-items:center;margin-bottom:14px}
+
+  /* 校验器 */
+  .vwrap{display:grid;grid-template-columns:1fr 300px;gap:16px;align-items:start}
+  .vin{display:flex;flex-direction:column;gap:10px}
+  .vin label{font-size:12px;font-weight:600;color:var(--ink2)}
+  .vin input,.vin textarea{width:100%;font:inherit;font-size:13px;color:var(--ink);
+    border:1px solid var(--line);border-radius:10px;padding:9px 12px;background:#fff;
+    transition:border-color .2s,box-shadow .2s;line-height:1.7}
+  .vin textarea{min-height:150px;resize:vertical}
+  .vin input:focus,.vin textarea:focus{outline:none;border-color:#B9DDF4;
+    box-shadow:0 0 0 4px rgba(79,168,232,.13)}
+  .vpanel{border:1px solid var(--line);border-radius:13px;background:#FDFEFF;padding:14px 15px}
+  .vpanel .score{font-size:30px;font-weight:800;line-height:1.1;color:var(--ink);
+    font-variant-numeric:tabular-nums}
+  .vpanel .score small{font-size:12px;color:var(--ink3);font-weight:600;margin-left:4px}
+  .vpanel .sl{font-size:11.5px;color:var(--ink3);margin-bottom:11px}
+  .vl{margin-bottom:9px}
+  .vl .hd{display:flex;justify-content:space-between;font-size:11.5px;margin-bottom:4px}
+  .vl .hd .nm2{color:var(--ink2);font-weight:600}
+  .vl .hd .n2{font-weight:700;font-variant-numeric:tabular-nums;color:var(--ink)}
+  .vl .hd .n2.ok{color:var(--green)}
+  .vl .hd .n2.bad{color:var(--red-d)}
+  .vl .tr{height:7px;border-radius:99px;background:#EDF2F8;overflow:hidden}
+  .vl .fl{height:100%;width:0;border-radius:99px;transition:width .35s,background .35s;
+    background:linear-gradient(90deg,var(--blue),var(--teal))}
+  .vl .fl.bad{background:linear-gradient(90deg,#FFB4C0,var(--red-d))}
+
+  /* 选择器 */
+  .sel-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+  .sel{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 16px;
+    transition:transform .2s,box-shadow .2s,border-color .2s}
+  .sel:hover{transform:translateY(-2px);border-color:#D6EAF8;
+    box-shadow:0 10px 24px rgba(79,168,232,.13)}
+  .sel .sn{font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--blue-d);
+    font-family:Consolas,Monaco,monospace;margin-bottom:2px}
+  .sel .sd{font-size:12.5px;color:var(--ink2);margin-bottom:8px}
+  .sel ol{list-style:none;counter-reset:s}
+  .sel li{counter-increment:s;font-size:11.5px;line-height:1.85;color:#3A4557;
+    font-family:Consolas,"Cascadia Code",Monaco,monospace;padding-left:20px;position:relative;
+    word-break:break-all}
+  .sel li::before{content:counter(s);position:absolute;left:0;top:0;color:var(--ink3);
+    font-size:10px;font-weight:700}
+  .sel li:first-child{color:var(--red-d);font-weight:600}
+
+  /* 坑 */
+  .pits{display:flex;flex-direction:column;gap:12px}
+  .pit{display:flex;gap:14px;background:#fff;border:1px solid var(--line);border-radius:14px;
+    padding:15px 17px}
+  .pit .pn{flex:none;width:26px;height:26px;border-radius:8px;display:flex;align-items:center;
+    justify-content:center;font-size:12.5px;font-weight:800;color:#fff;
+    background:linear-gradient(135deg,var(--blue),var(--red-d));
+    box-shadow:0 5px 14px rgba(214,47,74,.3)}
+  .pit h3{font-size:14px;font-weight:700;color:var(--ink);margin-bottom:5px}
+  .pit p{font-size:13px;color:var(--ink2);line-height:1.75;margin:0}
+  .pit p+p{margin-top:5px}
+  .pit .ev{font-family:Consolas,Monaco,monospace;font-size:11.5px;color:var(--blue-d);
+    background:var(--blue-s);border-radius:6px;padding:1px 7px}
+
+  .note{border-left:4px solid var(--red);background:linear-gradient(90deg,var(--red-s),#fff);
+    border-radius:0 13px 13px 0;padding:15px 18px;font-size:13.5px;color:var(--ink2);
+    line-height:1.8}
+  .note b{color:var(--red-d)}
+
+  footer{margin-top:46px;padding-top:20px;border-top:1px solid var(--line);
+    font-size:12.5px;color:var(--ink3);line-height:1.9}
+  footer a{color:var(--blue-d);text-decoration:none;font-weight:600}
+  footer a:hover{text-decoration:underline}
+
+  @media(max-width:860px){
+    .grid3{grid-template-columns:1fr}
+    .pipe{grid-template-columns:1fr;gap:12px}
+    .rail{flex-direction:row;overflow-x:auto;padding-bottom:4px}
+    .stp{flex:none;min-width:132px}
+    .rail-mid{display:none}
+    .stats{grid-template-columns:repeat(2,1fr)}
+    .plats{grid-template-columns:repeat(2,1fr)}
+    .vwrap{grid-template-columns:1fr}
+    .sel-grid{grid-template-columns:1fr}
+    .pane{min-height:0;max-height:none}
+  }
+</style>
+</head>
+<body>
+<div class="glow"></div>
+
+<nav class="wrap" style="padding:0">
+  <div style="padding:56px clamp(16px,3vw,40px) 0">
+    <a class="back" href="../../index.html">← 返回作品集</a>
+  </div>
+</nav>
+
+<div class="wrap" style="padding-top:0">
+
+  <span class="num">PROJECT 12</span>
+  <h1>自媒体自动运营流水线</h1>
+  <p class="lede">
+    刷热点、写初稿、排版、点发布——这几件事我做了三年，每天重复，做完就忘。
+    后来我把它们串成一条流水线：<strong>机器负责采集和搬运，我只负责选题和最后那一下点头</strong>。
+    下面这条流水线现在就在跑，用的是今天（2026-10-25）真实抓到的榜单。
+  </p>
+  <div class="tags">
+    <span class="tag">Python</span><span class="tag">Playwright</span><span class="tag">SKILL · SOP</span>
+    <span class="tag">多平台采集</span><span class="tag">交叉验证</span><span class="tag">知乎发布</span>
+  </div>
+
+  <!-- ================= 舞台一：流水线 ================= -->
+  <section class="stage" id="stage1">
+    <div class="stage-bar">
+      <span class="stage-dot"></span><span class="stage-dot"></span><span class="stage-dot"></span>
+      <span class="stage-title">真实流水线 · 数据是今天抓的</span>
+      <span class="stage-live">LIVE</span>
+      <span class="stage-note" id="note1">打开就自己跑，五步走完停在草稿</span>
+      <button class="fs-btn" id="fs1">全屏 ↗</button>
+    </div>
+    <div class="demo">
+
+      <div class="stats">
+        <div class="stat c1"><div class="v" id="s1">91<small>条</small></div><div class="k">抓到的榜单条目</div></div>
+        <div class="stat c2"><div class="v" id="s2">2<small>个</small></div><div class="k">通的平台（四个里）</div></div>
+        <div class="stat c3"><div class="v" id="s3">—</div><div class="k">跨平台互证的话题</div></div>
+        <div class="stat c4"><div class="v" id="s4">1<small>篇</small></div><div class="k">真发出去过</div></div>
+      </div>
+
+      <div class="tools">
+        <button class="btn pri" id="run1">重跑一遍 ↻</button>
+        <span style="font-size:11.5px;color:var(--ink3)">左边五步可以点，点哪步看哪步的原始输出</span>
+      </div>
+
+      <div class="pipe">
+        <div class="rail" id="rail"></div>
+        <div class="pane" id="pane"></div>
+      </div>
+    </div>
+  </section>
+
+  <h2>我为什么把它做成流水线，而不是写个脚本</h2>
+  <div class="grid3">
+    <div class="card">
+      <h3>一开始我不是这么想的</h3>
+      <p>最初我只想要"一键发知乎"。写完发现真正耗时间的不是发布那 30 秒，是前面两小时刷热点和纠结写什么。所以我把最上游的采集也拉了进来，整条链才省时间。</p>
+    </div>
+    <div class="card">
+      <h3>三个平台起才叫验证</h3>
+      <p>SOP 里我给自己定的是"至少三个平台热点 + 两个平台交叉验证"。这次只通了两个平台，我拿 B 站的热搜榜和排行榜当两路分开算，跨平台的那两个话题我认，同平台互证的不认。</p>
+    </div>
+    <div class="card">
+      <h3>最后一步永远是手动</h3>
+      <p>它能一路跑到"已存草稿"，然后停住。不是做不到自动发布，是我不想让一个我没看过的东西带着我名字出去。</p>
+    </div>
+  </div>
+
+  <!-- ================= 舞台二：写稿校验 ================= -->
+  <h2>第二步我很怕：字数规矩自己都守不住</h2>
+  <p style="font-size:14.5px;color:var(--ink2);max-width:760px;margin-bottom:18px">
+    SOP 里我给写稿定了死规矩：标题 18–28 字、正文 600–1000 字、来源 2–3 条。
+    规矩写下来容易，写的时候没人盯着就飘。所以我做了一个实时校验器——下面填的是我
+    <b>9 月 8 日真发出去的那篇</b>，你可以改任意一个字符，看它怎么翻红。
+  </p>
+
+  <section class="stage" id="stage2">
+    <div class="stage-bar">
+      <span class="stage-dot"></span><span class="stage-dot"></span><span class="stage-dot"></span>
+      <span class="stage-title">写稿校验器 · 四条规矩实时判定</span>
+      <span class="stage-note" id="note2">改标题或正文，右边立刻变</span>
+      <button class="fs-btn" id="fs2">全屏 ↗</button>
+    </div>
+    <div class="demo">
+      <div class="vwrap">
+        <div class="vin">
+          <div>
+            <label for="vt">标题（规矩：18–28 字）</label>
+            <input id="vt" type="text">
+          </div>
+          <div>
+            <label for="vb">正文（规矩：600–1000 字）</label>
+            <textarea id="vb"></textarea>
+          </div>
+          <div>
+            <label for="vs">来源链接（一行一条，规矩：2–3 条）</label>
+            <textarea id="vs" style="min-height:96px"></textarea>
+          </div>
+          <div class="tools" style="margin:6px 0 0">
+            <button class="btn" id="fillGood">放回原稿</button>
+            <button class="btn" id="fillBad">试一个不合规的</button>
+          </div>
+        </div>
+        <div class="vpanel">
+          <div class="score"><span id="score">—</span><small>/ 4 条通过</small></div>
+          <div class="sl" id="sline">等输入</div>
+          <div class="vl">
+            <div class="hd"><span class="nm2">标题字数</span><span class="n2" id="n-t">—</span></div>
+            <div class="tr"><div class="fl" id="f-t"></div></div>
+          </div>
+          <div class="vl">
+            <div class="hd"><span class="nm2">正文字数</span><span class="n2" id="n-b">—</span></div>
+            <div class="tr"><div class="fl" id="f-b"></div></div>
+          </div>
+          <div class="vl">
+            <div class="hd"><span class="nm2">来源条数</span><span class="n2" id="n-s">—</span></div>
+            <div class="tr"><div class="fl" id="f-s"></div></div>
+          </div>
+          <div class="vl">
+            <div class="hd"><span class="nm2">标题不写震惊体</span><span class="n2" id="n-e">—</span></div>
+            <div class="tr"><div class="fl" id="f-e"></div></div>
+          </div>
+          <div style="font-size:11px;color:var(--ink3);line-height:1.7;margin-top:4px">
+            第四条也是 SOP 原文：「不写'震惊体'」。我把它写成关键词检查（震惊 / 必看 / 速看 / 炸裂 / 惊呆 / 史上最 …）。
+            这招很土，但对"写完就想发"的自己有用 —— 它拦的是我手快，不是别人。
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <h2>发布这段：它靠什么找到知乎的输入框</h2>
+  <p style="font-size:14.5px;color:var(--ink2);max-width:780px;margin-bottom:18px">
+    知乎的编辑器是 Draft.js，标题是个 <code style="font-family:Consolas,monospace;font-size:12.5px;background:var(--blue-s);color:var(--blue-d);border-radius:5px;padding:1px 6px">textarea</code>，
+    正文是个 <code style="font-family:Consolas,monospace;font-size:12.5px;background:var(--blue-s);color:var(--blue-d);border-radius:5px;padding:1px 6px">contenteditable</code> 的 div——直接 <code style="font-family:Consolas,monospace;font-size:12.5px;background:var(--blue-s);color:var(--blue-d);border-radius:5px;padding:1px 6px">fill()</code> 填不进去，
+    得先点一下、再 <code style="font-family:Consolas,monospace;font-size:12.5px;background:var(--blue-s);color:var(--blue-d);border-radius:5px;padding:1px 6px">keyboard.type()</code> 一个字一个字敲。
+    我把所有定位都单独放一个文件，每个位置先按语义找、再按 CSS 兜底：
+  </p>
+  <div class="sel-grid">
+    <div class="sel">
+      <div class="sn">TITLE</div>
+      <div class="sd">标题输入框 · 4 个候选，第一个命中就用</div>
+      <ol>
+        <li>textarea[placeholder*='请输入标题']</li>
+        <li>textarea[placeholder*='标题']</li>
+        <li>textarea.WriteIndex-titleInput</li>
+        <li>.WriteIndex-titleInput textarea</li>
+      </ol>
+    </div>
+    <div class="sel">
+      <div class="sn">BODY</div>
+      <div class="sd">正文区 · Draft 的 contenteditable，得先点再敲</div>
+      <ol>
+        <li>.public-DraftEditor-content[contenteditable='true']</li>
+        <li>.ProseMirror[contenteditable='true']</li>
+        <li>div[contenteditable='true'][role='textbox']</li>
+        <li>div[contenteditable='true'][data-contents='true']</li>
+      </ol>
+    </div>
+    <div class="sel">
+      <div class="sn">TOPIC_INPUT</div>
+      <div class="sd">话题搜索 · 弹窗里的输入框，跟页面上的不是同一个</div>
+      <ol>
+        <li>input[aria-label='搜索话题']</li>
+        <li>[role='dialog'] input[placeholder*='搜索话题']</li>
+        <li>[role='dialog'] input[placeholder*='话题']</li>
+        <li>input[placeholder*='添加话题']</li>
+      </ol>
+    </div>
+    <div class="sel">
+      <div class="sn">PUBLISH_TRIGGER</div>
+      <div class="sd">发布入口 · 三个按钮长得一样，位置不同</div>
+      <ol>
+        <li>button:has-text('发布文章')</li>
+        <li>button.PublishPanel-triggerButton</li>
+        <li>button:has-text('发布')</li>
+        <li>button:has-text('确认发布')</li>
+      </ol>
+    </div>
+  </div>
+  <p style="font-size:13px;color:var(--ink3);margin-top:12px;line-height:1.8">
+    踩过的顺序问题：<b style="color:var(--ink2)">先按语义找，语义失效再退回 CSS</b>。
+    反过来不行——知乎改版一次，写死的 CSS 全废；而"输入框的 placeholder 是'请输入标题'"这种事，三五年都不太会变。
+    第一个候选我标红了，那是首选，后面三个是备胎。
+  </p>
+
+  <h2>我踩过的坑</h2>
+  <div class="pits">
+    <div class="pit">
+      <div class="pn">1</div>
+      <div>
+        <h3>标题忘了换，我真发出去一篇叫「测试文章」的</h3>
+        <p>跑通那晚我把一整篇写得好好的《我用AI开了一家24小时不打烊的自媒体餐厅》配了个标题「测试文章」就发出去了，
+        因为命令行里 <span class="ev">--title</span> 我图省事没改。</p>
+        <p>发现的时候已经发布了。这张截图是我当时存的报错页，浏览器标签上写着 <span class="ev">(2 条消息) 测试文章 - 知乎</span>——
+        标题错了，内容是对的。后来我没删，留着提醒自己：<b>自动化最危险的地方不是它做错，是它做对了你没看的那一项。</b></p>
+      </div>
+    </div>
+    <div class="pit">
+      <div class="pn">2</div>
+      <div>
+        <h3>cookie 20KB，不能进仓库</h3>
+        <p>登录状态存在 <span class="ev">.zhihu-state/creator.json</span>，20,600 字节，里面是账号凭证。
+        这个文件一旦被提交上去，等于把账号送人。所以 <span class="ev">.gitignore</span> 第一行就得写它。</p>
+        <p>跟上次做网易云那个项目是同一个教训：<b>凭证永远不进代码。</b></p>
+      </div>
+    </div>
+    <div class="pit">
+      <div class="pn">3</div>
+      <div>
+        <h3>四个平台，只有两个能通</h3>
+        <p>SOP 写的是"至少成功获取三个平台热点"。这次为了做这个页面我重新采了一遍：
+        微博的 JSON 接口直接 403 Forbidden，只能抓 HTML 榜单页；知乎的热榜接口回的是"身份未经过验证"；
+        小红书要登录态。真正常的只有 B 站。</p>
+        <p>所以统计块里那个「2 个」不是我谦虚，是实话。这次我也没凑——<b>缺平台就在页面上写缺，不假装四个都通。</b></p>
+      </div>
+    </div>
+    <div class="pit">
+      <div class="pn">4</div>
+      <div>
+        <h3>第一版交叉验证会把不相干的东西凑成一对</h3>
+        <p>我用二元组重合来判"两个平台的同一条热点"，结果第一版跑出来
+        <span class="ev">人工耳蜗里的声音是什么样的</span> ↔ <span class="ev">现实夜之城什么样</span>
+        被判成一对——只因为都含"什么""么样"。</p>
+        <p>加了停用二元组（什么 / 么样 / 是什 / 样的）之后这对就消失了。<b>阈值和停用词不是玄学，是不加就一定会出假阳性。</b></p>
+      </div>
+    </div>
+  </div>
+
+  <h2>边界：哪些是我做的，哪些不是</h2>
+  <div class="note">
+    <b>发布器（zhihu-auto-publisher）是课程给的成品，不是我写的。</b>
+    509 行 publisher.py + 那套选择器，我改的是参数、跑的是链路。<br>
+    真正属于我的是三件：<b>①</b> 那份 SOP（operate-zhihu 这个 skill：采集→互证→选题→写稿→发布，每一步的硬规矩）；
+    <b>②</b> 把采集和发布接起来，让它能一条命令跑完；<b>③</b> 上面那个标题没换的事故——是我真操作失误的。<br>
+    页面里那篇文章是 Agent 按 SOP 出的初稿、我审过之后按下的发布，所以署名是我的，文字不是我一字一字敲的，这点我不含糊。
+  </div>
+
+  <footer>
+    页面上所有榜单数据抓取于 <b>2026-10-25 16:5x</b>：微博热搜 51 条（含置顶）、B 站热搜 20 条、B 站排行榜 20 条，共 91 条，没有一条是编的。<br>
+    交叉验证是这一页里实时算出来的，算法是二元组重合 + 停用词过滤，你可以点上面任意一步看它算的过程。<br>
+    文章《我用AI开了一家24小时不打烊的自媒体餐厅》2026-09-08 17:06 真实发布于知乎。<br>
+    <a href="../../index.html">← 回到全部作品</a>
+  </footer>
+
+</div>
+
+<script>
+/* ============================================================
+   数据：2026-10-25 16:5x 真实抓取
+   ============================================================ */
+/* 微博热搜：[榜位, 原文, 热度]，已剔除 12 条时政/案件/灾害类（含置顶），留 39 条 */
+var WEIBO = [
+[6,'虞书欣菜市场红毯',880410],[7,'羊年央视春晚总导演于蕾',650148],
+[8,'江苏姑娘网购鹤岗房搬进去后傻眼',572718],[9,'人造黄金会不会击穿金价',541275],
+[10,'蒯曼2比3张本美和',491312],[11,'深圳水贝被挤爆',394428],
+[12,'sakee被打',390737],[13,'祖海创始人点赞迪丽热巴无可替代',376736],
+[14,'金饰价格跳水了',371838],[15,'再也不去理发店去洗头了',348867],
+[16,'唐诡五六季一起拍80集',325913],[17,'香港中环偶遇虞书欣',325284],
+[18,'迪丽热巴全平台爆出圈',300342],[19,'国乒重夺亚锦赛男双冠军',269333],
+[21,'小米在纽北设立专属Worksop',261622],[22,'章子怡称呼肖战为战战',259259],
+[23,'全款给孩子买房做好三层防护',255321],[24,'新音',251564],
+[25,'吃药只用少量水送服很危险',245460],[26,'突然发财后卖房带父母去陌生城市',245268],
+[27,'肖战被迫营业中',239895],[28,'iPhoneDuo王者荣耀黑边',227770],
+[30,'被猫砸死概率很小但不为零',210464],[31,'温瑞博0比3张本智和',208673],
+[32,'终于知道冰箱贴的受众是谁了',208456],[33,'VOGUE女艺人子弹时间',207970],
+[34,'刘学义 张予曦',199219],[36,'惠英红张小斐杨幂 全场都被你们镇住',190184],
+[38,'明日方舟',163458],[39,'小城良方观众发力了',161569],
+[40,'范丞丞王安宇觉得王楚然容易被表白',161147],[42,'陈熠3比0王艺迪',160384],
+[43,'蒯曼无缘亚锦赛决赛',160380],[44,'金价连日大跌原因',157668],
+[46,'段永平泡泡玛特浮亏20亿',153253],[47,'李昀锐主动邀孟子义二搭',152513],
+[48,'李艺彤黄婷婷be原因',141912],[49,'范丞丞自曝上学时不太吃香',139598],
+[51,'WBG对战MRC',135932]
+];
+/* B 站热搜 */
+var BHOT = [
+[1,'IG对阵HLE有哪些看点',2081060],[2,'张雪在家乡刷新吉尼斯纪录',1473831],
+[3,'人工耳蜗里的声音是什么样的',1270886],[4,'真实拍视频日常有多烧心',1259510],
+[5,'TheShy伤害第一打服德云色',1254707],[6,'锐评S16瑞士轮第三轮抽签',1238262],
+[7,'IVL秋季赛',1238257],[8,'BLG TLAW',1238251],[9,'Spirit TYLOO',1237860],
+[10,'日剧Vivant抹黑中国',1218189],[11,'鸣潮世界观PV',1179288],
+[12,'锐评LPL瑞士轮第二轮外战全胜',1133988],[13,'iPhone Duo的折叠屏有何不同',1121628],
+[14,'HLE GEN',1121607],[15,'LOS G2',1121250],[16,'MKOI CFO',1120048],
+[17,'薄肌级不要笑挑战',1103588],[18,'DK T1',1103586],[19,'S16举办场馆有哪些故事',1103584],
+[20,'UP主自制大肥鱼游戏',1103583]
+];
+/* B 站排行榜：[名次, 标题, 播放量] */
+var BRANK = [
+[1,'《绝区零》先导演示丨挽昼',4445014],[2,'传统口技表演《大闹天宫》',3281784],
+[3,'《原神》7.2版本PV：「坏灭肇始之时」',2357824],[4,'写了全国所有省份的love me！',3479816],
+[5,'折1万次，会坏吗？iPhone Duo深度评测',8998805],[6,'人工耳蜗里的声音，到底是什么样的？',4353141],
+[7,'《话术博弈》如何优雅的套出对方的真心话？',1074683],[8,'😨"后室里的乌鲁鲁3"😰',1154609],
+[9,'人性、欲望与奇观，自驾拉斯维加斯，现实夜之城什么样？',3695084],
+[10,'“借大圣威名，护我痴儿周全”',3014709],
+[11,'【司凤TV】司凤音乐270个视频14小时合集 看完这辈子都通透了',876559],
+[12,'《纯阳真气》',4839287],[13,'四人行，必有一怂蛋',1443464],
+[14,'“大肥鱼适合做女朋友吗？”',2699222],[15,'我花了3个月！把MC爆改成别的游戏！！',1839705],
+[16,'《影之刃零》最终预告',7558179],[17,'《明日方舟》2026「感谢庆典」活动宣传PV',1633900],
+[18,'影视飓风员工，开什么车？',3033647],[19,'《鸣潮》世界观PV | 超验TRANSCENDO',1413900],
+[20,'用寂静岭的画风打开《周处除三害》【AI MV大赛】',3180698]
+];
+/* 真发出去的那篇（2026-09-08 17:06 知乎） */
+var ART = {
+  t:'我用AI开了一家24小时不打烊的自媒体餐厅',
+  b:[['p','做自媒体三年，我终于悟了：我不是内容创作者，我是一人餐厅的冤种老板。'],
+     ['p','早上五点起床买菜（找热点），上午切配备料（整理素材），下午掌勺炒菜（写文案），晚上端盘子洗碗（排版分发）。凌晨两点躺在床上，看着50个阅读量的数据，我问自己：这餐厅，非开不可吗？'],
+     ['h','从一人厨房到智能餐厅'],
+     ['p','上个月，我招了一个团队。不，准确地说，是造了一个团队。'],
+     ['p','这个团队叫 Agent。如果普通AI是只会炒菜的厨师，那Agent就是完整的餐厅运营体系：采购员凌晨去菜市场蹲守最新鲜的食材（全网热点），厨师按我的口味偏好配菜（生成初稿），服务员把成品端到不同平台的桌上（自动发布），店长在后台统计哪道菜最受欢迎（数据分析）。'],
+     ['p','而我？我终于回到了我最该干的事——决定今天卖什么菜。'],
+     ['h','我的智能餐厅是怎么开张的'],
+     ['p','工具其实很简单，就两件。'],
+     ['p','第一件叫 autocli，相当于我给每个平台派了一个卧底采购员。它在B站、知乎、微博、小红书之间穿梭，把热搜榜单拍成表格带回来。以前我刷两小时热点，现在三秒出结果。'],
+     ['p','第二件叫 zhihu-auto-publisher，相当于我的自动上菜机。文章写好后，它帮我登录知乎、填标题、选话题、存草稿。我只需要最后把关，点一下正式发布。'],
+     ['p','整个流程用Python串起来，就像给餐厅写了一份标准操作手册（SOP）：采购→配菜→炒菜→上菜。每一步都是函数，每个函数只做一件事。'],
+     ['h','Agent不是老板，你才是'],
+     ['p','但必须泼一盆冷水：Agent炒出来的菜，是毛坯房，不是精装交付。'],
+     ['p','它不知道你的账号调性，不懂你的粉丝爱听什么梗，更分不清幽默和冒犯的边界。如果你直接复制粘贴Agent生成的内容，你的账号会迅速沦为AI垃圾中转站，粉丝跑得比外卖骑手还快。'],
+     ['p','我的做法是：Agent做苦力，我把控方向。热点它来采，选题我来定；初稿它来打，灵魂我来注入；发布它执行，审核我把关。'],
+     ['p','Agent是那双不知疲倦的手，但握住方向盘的，必须是人。'],
+     ['h','写在最后'],
+     ['p','自媒体这行，最稀缺的不是执行力，是持续创作的精力。Agent没有帮你解决写什么的问题，但它把怎么写、怎么发的重复劳动扛走了。'],
+     ['p','当你从繁琐的机械操作中解脱出来，你才有脑力去想：下一道菜，该用什么火候？']],
+  s:['GitHub - nashsuautocli 多平台CLI热点采集工具',
+     'GitHub - zhihu-auto-publisher 知乎文章自动发布',
+     'WorkBuddy AI Agent自媒体运营实践']
+};
+
+/* ============================================================
+   交叉验证：二元组重合 + 停用二元组
+   ============================================================ */
+var STRIP = ['《','》','「','」','【','】','"',"'",'“','”','‘','’','，','。','！','？','、','：','；','·','|','~','—','-'];
+var STOPBI = ['什么','么样','是什','样的','的是','是不','不是','一个','可以','真的','如何','有哪些'];
+function norm(s){
+  s = String(s).toLowerCase();
+  for (var i=0;i<STRIP.length;i++) s = s.split(STRIP[i]).join('');
+  return s.replace(/\s+/g,'');
+}
+function bgs(s){
+  var t = norm(s), out = [], seen = {};
+  if (!t) return [];
+  if (t.length <= 2) return [t];
+  for (var i=0;i<t.length-1;i++){
+    var g = t.substr(i,2);
+    if (STOPBI.indexOf(g) >= 0) continue;
+    if (!seen[g]) { seen[g] = 1; out.push(g); }
+  }
+  return out;
+}
+function makeItems(){
+  var it = [], i;
+  for (i=0;i<WEIBO.length;i++) it.push({src:'微博', plat:'微博', cls:'w', r:WEIBO[i][0], t:WEIBO[i][1], h:WEIBO[i][2]});
+  for (i=0;i<BHOT.length;i++) it.push({src:'B站热搜', plat:'B站', cls:'b', r:BHOT[i][0], t:BHOT[i][1], h:BHOT[i][2]});
+  for (i=0;i<BRANK.length;i++) it.push({src:'B站排行', plat:'B站', cls:'b', r:BRANK[i][0], t:BRANK[i][1], h:BRANK[i][2]});
+  return it;
+}
+var ITEMS = makeItems();
+function verify(){
+  var pairs = [], i, j;
+  for (i=0;i<ITEMS.length;i++){
+    for (j=i+1;j<ITEMS.length;j++){
+      if (ITEMS[i].plat === ITEMS[j].plat) continue;   /* 同平台不算跨平台互证 */
+      var A = bgs(ITEMS[i].t), B = bgs(ITEMS[j].t), inter = [];
+      for (var k=0;k<A.length;k++) if (B.indexOf(A[k]) >= 0) inter.push(A[k]);
+      if (inter.length >= 2) pairs.push({a:ITEMS[i], b:ITEMS[j], g:inter});
+    }
+  }
+  /* 同平台互证：B站热搜 ↔ B站排行（只做参考，不算跨平台） */
+  var selfPairs = [];
+  for (i=0;i<BHOT.length;i++){
+    for (j=0;j<BRANK.length;j++){
+      var A2 = bgs(BHOT[i][1]), B2 = bgs(BRANK[j][1]), inter2 = [];
+      for (var k2=0;k2<A2.length;k2++) if (B2.indexOf(A2[k2]) >= 0) inter2.push(A2[k2]);
+      if (inter2.length >= 2) selfPairs.push({a:{src:'B站热搜',plat:'B站',cls:'b',r:BHOT[i][0],t:BHOT[i][1],h:BHOT[i][2]},
+        b:{src:'B站排行',plat:'B站',cls:'b',r:BRANK[j][0],t:BRANK[j][1],h:BRANK[j][2]}, g:inter2, self:1});
+    }
+  }
+  return {cross:pairs, self:selfPairs};
+}
+var RES = verify();
+
+/* 聚成话题：把互相关联的条目连成一簇 */
+function clusters(pairs){
+  var parent = [];
+  function find(x){ while (parent[x] !== x) { parent[x] = parent[parent[x]]; x = parent[x]; } return x; }
+  var key = {}, list = [];
+  function id(o){
+    var k = o.src + '|' + o.t;
+    if (key[k] === undefined) { key[k] = list.length; parent.push(list.length); list.push(o); }
+    return key[k];
+  }
+  for (var i=0;i<pairs.length;i++){
+    var a = id(pairs[i].a), b = id(pairs[i].b);
+    var ra = find(a), rb = find(b);
+    if (ra !== rb) parent[ra] = rb;
+  }
+  var groups = {};
+  for (var i2=0;i2<list.length;i2++){
+    var r = find(i2);
+    (groups[r] = groups[r] || []).push(list[i2]);
+  }
+  var out = [];
+  for (var g in groups){
+    var items = groups[g], srcs = {}, plats = {};
+    for (var m=0;m<items.length;m++){ srcs[items[m].src] = 1; plats[items[m].plat] = 1; }
+    var plat = 0;
+    for (var p in plats) plat++;
+    out.push({items:items, plat:plat, n:items.length});
+  }
+  out.sort(function(x,y){ return (y.plat - x.plat) || (y.n - x.n) || (y.items[0].h - x.items[0].h); });
+  return out;
+}
+var CL = clusters(RES.cross.concat(RES.self));
+var CROSSTOPIC = CL.filter(function(c){ return c.plat >= 2; }).length;
+
+/* ============================================================
+   工具
+   ============================================================ */
+function $(id){ return document.getElementById(id); }
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function wan(n){
+  if (n >= 100000000) return (n/100000000).toFixed(1) + '亿';
+  if (n >= 10000) return (n/10000).toFixed(1) + '万';
+  return String(n);
+}
+function srcBadge(it){
+  var c = it.src === '微博' ? 'w' : 'b';
+  return '<span class="bd ' + c + '">' + it.src + ' #' + it.r + '</span>';
+}
+
+/* ============================================================
+   五步：渲染
+   ============================================================ */
+var STEPS = [
+  {nm:'采集 · 四个平台', sub:'只通了两个'},
+  {nm:'交叉验证 · 二元组', sub:'两边都出现的才算'},
+  {nm:'选题 · 只留一个',    sub:'其余全部落选'},
+  {nm:'成稿 · 按 SOP 卡',   sub:'四条硬规矩'},
+  {nm:'存草稿 · 停下',      sub:'最后一下留给人'}
+];
+var cur = -1, runToken = 0;
+
+function renderRail(){
+  var h = '';
+  for (var i=0;i<STEPS.length;i++){
+    if (i) h += '<div class="rail-mid"><i></i></div>';
+    h += '<button class="stp' + (i<cur?' done':'') + (i===cur?' on':'') + '" data-i="' + i + '">' +
+         '<span class="idx">' + (i<cur?'✓':(i+1)) + '</span>' +
+         '<span class="tx2"><span class="nm">' + STEPS[i].nm + '</span>' +
+         '<span class="sub">' + STEPS[i].sub + '</span></span></button>';
+  }
+  $('rail').innerHTML = h;
+}
+
+function pane0(){
+  var total = 12 + WEIBO.length;   /* 51 = 50 榜位 + 1 置顶 */
+  var h = '<h4>第一步：先去把榜单搬回来</h4>' +
+    '<div class="ph">四个平台各跑一遍，SOP 要求<b>至少成功三个</b>才算数。这次只通了两个 —— 原因写在卡片上，不藏。</div>' +
+    '<div class="plats">' +
+      '<div class="plat ok"><div class="n">微博 <em>通</em></div><div class="num2">' + total + '<small>条</small></div><div class="why">HTML 榜单页，剔掉 12 条后留 ' + WEIBO.length + ' 条</div></div>' +
+      '<div class="plat ok"><div class="n">B站 <em>通</em></div><div class="num2">' + (BHOT.length + BRANK.length) + '<small>条</small></div><div class="why">热搜 20 + 排行 20</div></div>' +
+      '<div class="plat no"><div class="n">知乎 <em>断</em></div><div class="num2">需登录</div><div class="why">API 回「身份未经过验证」</div></div>' +
+      '<div class="plat no"><div class="n">小红书 <em>断</em></div><div class="num2">需登录</div><div class="why">要登录态才能看榜单</div></div>' +
+    '</div>' +
+    '<div class="ph" style="margin:2px 0 8px">我留下的 ' + WEIBO.length + ' 条微博（榜位 / 原文 / 热度）。剔掉的 12 条是时政、案件、灾害类（含置顶那条） —— 不是不能看，是我写不了，也不该拿来写。</div>' +
+    '<div class="rows">';
+  for (var i=0;i<WEIBO.length;i++){
+    h += '<div class="row"><span class="rk">' + WEIBO[i][0] + '</span>' +
+         '<span class="tx">' + esc(WEIBO[i][1]) + '</span>' +
+         '<span class="ht">' + wan(WEIBO[i][2]) + '</span></div>';
+  }
+  h += '</div>';
+  return h;
+}
+
+function pane1(){
+  var cross = RES.cross, self = RES.self;
+  var h = '<h4>第二步：两边都出现的，才算真的热</h4>' +
+    '<div class="ph">把微博每一条，跟 B 站每一条做中文二元组比对（"iPhoneDuo王者荣耀黑边" 会切出 ip/ph/ho/on/ne/ed/du/uo）。' +
+    '<b>至少 2 个二元组重合</b>才算命中，泛词（什么 / 么样 / 样的）先剔掉。</div>' +
+    '<div class="ph" style="margin-bottom:9px"><b>跨平台互证 ' + cross.length + ' 对</b>（微博 ↔ B站）</div>';
+  for (var i=0;i<cross.length;i++){
+    var p = cross[i];
+    h += '<div class="xrow cross"><div class="top">' + srcBadge(p.a) +
+      '<span class="verdict y">跨平台 ✓</span></div>' +
+      '<div class="t1">' + esc(p.a.t) + '</div>' +
+      '<div class="t2">' + srcBadge(p.b) + ' ' + esc(p.b.t) + '</div>' +
+      '<div class="g">重合二元组 <b>' + p.g.join(' / ') + '</b></div></div>';
+  }
+  h += '<div class="ph" style="margin:12px 0 9px"><b>同平台互证 ' + self.length + ' 对</b>（B站热搜 ↔ B站排行，只能当补充，不算跨平台）</div>';
+  for (var j=0;j<self.length;j++){
+    var q = self[j];
+    h += '<div class="xrow self"><div class="top">' + srcBadge(q.a) +
+      '<span class="verdict n">同平台 ✗</span></div>' +
+      '<div class="t1">' + esc(q.a.t) + '</div>' +
+      '<div class="t2">' + srcBadge(q.b) + ' ' + esc(q.b.t) + '</div>' +
+      '<div class="g">重合二元组 ' + q.g.join(' / ') + '</div></div>';
+  }
+  return h;
+}
+
+function pane2(){
+  var w = CL[0];
+  var h = '<h4>第三步：只留一个，其余全部落选</h4>' +
+    '<div class="ph">排序规则很土：<b>先看跨了几个平台，再看几条同时上榜，最后看热度。</b>规矩先写死，选的时候就不靠心情。</div>';
+  if (!w) { return h + '<div class="ph">这次没出现跨平台命中。</div>'; }
+  h += '<div class="pick"><div class="lbl">今天选它</div>' +
+    '<div class="tt">' + esc(w.items[0].t) + '</div><div class="why">';
+  h += '<div>跨了 ' + w.plat + ' 个平台，共 ' + w.n + ' 处上榜</div>';
+  var detail = [];
+  for (var i=0;i<w.items.length;i++) detail.push(w.items[i].src + ' #' + w.items[i].r + '（' + wan(w.items[i].h) + '）');
+  h += '<div>' + detail.join(' · ') + '</div>';
+  h += '<div>不是纯娱乐向：硬件评测这种题，我能写出自己的判断，不会只剩转述</div>';
+  h += '</div></div>';
+  h += '<div class="ph" style="margin:6px 0 8px"><b>落选的（也是真实算出来的）</b></div>';
+  for (var j=1;j<CL.length && j<5;j++){
+    var c = CL[j], d = [];
+    for (var k=0;k<c.items.length;k++) d.push(c.items[k].src + ' #' + c.items[k].r);
+    var why = c.plat < 2 ? '只在 B 站内部两个榜互证，跨平台没出现 —— 按规矩不认' : '跨平台了，但只有 ' + c.n + ' 处，比不过上面那个';
+    h += '<div class="drop"><b>' + esc(c.items[0].t) + '</b><br>' +
+         '<span>' + d.join(' · ') + '　→　' + why + '</span></div>';
+  }
+  h += '<div class="ph" style="margin-top:8px">注意它挑的不是热度最高的那条。热度最高的是娱乐八卦，我写不了也写不好 —— ' +
+       '<b>选题的第一标准是"我有没有话说"，不是"它有多热"。</b></div>';
+  return h;
+}
+
+function pane3(){
+  var bodyLen = 0, paras = 0;
+  for (var i=0;i<ART.b.length;i++){ if (ART.b[i][0]==='p'){ bodyLen += ART.b[i][1].replace(/\s/g,'').length; paras++; } }
+  var heads = 0;
+  for (var j=0;j<ART.b.length;j++) if (ART.b[j][0]==='h') heads++;
+  var h = '<h4>第四步：成稿，拿 SOP 四条规矩卡一遍</h4>' +
+    '<div class="ph">这篇是我真发出去的那篇（9-8 17:06）。规矩是当时自己定的，卡完发现有一条没完全守住 —— 也摆出来。</div>' +
+    '<div class="art"><div class="at">' + esc(ART.t) + '</div>' +
+    '<div class="am">' + bodyLen + ' 字 · ' + paras + ' 个短段 · ' + heads + ' 个小标题 · ' + ART.s.length + ' 条来源 · 2026-09-08 17:06 发布</div>';
+  var shown = 0;
+  for (var k=0;k<ART.b.length;k++){
+    var t = ART.b[k][0], x = ART.b[k][1];
+    if (t === 'h'){
+      if (shown >= 3) break;
+      h += '<div class="ah">' + esc(x) + '</div>';
+    } else {
+      h += '<div class="ap">' + esc(x) + '</div>';
+      shown++;
+      if (shown >= 3) break;
+    }
+  }
+  h += '<button class="more" id="moreArt">展开全文 ↓</button>';
+  h += '<div id="artRest" style="display:none"></div></div>';
+  h += '<div class="checks">' +
+    '<div class="ck"><span class="i">✓</span><span class="k">标题 18–28 字</span><span class="v">' + ART.t.length + ' 字</span></div>' +
+    '<div class="ck"><span class="i">✓</span><span class="k">正文 600–1000 字</span><span class="v">' + bodyLen + ' 字</span></div>' +
+    '<div class="ck"><span class="i">✓</span><span class="k">来源 2–3 条</span><span class="v">' + ART.s.length + ' 条</span></div>' +
+    '<div class="ck"><span class="i bad">!</span><span class="k">「中间 2–3 段」—— 我写成了 ' + heads + ' 个小标题 / ' + paras + ' 个短段</span><span class="v">没照做</span></div>' +
+    '</div>' +
+    '<div class="ph" style="margin-top:9px">最后那条我不打算改。规矩是给不熟的时候用的，写多了就知道手机上短段更好读 —— ' +
+    '<b>但我知道自己破了规矩，不是假装它不存在。</b></div>';
+  return h;
+}
+
+function pane4(){
+  var h = '<h4>第五步：存草稿，然后停住</h4>' +
+    '<div class="ph">流水线能一路跑到"已存草稿"。正式发布那个按钮，我从来没接进自动化里 —— 这是故意的。</div>' +
+    '<div class="code"><span class="c"># 我实际跑的那条（1.txt 里存的原文）</span>\n' +
+    'python main.py --profile creator --debug publish \\\n' +
+    '  <span class="k">--title</span> <span class="s">"我用AI开了一家24小时不打烊的自媒体餐厅"</span> \\\n' +
+    '  <span class="k">--content-file</span> <span class="s">"我的餐厅.md"</span> \\\n' +
+    '  <span class="k">--topics</span> <span class="s">"人工智能,自动化"</span> \\\n' +
+    '  <span class="k">--draft</span> <span class="k">--headed</span></div>' +
+    '<div class="cmdnote"><b>--draft</b> 只存草稿不发布；<b>--headed</b> 让浏览器露出来，我能看见它在填什么。' +
+    '刚开始我嫌 --headed 慢，去掉过一次，结果填错地方也看不见。</div>' +
+    '<div class="badge-draft">● 已存草稿 · 等你点发布</div>' +
+    '<div class="ph" style="margin-top:10px">它做完这一步就退出，不会自己按"确认发布"。' +
+    '<b>一条流水线该有的自觉是：知道哪里该停。</b></div>';
+  return h;
+}
+
+var PANES = [pane0, pane1, pane2, pane3, pane4];
+
+function draw(step){
+  cur = step;
+  renderRail();
+  $('pane').innerHTML = PANES[step]();
+  $('pane').scrollTop = 0;
+  if (step === 3){
+    var b = $('moreArt');
+    if (b) b.addEventListener('click', function(){
+      var rest = $('artRest');
+      if (rest.style.display === 'none'){
+        var h = '', shown = 0;
+        for (var i=0;i<ART.b.length;i++){
+          var t = ART.b[i][0], x = ART.b[i][1];
+          h += t === 'h' ? '<div class="ah">' + esc(x) + '</div>' : '<div class="ap">' + esc(x) + '</div>';
+        }
+        h += '<div class="ah">参考信息</div>';
+        for (var j=0;j<ART.s.length;j++) h += '<div class="ap">- ' + esc(ART.s[j]) + '</div>';
+        rest.innerHTML = h; rest.style.display = 'block';
+        this.textContent = '收起 ↑';
+      } else { rest.style.display = 'none'; this.textContent = '展开全文 ↓'; }
+    });
+  }
+  if (step >= 2) $('s3').innerHTML = CROSSTOPIC + '<small>个</small>';
+}
+
+function run(){
+  var token = ++runToken;
+  $('note1').className = 'stage-note';
+  $('note1').textContent = '正在跑…';
+  cur = -1; renderRail();
+  var delays = [420, 720, 760, 820, 640];
+  var acc = 0;
+  for (var i=0;i<STEPS.length;i++){
+    (function(i){
+      acc += delays[i];
+      setTimeout(function(){
+        if (token !== runToken) return;
+        draw(i);
+        if (i === STEPS.length - 1){
+          $('note1').className = 'stage-note pass';
+          $('note1').textContent = '跑完了 · 停在草稿，等你点头';
+        }
+      }, acc);
+    })(i);
+  }
+}
+
+$('rail').addEventListener('click', function(e){
+  var b = e.target.closest ? e.target.closest('.stp') : null;
+  if (!b) return;
+  runToken++;              /* 手动点就打断自动播放 */
+  draw(parseInt(b.getAttribute('data-i'), 10));
+  $('note1').className = 'stage-note';
+  $('note1').textContent = '手动看第 ' + (parseInt(b.getAttribute('data-i'), 10) + 1) + ' 步';
+});
+$('run1').addEventListener('click', run);
+
+/* ============================================================
+   舞台二：写稿校验器
+   ============================================================ */
+var GOOD_BODY = ART.b.filter(function(x){ return x[0] === 'p'; }).map(function(x){ return x[1]; }).join('\n\n');
+
+function cnt(s){ return String(s || '').replace(/\s/g,'').length; }
+
+function bar(id, val, lo, hi){
+  var box = $(id), pct;
+  if (val < lo) pct = Math.max(4, val / lo * 100 * 0.7);
+  else if (val > hi) pct = 100;
+  else pct = 55 + ((val - lo) / (hi - lo)) * 45;
+  box.style.width = Math.min(100, pct) + '%';
+  box.className = 'fl' + (val < lo || val > hi ? ' bad' : '');
+}
+
+function check(){
+  var t = $('vt').value.trim();
+  var b = $('vb').value;
+  var s = $('vs').value.split('\n').filter(function(x){ return x.trim(); });
+  var tl = cnt(t), bl = cnt(b), sl = s.length;
+  var SHOCK = /(震惊|必看|速看|炸裂|惊呆|吓人|史上最|惊天|不敢相信|万万没想到|!!!|！！！)/;
+  var okShock = !SHOCK.test(t);
+
+  $('n-t').textContent = tl + ' 字';
+  $('n-b').textContent = bl + ' 字';
+  $('n-s').textContent = sl + ' 条';
+  $('n-e').textContent = okShock ? '没有' : '有';
+  $('n-t').className = 'n2 ' + (tl >= 18 && tl <= 28 ? 'ok' : 'bad');
+  $('n-b').className = 'n2 ' + (bl >= 600 && bl <= 1000 ? 'ok' : 'bad');
+  $('n-s').className = 'n2 ' + (sl >= 2 && sl <= 3 ? 'ok' : 'bad');
+  $('n-e').className = 'n2 ' + (okShock ? 'ok' : 'bad');
+
+  bar('f-t', tl, 18, 28);
+  bar('f-b', bl, 600, 1000);
+  bar('f-s', sl, 2, 3);
+  $('f-e').style.width = '100%';
+  $('f-e').className = 'fl' + (okShock ? '' : ' bad');
+
+  var pass = 0;
+  if (tl >= 18 && tl <= 28) pass++;
+  if (bl >= 600 && bl <= 1000) pass++;
+  if (sl >= 2 && sl <= 3) pass++;
+  if (okShock) pass++;
+  $('score').textContent = pass;
+  var msg = pass === 4 ? '四条全过，可以存草稿了。' :
+            pass === 3 ? '差一条。别急着发，先看是哪条。' :
+            pass === 2 ? '一半都没到，这篇还得改。' : '还早，先别管排版。';
+  $('sline').textContent = msg;
+  $('sline').style.color = pass === 4 ? 'var(--green)' : (pass <= 2 ? 'var(--red-d)' : 'var(--ink3)');
+  $('note2').className = 'stage-note' + (pass === 4 ? ' pass' : '');
+  $('note2').textContent = pass === 4 ? '四条全过 · 这就是那篇真发出去的' : pass + ' / 4 通过';
+}
+
+function fillGood(){
+  $('vt').value = ART.t;
+  $('vb').value = GOOD_BODY;
+  $('vs').value = ART.s.join('\n');
+  check();
+}
+$('fillGood').addEventListener('click', fillGood);
+$('fillBad').addEventListener('click', function(){
+  $('vt').value = '震惊！AI真的太厉害了';
+  $('vb').value = '今天聊聊AI。AI真的很厉害，我们要拥抱AI，用好AI，让AI为我们服务。就写到这里。';
+  $('vs').value = '';
+  check();
+});
+$('vt').addEventListener('input', check);
+$('vb').addEventListener('input', check);
+$('vs').addEventListener('input', check);
+
+/* ============================================================
+   全屏（Esc 退）
+   ============================================================ */
+function bindFS(stageId, btnId){
+  var st = $(stageId), btn = $(btnId);
+  function set(on){
+    st.classList.toggle('fs', on);
+    document.body.classList.toggle('fs-lock', on);
+    btn.textContent = on ? '退出全屏 ✕' : '全屏 ↗';
+  }
+  btn.addEventListener('click', function(){ set(!st.classList.contains('fs')); });
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape' && st.classList.contains('fs')) set(false);
+  });
+}
+bindFS('stage1', 'fs1');
+bindFS('stage2', 'fs2');
+
+/* ============================================================
+   打开就自己跑
+   ============================================================ */
+renderRail();
+setTimeout(function(){
+  draw(0);
+  run();
+}, 260);
+fillGood();
+</script>
+</body>
+</html>

@@ -1,0 +1,2239 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg?v=2">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>验证码制作工坊</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    height: 100%; overflow: hidden;
+    font-family: 'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;
+    background: #0f0f1a; color: #e0e8ff;
+  }
+
+  .app { display: flex; height: 100vh; width: 100vw; }
+
+  /* ── LEFT ── */
+  .left-panel {
+    width: 440px; min-width: 440px; background: #15152a;
+    border-right: 1px solid #2a2a48; display: flex; flex-direction: column; overflow: hidden;
+  }
+  .left-header { padding: 20px 24px 0; flex-shrink: 0; }
+  .left-header h1 { font-size: 22px; font-weight: 700; }
+  .left-header .subtitle { font-size: 12px; color: #667799; margin-top: 3px; }
+
+  .left-tabs { display: flex; padding: 16px 24px 0; gap: 0; flex-shrink: 0; }
+  .left-tab {
+    flex:1; padding:10px 14px; border:none; background:transparent; color:#556688;
+    font-size:13px; font-weight:700; cursor:pointer; border-radius:10px 10px 0 0; transition:all .2s;
+  }
+  .left-tab.active { background:#1e1e35; color:#a0c4ff; }
+  .left-tab:hover:not(.active) { color:#8899cc; }
+
+  .left-scroll {
+    flex:1; overflow-y:auto; overflow-x:hidden; padding:0 24px 20px; background:#1e1e35;
+  }
+  .left-scroll::-webkit-scrollbar { width:5px; }
+  .left-scroll::-webkit-scrollbar-thumb { background:#2a2a48; border-radius:3px; }
+
+  .config-section { display:none; }
+  .config-section.active { display:block; }
+
+  .cfg-group {
+    font-size:11px; font-weight:700; color:#667799; text-transform:uppercase;
+    letter-spacing:2px; margin:16px 0 8px; padding-bottom:6px; border-bottom:1px solid #28284a;
+  }
+  .cfg-row {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:7px 0; gap:10px;
+  }
+  .cfg-row label { font-size:13px; color:#aab8d0; font-weight:600; white-space:nowrap; }
+  .cfg-row .cfg-val { font-size:12px; color:#6d8fff; font-weight:700; min-width:40px; text-align:right; }
+  .cfg-row input[type="range"] {
+    -webkit-appearance:none; flex:1; height:5px; border-radius:3px; background:#252545; outline:none;
+  }
+  .cfg-row input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance:none; width:18px; height:18px; border-radius:50%;
+    background:#6d8fff; cursor:pointer; border:2px solid #a0c4ff;
+  }
+  .cfg-row select {
+    flex:1; padding:6px 8px; background:#12122a; border:1.5px solid #35355a;
+    border-radius:7px; color:#e0e8ff; font-size:12px; font-weight:600; outline:none; cursor:pointer;
+  }
+  .cfg-row select:focus { border-color:#6d8fff; }
+  .cfg-row input[type="color"] {
+    width:32px; height:28px; border:1.5px solid #35355a; border-radius:6px;
+    background:transparent; cursor:pointer; padding:1px;
+  }
+  .cfg-checkboxes {
+    display:flex; flex-wrap:wrap; gap:6px 14px; padding:4px 0;
+  }
+  .cfg-checkboxes label { display:flex; align-items:center; gap:4px; font-size:12px; color:#aab8d0; cursor:pointer; }
+  .cfg-checkboxes input[type="checkbox"] { accent-color:#6d8fff; width:15px; height:15px; }
+
+  .upload-row {
+    display:flex; align-items:center; justify-content:space-between; padding:6px 0; gap:8px;
+  }
+  .upload-row label.fname { font-size:12px; color:#aab8d0; font-weight:600; white-space:nowrap; min-width:55px; }
+  .upload-row input[type="file"] { display:none; }
+  .upload-btn {
+    display:inline-block; padding:8px 14px; background:#252545; border:1.5px dashed #4a4a6a;
+    border-radius:8px; font-size:12px; color:#8899bb; cursor:pointer; transition:all .2s;
+    white-space:nowrap; flex:1; text-align:center; overflow:hidden; text-overflow:ellipsis;
+  }
+  .upload-btn:hover { border-color:#6d8fff; color:#a0c4ff; background:#1e1e3a; }
+  .upload-btn.loaded { border-style:solid; border-color:#4ade80; color:#4ade80; font-weight:700; }
+  .upload-row .preview-thumb {
+    width:40px; height:40px; border-radius:6px; border:1px solid #35355a;
+    object-fit:cover; display:none; cursor:pointer;
+  }
+  .upload-row .preview-thumb.show { display:block; }
+
+  .btn-build-wrap { flex-shrink:0; padding:14px 24px 18px; background:#15152a; border-top:1px solid #2a2a48; }
+  .btn-build {
+    width:100%; padding:13px 24px; border:none; border-radius:10px;
+    font-size:15px; font-weight:700; cursor:pointer; letter-spacing:2px; transition:all .2s;
+    background:linear-gradient(135deg,#f59e0b,#f97316); color:#1a1a2e;
+  }
+  .btn-build:hover { transform:translateY(-1px); box-shadow:0 6px 20px rgba(245,158,11,.4); }
+  .btn-build:active { transform:scale(.98); }
+
+  /* ── RIGHT ── */
+  .right-panel { flex:1; display:flex; flex-direction:column; overflow:hidden; background:#12121f; }
+  .right-header {
+    padding:20px 28px 0; flex-shrink:0; display:flex; align-items:center; justify-content:space-between;
+  }
+  .right-header h2 { font-size:18px; font-weight:700; color:#c0d0f0; }
+  .right-header .badge { font-size:12px; background:#1e1e35; color:#667799; padding:4px 12px; border-radius:12px; font-weight:600; }
+
+  .right-scroll {
+    flex:1; overflow-y:auto; overflow-x:hidden; padding:16px 28px 24px;
+    display:flex; flex-direction:column; gap:20px;
+  }
+  .right-scroll::-webkit-scrollbar { width:5px; }
+  .right-scroll::-webkit-scrollbar-thumb { background:#2a2a48; border-radius:3px; }
+
+  .captcha-card {
+    background:#1a1a32; border-radius:14px; padding:20px; border:1px solid #2a2a48;
+    display:none; flex-direction:column; align-items:center; gap:14px; flex-shrink:0;
+  }
+  .captcha-card canvas { border-radius:8px; max-width:100%; display:block; }
+
+  .card-type-tag {
+    font-size:11px; font-weight:700; color:#667799; background:#252545;
+    padding:3px 12px; border-radius:10px; letter-spacing:1px; align-self:flex-start;
+  }
+
+  .empty-state {
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    padding:50px 20px; color:#445577; text-align:center; gap:10px; flex-shrink:0;
+  }
+  .empty-state .icon { font-size:48px; opacity:.5; }
+  .empty-state .msg { font-size:14px; }
+  .empty-state .sub { font-size:12px; opacity:.7; }
+
+  .verify-row { display:flex; gap:10px; width:100%; }
+  .text-input {
+    flex:1; padding:10px 14px; background:#0f0f22; border:1.5px solid #35355a;
+    border-radius:10px; color:#e0e8ff; font-size:17px; letter-spacing:4px;
+    text-align:center; font-weight:700; outline:none; transition:border-color .2s;
+  }
+  .text-input:focus { border-color:#6d8fff; }
+  .text-input::placeholder { color:#3a3a55; letter-spacing:2px; font-weight:400; }
+
+  .btn-sm {
+    padding:9px 18px; border:none; border-radius:9px; font-size:13px;
+    font-weight:700; cursor:pointer; transition:all .2s; white-space:nowrap;
+  }
+  .btn-verify { background:linear-gradient(135deg,#10b981,#059669); color:#fff; }
+  .btn-verify:hover { box-shadow:0 4px 14px rgba(16,185,129,.35); }
+  .btn-export {
+    padding:5px 14px; border:1px solid #4a6cf7; border-radius:8px;
+    background:transparent; color:#6d8fff; font-size:12px;
+    font-weight:700; cursor:pointer; transition:all .2s;
+  }
+  .btn-export:hover { background:#1a1a3a; box-shadow:0 2px 10px rgba(74,108,247,.25); }
+
+  .toast {
+    padding:9px 16px; border-radius:9px; font-weight:600; font-size:13px;
+    text-align:center; width:100%; animation:fadeIn .3s ease;
+  }
+  .toast.success { background:#0d3320; color:#4ade80; border:1px solid #1a5c35; }
+  .toast.error { background:#331010; color:#f87171; border:1px solid #5c1a1a; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:translateY(0)} }
+
+  .slide-wrapper {
+    display: flex; flex-direction: column; align-items: stretch;
+  }
+  .slide-wrapper .slider-area { width: 100%; }
+  .slide-wrapper .gap-info { width: 100%; }
+
+  .slider-area { width:100%; }
+  .slider-label { font-size:11px; color:#556688; margin-bottom:8px; text-align:center; }
+  .slider-track {
+    width:100%; height:42px; background:#0f0f22; border-radius:21px;
+    position:relative; border:1.5px solid #35355a; overflow:hidden;
+    cursor:pointer; user-select:none; -webkit-user-select:none;
+  }
+  .slider-fill {
+    height:100%; background:linear-gradient(90deg,#4a6cf7,#6d8fff);
+    border-radius:21px 0 0 21px;
+  }
+  .slider-handle {
+    position:absolute; top:2px; width:38px; height:38px; background:#e0e8ff;
+    border-radius:50%; display:flex; align-items:center; justify-content:center;
+    font-size:16px; color:#4a6cf7; cursor:grab; box-shadow:0 2px 10px rgba(0,0,0,.4); z-index:2;
+  }
+  .slider-handle:active { cursor:grabbing; }
+
+  .piece-overlay {
+    position:relative; display:inline-block; line-height:0;
+  }
+  .piece-overlay canvas.piece {
+    position:absolute; top:0; border-radius:4px;
+    box-shadow:0 6px 22px rgba(0,0,0,.65); pointer-events:none;
+    border: 2px solid rgba(255,255,255,.8);
+  }
+
+  .gap-info {
+    font-size:11px; color:#556688; text-align:center;
+    background:#0f0f22; padding:6px 14px; border-radius:8px;
+    font-family: monospace;
+  }
+
+  .history-title {
+    font-size:13px; font-weight:700; color:#667799; letter-spacing:1px;
+    text-transform:uppercase; flex-shrink:0;
+  }
+  .history-grid {
+    display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:12px;
+  }
+  .history-card {
+    background:#1a1a32; border:1px solid #2a2a48; border-radius:12px;
+    overflow:hidden; transition:border-color .2s; cursor:pointer; position:relative;
+  }
+  .history-card:hover { border-color:#4a6cf7; }
+  .history-card .hc-type {
+    position:absolute; top:6px; left:6px; font-size:10px;
+    background:rgba(0,0,0,.6); color:#8899cc; padding:2px 8px; border-radius:8px;
+    font-weight:700; letter-spacing:1px;
+  }
+  .history-card .hc-delete {
+    position:absolute; top:6px; right:6px; background:rgba(0,0,0,.5);
+    border:none; color:#f87171; width:22px; height:22px; border-radius:50%;
+    cursor:pointer; font-size:12px; display:flex; align-items:center; justify-content:center;
+    opacity:0; transition:opacity .2s;
+  }
+  .history-card:hover .hc-delete { opacity:1; }
+  .history-card img { width:100%; display:block; }
+  .history-card .hc-info {
+    padding:8px 10px; display:flex; justify-content:space-between;
+    align-items:center; font-size:11px; color:#556688;
+  }
+  .history-card .hc-answer { font-weight:700; color:#a0c4ff; letter-spacing:2px; }
+  .hc-empty {
+    grid-column:1/-1; text-align:center; color:#3a3a55; font-size:13px; padding:30px;
+  }
+
+  .tech-note {
+    background: #0f0f1f;
+    border: 1px solid #2a2a45;
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: 11px;
+    color: #667799;
+    line-height: 1.7;
+    margin-top: 6px;
+  }
+  .tech-note strong { color: #a0c4ff; }
+  .tech-note code {
+    background: #1a1a2e;
+    color: #f59e0b;
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-family: 'Cascadia Code','Consolas',monospace;
+    font-size: 10px;
+  }
+  .btn-rand {
+    font-size:11px; padding:6px 12px; background:#252545; color:#8899bb;
+    border:1px solid #35355a; border-radius:7px; cursor:pointer;
+  }
+  .btn-rand:hover { border-color:#6d8fff; color:#a0c4ff; }
+
+\n');
+  p.push('*{box-sizing:border-box;margin:0;padding:0}');
+  p.push("body{display:flex;align-items:center;justify-content:center;min-height:100vh;background:#0f0f1a;font-family:'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif}");
+  p.push('.card{background:#1a1a32;border-radius:16px;padding:24px;border:1px solid #2a2a48;display:flex;flex-direction:column;align-items:center;gap:14px}');
+  p.push('img{border-radius:8px;max-width:100%;display:block}');
+  p.push('.row{display:flex;gap:10px;width:100%}');
+  p.push('input{flex:1;padding:10px 14px;background:#0f0f22;border:1.5px solid #35355a;border-radius:10px;color:#e0e8ff;font-size:17px;letter-spacing:4px;text-align:center;font-weight:700;outline:none}');
+  p.push('input:focus{border-color:#6d8fff}');
+  p.push('.btn{padding:10px 20px;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;background:linear-gradient(135deg,#10b981,#059669);color:#fff}');
+  p.push('.btn:hover{box-shadow:0 4px 14px rgba(16,185,129,.35)}');
+  p.push('.toast{padding:9px 16px;border-radius:9px;font-weight:600;font-size:13px;text-align:center;width:100%;display:none}');
+  p.push('.toast.success{background:#0d3320;color:#4ade80;border:1px solid #1a5c35;display:block}');
+  p.push('.toast.error{background:#331010;color:#f87171;border:1px solid #5c1a1a;display:block}');
+  p.push('
+\n');
+  p.push('*{box-sizing:border-box;margin:0;padding:0}');
+  p.push("body{display:flex;align-items:center;justify-content:center;min-height:100vh;background:#0f0f1a;font-family:'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif}");
+  p.push('.card{background:#1a1a32;border-radius:16px;padding:24px;border:1px solid #2a2a48;display:flex;flex-direction:column;align-items:center;gap:12px}');
+  p.push('.ov{position:relative;display:inline-block;line-height:0}');
+  p.push('.ov .piece{position:absolute;top:' + String(correctY) + 'px;left:0;border-radius:4px;box-shadow:0 6px 22px rgba(0,0,0,.65);pointer-events:none;border:2px solid rgba(255,255,255,.8)}');
+  p.push('img{border-radius:8px;max-width:100%;display:block}');
+  p.push('.info{font-size:11px;color:#556688;text-align:center;background:#0f0f22;padding:6px 14px;border-radius:8px;width:100%}');
+  p.push('.slider-area{width:' + String(bgW) + 'px;max-width:100%}');
+  p.push('.slider-label{font-size:11px;color:#556688;margin-bottom:8px;text-align:center}');
+  p.push('.slider-track{width:100%;height:42px;background:#0f0f22;border-radius:21px;position:relative;border:1.5px solid #35355a;overflow:hidden;cursor:pointer;user-select:none;-webkit-user-select:none}');
+  p.push('.slider-fill{height:100%;background:linear-gradient(90deg,#4a6cf7,#6d8fff);border-radius:21px 0 0 21px}');
+  p.push('.slider-handle{position:absolute;top:2px;width:38px;height:38px;background:#e0e8ff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;color:#4a6cf7;cursor:grab;box-shadow:0 2px 10px rgba(0,0,0,.4);z-index:2}');
+  p.push('.slider-handle:active{cursor:grabbing}');
+  p.push('.toast{padding:9px 16px;border-radius:9px;font-weight:600;font-size:13px;text-align:center;width:100%;display:none}');
+  p.push('.toast.success{background:#0d3320;color:#4ade80;border:1px solid #1a5c35;display:block}');
+  p.push('.toast.error{background:#331010;color:#f87171;border:1px solid #5c1a1a;display:block}');
+  p.push('</style>
+<style>
+/* ── 站点外壳 ── */
+:root{
+  --bg:#FBFCFE; --ink:#1A1D24; --ink2:#525B6B; --ink3:#8B95A6;
+  --blue:#4FA8E8; --blue-d:#2E8BD0; --blue-s:#EAF5FD;
+  --red:#E8455F; --line:#E4EBF5;
+}
+html,body{height:auto!important;overflow:visible!important}
+body{
+  background:var(--bg)!important;
+  font-family:"Noto Sans SC","Microsoft YaHei","PingFang SC",Arial,sans-serif!important;
+  color:var(--ink);line-height:1.75;overflow-x:hidden;
+}
+.wrap{max-width:min(1600px,100%);margin:0 auto;padding:56px clamp(16px,3vw,40px) 96px}
+.back{display:flex;width:fit-content;align-items:center;gap:8px;color:var(--ink3);
+  text-decoration:none;font-size:14px;margin-bottom:34px;transition:color .2s}
+.back:hover{color:var(--blue-d)}
+.num{display:inline-block;font-size:12.5px;font-weight:600;letter-spacing:.14em;
+  color:#fff;background:linear-gradient(100deg,#3E9FE0 0%,#E8455F 72%,#D62F4A 100%);
+  border-radius:999px;padding:6px 16px;margin-bottom:16px;
+  box-shadow:0 8px 22px rgba(214,47,74,.34)}
+.wrap > h1{font-size:clamp(26px,3.6vw,38px);line-height:1.28;font-weight:700;
+  color:var(--ink);margin:0 0 14px;letter-spacing:-.01em}
+.lede{font-size:17px;color:var(--ink2);max-width:780px;margin:0 0 22px;line-height:1.8}
+.tags{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:26px}
+.tags .tag{font-size:12.5px;color:var(--blue-d);background:var(--blue-s);
+  border:1px solid #D6E9F8;border-radius:999px;padding:4px 12px}
+
+/* 工具本体的深色界面（开发者工具那种观感）收进一张卡片 */
+.app{
+  height:min(880px,90vh)!important;width:100%!important;
+  border:1px solid #24243d;border-radius:18px;overflow:hidden;
+  box-shadow:0 20px 50px rgba(20,22,40,.22);
+  background:#12121f;
+}
+/* 工具内部的标题原来继承 body 颜色，放到深色卡片里会看不见 */
+.left-header h1{color:#EDEFFA!important}
+.left-header .subtitle{color:#8F9AC0!important}
+
+@media (max-width:900px){
+  .app{height:auto!important;flex-direction:column!important}
+  .left-panel{width:100%!important;min-width:0!important;max-height:none!important}
+  .right-panel{min-height:420px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="../../index.html">← 返回作品集</a>
+  <div class="num">PROJECT 32</div>
+  <h1>验证码制作工坊</h1>
+  <p class="lede">
+    做采集时最烦的一关是验证码，索性先自己做一台「造验证码」的机器：
+    字符数、字号、旋转幅度、噪点数量、干扰线数量、扭曲强度全都能调，实时生成数英验证码和滑块验证码，
+    拿它当靶子去试识别方案，比在网上找样本靠谱得多。
+  </p>
+  <div class="tags">
+    <span class="tag">Canvas</span><span class="tag">滑块验证码</span>
+    <span class="tag">噪点 / 干扰线</span><span class="tag">反爬对抗</span>
+  </div>
+
+
+<div class="app">
+  <!-- ═════════════════════ LEFT ═════════════════════ -->
+  <div class="left-panel">
+    <div class="left-header">
+      <h1>🔧 验证码制作工坊</h1>
+      <p class="subtitle">配置参数 → 制作 → 右侧验证</p>
+    </div>
+
+    <div class="left-tabs">
+      <button class="left-tab active" data-config="textCfg">🔤 数英验证码</button>
+      <button class="left-tab" data-config="slideCfg">🧩 滑块验证码</button>
+    </div>
+
+    <div class="left-scroll">
+
+      <!-- ═══ 数英验证码 ═══ -->
+      <div class="config-section active" id="textCfg">
+        <div class="cfg-group">📐 基本参数</div>
+        <div class="cfg-row">
+          <label>字符数量</label>
+          <input type="range" id="tCharCount" min="4" max="8" value="5" step="1">
+          <span class="cfg-val" id="tCharCountVal">5 位</span>
+        </div>
+        <div class="cfg-row">
+          <label>字体大小</label>
+          <input type="range" id="tFontSize" min="28" max="52" value="36" step="2">
+          <span class="cfg-val" id="tFontSizeVal">36px</span>
+        </div>
+        <div class="cfg-row">
+          <label>旋转幅度</label>
+          <select id="tRotation">
+            <option value="0">无</option>
+            <option value="1" selected>低 (±8°)</option>
+            <option value="2">中 (±18°)</option>
+            <option value="3">高 (±30°)</option>
+          </select>
+        </div>
+        <div class="cfg-row">
+          <label>噪点数量</label>
+          <input type="range" id="tNoise" min="0" max="120" value="50" step="10">
+          <span class="cfg-val" id="tNoiseVal">50 个</span>
+        </div>
+        <div class="cfg-row">
+          <label>干扰线数量</label>
+          <input type="range" id="tLines" min="0" max="12" value="4" step="1">
+          <span class="cfg-val" id="tLinesVal">4 条</span>
+        </div>
+        <div class="cfg-row">
+          <label>扭曲强度</label>
+          <select id="tWarp">
+            <option value="0">无</option>
+            <option value="1">低</option>
+            <option value="2">中</option>
+            <option value="3">高</option>
+          </select>
+        </div>
+        <div class="cfg-group">🔤 字符组成</div>
+        <div class="cfg-checkboxes">
+          <label><input type="checkbox" id="tUseUpper" checked> 大写 (A-Z)</label>
+          <label><input type="checkbox" id="tUseLower" checked> 小写 (a-z)</label>
+          <label><input type="checkbox" id="tUseDigit" checked> 数字 (2-9)</label>
+        </div>
+        <div class="cfg-group">🎨 外观</div>
+        <div class="cfg-row">
+          <label>背景颜色</label>
+          <input type="color" id="tBgColor" value="#1a1a35">
+          <span class="cfg-val" style="font-weight:400;font-size:11px;">取色器</span>
+        </div>
+        <div class="cfg-row">
+          <label>文字颜色</label>
+          <select id="tTextColorMode">
+            <option value="random">随机鲜艳色</option>
+            <option value="light">统一浅色</option>
+            <option value="gradient">渐变色</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- ═══ 滑块验证码 ═══ -->
+      <div class="config-section" id="slideCfg">
+        <div class="cfg-group">🖼️ 上传背景图（必填）</div>
+        <div class="upload-row">
+          <label class="fname">背景图</label>
+          <label class="upload-btn" id="lblBg" for="fileBg">📁 点击选择背景图片</label>
+          <input type="file" id="fileBg" accept="image/*">
+          <img class="preview-thumb" id="thumbBg" title="背景预览">
+        </div>
+
+        <div class="tech-note">
+          <strong>🔬 技术原理：</strong>滑块图片和缺口都从你的背景图上<b>实时裁剪</b>。
+          <br>使用 <code>getImageData(x, y, w, h)</code> 从背景指定位置提取像素，作为滑块图片；
+          同时在背景同一位置绘制<b>遮罩+虚线框</b>作为缺口标记。
+          滑块拖到缺口位置时<b>像素完全吻合</b>——因为它们本来就来自同一张图。
+        </div>
+
+        <div class="cfg-group">📐 裁剪参数</div>
+        <div class="cfg-row">
+          <label>滑块大小</label>
+          <input type="range" id="sPieceSize" min="40" max="100" value="60" step="5">
+          <span class="cfg-val" id="sPieceSizeVal">60px</span>
+        </div>
+        <div class="cfg-row">
+          <label>缺口样式</label>
+          <select id="sGapStyle">
+            <option value="dark">暗色遮罩 + 虚线框</option>
+            <option value="blur">模糊 + 虚线框</option>
+            <option value="cutout">挖空效果</option>
+          </select>
+        </div>
+        <div class="cfg-row">
+          <label>验证容差</label>
+          <input type="range" id="sTolerance" min="3" max="20" value="5" step="1">
+          <span class="cfg-val" id="sToleranceVal">±5px</span>
+        </div>
+
+        <div class="cfg-group">🎯 缺口位置（手动调节 / 随机）</div>
+        <div class="cfg-row">
+          <label>缺口 X</label>
+          <input type="range" id="sGapX" min="0" max="500" value="0" step="1">
+          <span class="cfg-val" id="sGapXVal">0px</span>
+        </div>
+        <div class="cfg-row" style="justify-content:flex-end;">
+          <button class="btn-rand" id="btnRandomGap">🎲 随机缺口位置</button>
+        </div>
+
+        <p style="font-size:11px;color:#556688;margin-top:8px;line-height:1.6;">
+          💡 滑块从 <b>X=0</b> 固定起点开始，与缺口<b>垂直居中</b>。<br>
+          每次制作仅在水平方向随机缺口距离（X坐标），容差 ±N px。
+        </p>
+      </div>
+    </div>
+
+    <div class="btn-build-wrap">
+      <button class="btn-build" id="btnBuild">🔨 制作验证码</button>
+    </div>
+  </div>
+
+  <!-- ═════════════════════ RIGHT ═════════════════════ -->
+  <div class="right-panel">
+    <div class="right-header">
+      <h2>🖼️ 验证码预览 & 验证</h2>
+      <span class="badge" id="historyCount">历史记录：0</span>
+    </div>
+
+    <div class="right-scroll" id="rightScroll">
+
+      <div class="empty-state" id="emptyState">
+        <div class="icon">👈</div>
+        <div class="msg">还没有制作验证码</div>
+        <div class="sub">在左侧配置好参数，点击「制作验证码」开始</div>
+      </div>
+
+      <!-- Current CAPTCHA -->
+      <div class="captcha-card" id="captchaCard">
+        <div style="display:flex;align-items:center;justify-content:space-between;width:100%;">
+          <span class="card-type-tag" id="cardTypeTag">数英验证码</span>
+          <button class="btn-export" id="btnExport" title="导出为独立 HTML 文件" style="display:none;">📥 导出代码</button>
+        </div>
+
+        <!-- Text elements -->
+        <canvas id="textCanvas" width="420" height="110" style="display:none;"></canvas>
+        <div class="verify-row" id="textVerifyRow" style="display:none;">
+          <input type="text" class="text-input" id="textInput" placeholder="输入验证码" maxlength="8" autocomplete="off">
+          <button class="btn-sm btn-verify" id="btnTextVerify">验证</button>
+        </div>
+
+        <!-- Slide elements -->
+        <div class="slide-wrapper" id="slideWrapper" style="display:none;">
+          <div class="piece-overlay" id="pieceOverlay">
+            <canvas id="bgCanvas" width="500" height="240" willReadFrequently="true"></canvas>
+            <canvas class="piece" id="pieceCanvas" width="60" height="60"></canvas>
+          </div>
+          <div class="gap-info" id="gapInfo">缺口位置：随机</div>
+          <div class="slider-area" id="slideArea">
+            <div class="slider-label">→ 拖动滑块，使拼图块对准缺口 ←</div>
+            <div class="slider-track" id="sliderTrack">
+              <div class="slider-fill" id="sliderFill" style="width:20px;"></div>
+              <div class="slider-handle" id="sliderHandle" style="left:0px;">⟷</div>
+            </div>
+          </div>
+        </div>
+
+        <div id="toastArea"></div>
+      </div>
+
+      <!-- History -->
+      <div class="history-title">📋 历史制作记录（永久保留）</div>
+      <div class="history-grid" id="historyGrid">
+        <div class="hc-empty">暂无记录 — 制作一个验证码吧！</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════
+//  API
+// ═══════════════════════════════════
+var API = {
+  getHistory: async function() {
+    try { var r=await fetch('/api/history'); return r.json(); }
+    catch(e) { return _localHistory(); }
+  },
+  saveHistory: async function(e) {
+    try { var r=await fetch('/api/history',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(e)}); var j=await r.json(); e.id=j.id; _localSave(e); return j; }
+    catch(err) { e.id=String(Date.now()); _localSave(e); return {ok:true,id:e.id}; }
+  },
+  deleteHistory: async function(id) {
+    try { await fetch('/api/history/'+id,{method:'DELETE'}); } catch(err) {}
+    _localDelete(id);
+  },
+  uploadImage: async function(f) {
+    try { var d=new FormData(); d.append('file',f); var r=await fetch('/api/upload',{method:'POST',body:d}); return r.json(); }
+    catch(err) { return {ok:false}; }
+  }
+};
+
+function _localHistory() {
+  try { var d = JSON.parse(localStorage.getItem('captcha_workshop_history') || '[]'); return Array.isArray(d) ? d : []; }
+  catch(e) { return []; }
+}
+function _localSave(entry) {
+  try { var h=_localHistory(); h.unshift(entry); localStorage.setItem('captcha_workshop_history',JSON.stringify(h)); }
+  catch(e) {}
+}
+function _localDelete(id) {
+  try { var h=_localHistory(); h=h.filter(function(e){return e.id!==id}); localStorage.setItem('captcha_workshop_history',JSON.stringify(h)); }
+  catch(e) {}
+}
+
+// ═══════════════════════════════════
+//  State
+// ═══════════════════════════════════
+var _historyArr = [];
+var currentEntry = null;
+var currentTextAnswer = '';
+
+function getHistoryArr() { if (!Array.isArray(_historyArr)) _historyArr = []; return _historyArr; }
+function setHistoryArr(v) { _historyArr = Array.isArray(v) ? v : []; }
+var dragging = false;
+var currentSliderPos = 0;
+var sliderMax = 0;
+var gapX = 0, gapY = 0;
+var uploadedBgImg = null;
+var uploadedBgFile = null;
+
+// ═══════════════════════════════════
+//  LEFT TABS
+// ═══════════════════════════════════
+document.querySelectorAll('.left-tab').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.left-tab').forEach(function(b) { b.classList.remove('active'); });
+    document.querySelectorAll('.config-section').forEach(function(s) { s.classList.remove('active'); });
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.config).classList.add('active');
+  });
+});
+
+// ═══════════════════════════════════
+//  LIVE LABELS
+// ═══════════════════════════════════
+document.getElementById('tCharCount').addEventListener('input', function(){ document.getElementById('tCharCountVal').textContent = this.value + ' 位'; });
+document.getElementById('tFontSize').addEventListener('input', function(){ document.getElementById('tFontSizeVal').textContent = this.value + 'px'; });
+document.getElementById('tNoise').addEventListener('input', function(){ document.getElementById('tNoiseVal').textContent = this.value + ' 个'; });
+document.getElementById('tLines').addEventListener('input', function(){ document.getElementById('tLinesVal').textContent = this.value + ' 条'; });
+document.getElementById('sTolerance').addEventListener('input', function(){ document.getElementById('sToleranceVal').textContent = '±' + this.value + 'px'; });
+document.getElementById('sPieceSize').addEventListener('input', function(){ document.getElementById('sPieceSizeVal').textContent = this.value + 'px'; });
+
+// ═══════════════════════════════════
+//  IMAGE UPLOAD
+// ═══════════════════════════════════
+(function() {
+  var fi = document.getElementById('fileBg');
+  var lbl = document.getElementById('lblBg');
+  var thumb = document.getElementById('thumbBg');
+  fi.addEventListener('change', function() {
+    var file = fi.files[0];
+    if (!file) return;
+    lbl.textContent = '📁 ' + file.name;
+    lbl.classList.add('loaded');
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      thumb.src = e.target.result;
+      thumb.classList.add('show');
+      var img = new Image();
+      img.onload = function() {
+        uploadedBgImg = img;
+        uploadedBgFile = file.name;
+        if ((document.querySelector('.left-tab.active')||{}).dataset||'' === 'slideCfg') {
+          buildSlideCaptcha(false);
+        }
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+})();
+
+// ── Live preview (real-time, no debounce) ──
+function liveRebuildSlide() {
+  if (!uploadedBgImg) return;
+  var activeTab = document.querySelector('.left-tab.active');
+  if (!activeTab || activeTab.dataset.config !== 'slideCfg') return;
+  buildSlideCaptcha(false);
+}
+
+['sPieceSize','sGapStyle','sTolerance','sGapX'].forEach(function(id) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  el.addEventListener('input', function() {
+    if (id === 'sTolerance') document.getElementById('sToleranceVal').textContent = '±' + el.value + 'px';
+    if (id === 'sPieceSize') document.getElementById('sPieceSizeVal').textContent = el.value + 'px';
+    if (id === 'sGapX') document.getElementById('sGapXVal').textContent = el.value + 'px';
+    liveRebuildSlide();
+  });
+  el.addEventListener('change', liveRebuildSlide);
+});
+
+document.getElementById('btnRandomGap').addEventListener('click', function() {
+  if (!uploadedBgImg) return;
+  document.getElementById('sGapX').dataset.random = 'true';
+  buildSlideCaptcha(false);
+});
+
+// ═══════════════════════════════════
+//  UTILS
+// ═══════════════════════════════════
+function randomInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+// ═══════════════════════════════════
+//  BUILD DISPATCH
+// ═══════════════════════════════════
+document.getElementById('btnBuild').addEventListener('click', function() {
+  var activeTab = document.querySelector('.left-tab.active');
+  if (!activeTab) return;
+  if (activeTab.dataset.config === 'textCfg') {
+    buildTextCaptcha();
+  } else {
+    if (!uploadedBgImg) { alert('请先上传一张背景图片！'); return; }
+    buildSlideCaptcha(true);
+  }
+});
+
+// ═══════════════════════════════════
+//  TEXT CAPTCHA
+// ═══════════════════════════════════
+var CHARS_UPPER = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+var CHARS_LOWER = 'abcdefghjkmnpqrstuvwxyz';
+var CHARS_DIGIT = '23456789';
+
+function getCharPool() {
+  var pool = '';
+  if (document.getElementById('tUseUpper').checked) pool += CHARS_UPPER;
+  if (document.getElementById('tUseLower').checked) pool += CHARS_LOWER;
+  if (document.getElementById('tUseDigit').checked) pool += CHARS_DIGIT;
+  if (!pool) pool = CHARS_UPPER + CHARS_LOWER + CHARS_DIGIT;
+  return pool;
+}
+
+function buildTextCaptcha() {
+  var pool = getCharPool();
+  var count = parseInt(document.getElementById('tCharCount').value);
+  var fontSize = parseInt(document.getElementById('tFontSize').value);
+  var rotLvl = parseInt(document.getElementById('tRotation').value);
+  var noiseN = parseInt(document.getElementById('tNoise').value);
+  var linesN = parseInt(document.getElementById('tLines').value);
+  var warpLvl = parseInt(document.getElementById('tWarp').value);
+  var bgColor = document.getElementById('tBgColor').value;
+  var colorMode = document.getElementById('tTextColorMode').value;
+
+  if (pool.length === 0) { alert('请至少选择一种字符类型'); return; }
+
+  showCaptchaCard('text');
+
+  var canvas = document.getElementById('textCanvas');
+  canvas.style.display = 'block';
+  var w = canvas.width, h = canvas.height;
+  var ctx = canvas.getContext('2d');
+
+  ctx.clearRect(0, 0, w, h);
+  ctx.fillStyle = bgColor;
+  ctx.fillRect(0, 0, w, h);
+  ctx.fillStyle = 'rgba(255,255,255,0.02)';
+  for (var i = 0; i < 25; i++) {
+    ctx.fillRect(randomInt(0, w-1), randomInt(0, h-1), randomInt(10, 50), randomInt(2, 6));
+  }
+
+  currentTextAnswer = '';
+  for (var i = 0; i < count; i++) {
+    currentTextAnswer += pool[randomInt(0, pool.length - 1)];
+  }
+
+  var rotRange = [0, 0.14, 0.31, 0.52][rotLvl];
+  var charWidth = w / (count + 1);
+
+  for (var i = 0; i < count; i++) {
+    var char = currentTextAnswer[i];
+    var x = charWidth * (i + 0.5) + randomInt(-10, 10);
+    var y = h / 2 + randomInt(-14, 14);
+    var angle = (Math.random() - 0.5) * 2 * rotRange;
+    var fs = fontSize + randomInt(-4, 4);
+
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(angle);
+
+    var color;
+    if (colorMode === 'random') color = 'rgb(' + randomInt(160,255) + ',' + randomInt(160,255) + ',' + randomInt(180,255) + ')';
+    else if (colorMode === 'light') color = 'rgb(' + randomInt(200,240) + ',' + randomInt(200,240) + ',' + randomInt(210,250) + ')';
+    else color = 'hsl(' + Math.round((i/count)*360 + randomInt(-20,20)) + ', 70%, 75%)';
+
+    ctx.fillStyle = color;
+    ctx.font = 'bold ' + fs + 'px "Segoe UI","PingFang SC","Microsoft YaHei",sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.shadowColor = 'rgba(0,0,0,0.35)';
+    ctx.shadowBlur = 3;
+    ctx.shadowOffsetX = 1; ctx.shadowOffsetY = 1;
+    ctx.fillText(char, 0, 0);
+    ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0;
+    ctx.shadowOffsetX = 0; ctx.shadowOffsetY = 0;
+
+    if (warpLvl > 0) {
+      var ws = [0, 1.5, 3, 5][warpLvl];
+      for (var py = Math.max(0, Math.floor(y-fs/2-5)); py < Math.min(h, Math.ceil(y+fs/2+5)); py++) {
+        var shift = Math.sin(py*0.3)*ws;
+        if (Math.abs(shift) > 0.5) {
+          var sx = Math.max(0, Math.floor(x-fs/2-5+shift));
+          var row = ctx.getImageData(sx, py, Math.min(w-sx, fs+15), 1);
+          ctx.putImageData(row, Math.max(0, Math.floor(x-fs/2-5)), py);
+        }
+      }
+    }
+    ctx.restore();
+  }
+
+  for (var i = 0; i < linesN; i++) {
+    ctx.beginPath();
+    ctx.moveTo(randomInt(0,w), randomInt(0,h));
+    ctx.lineTo(randomInt(0,w), randomInt(0,h));
+    ctx.strokeStyle = 'rgba(' + randomInt(100,200) + ',' + randomInt(100,200) + ',' + randomInt(130,220) + ',0.5)';
+    ctx.lineWidth = randomInt(1,3);
+    ctx.stroke();
+  }
+  for (var i = 0; i < noiseN; i++) {
+    ctx.beginPath();
+    ctx.arc(randomInt(0,w), randomInt(0,h), randomInt(1,2.5), 0, Math.PI*2);
+    ctx.fillStyle = 'rgba(' + randomInt(100,220) + ',' + randomInt(100,220) + ',' + randomInt(120,240) + ',' + (Math.random()*0.5+0.2) + ')';
+    ctx.fill();
+  }
+  ctx.strokeStyle = '#3a3a58'; ctx.lineWidth = 1;
+  ctx.strokeRect(1, 1, w-2, h-2);
+
+  document.getElementById('textInput').value = '';
+  document.getElementById('toastArea').innerHTML = '';
+  document.getElementById('textInput').focus();
+
+  var dataURL = canvas.toDataURL('image/png');
+  var config = { count:count, fontSize:fontSize, rotLvl:rotLvl, noiseN:noiseN, linesN:linesN, warpLvl:warpLvl, bgColor:bgColor, colorMode:colorMode };
+  addToHistory('text', currentTextAnswer, dataURL, config);
+}
+
+// ═══════════════════════════════════
+//  SLIDE CAPTCHA
+// ═══════════════════════════════════
+function buildSlideCaptcha(save) {
+  if (!uploadedBgImg) { alert('请先上传背景图'); return; }
+
+  var pieceSize  = parseInt(document.getElementById('sPieceSize').value);
+  var gapStyle   = document.getElementById('sGapStyle').value;
+  var tolerance  = parseInt(document.getElementById('sTolerance').value);
+
+  showCaptchaCard('slide');
+
+  // Canvas sizing
+  var rightScroll = document.getElementById('rightScroll');
+  var scrollStyle = window.getComputedStyle(rightScroll);
+  var scrollPad = parseFloat(scrollStyle.paddingLeft) + parseFloat(scrollStyle.paddingRight);
+  var cardPad = 20 + 20;
+  var availW = Math.min(rightScroll.clientWidth - scrollPad - cardPad - 4, 600);
+  var imgAspect = uploadedBgImg.width / uploadedBgImg.height;
+  var bgW = Math.max(availW, 300);
+  var bgH = Math.min(Math.round(bgW / imgAspect), 300);
+
+  var bgCanvas  = document.getElementById('bgCanvas');
+  var pieceCanvas = document.getElementById('pieceCanvas');
+
+  bgCanvas.width  = bgW;
+  bgCanvas.height = bgH;
+  bgCanvas.style.width  = bgW + 'px';
+  bgCanvas.style.height = bgH + 'px';
+
+  document.getElementById('slideWrapper').style.width = bgW + 'px';
+
+  var ctx = bgCanvas.getContext('2d');
+
+  // Cover mode
+  ctx.clearRect(0, 0, bgW, bgH);
+  var canAspect = bgW / bgH;
+  var drawW, drawH, drawX, drawY;
+  if (imgAspect > canAspect) {
+    drawH = bgH; drawW = bgH * imgAspect;
+    drawX = (bgW - drawW) / 2; drawY = 0;
+  } else {
+    drawW = bgW; drawH = bgW / imgAspect;
+    drawX = 0; drawY = (bgH - drawH) / 2;
+  }
+  ctx.drawImage(uploadedBgImg, drawX, drawY, drawW, drawH);
+
+  // Gap position
+  var PW = pieceSize, PH = pieceSize;
+  gapY = Math.floor((bgH - PH) / 2);
+  sliderMax = bgW - PW;
+
+  var gapSlider = document.getElementById('sGapX');
+  gapSlider.max = sliderMax;
+  var gapVal = document.getElementById('sGapXVal');
+  var useRandom = (gapSlider.dataset.random === 'true');
+  if (useRandom) {
+    gapX = randomInt(20, Math.max(20, sliderMax));
+    gapSlider.value = gapX;
+    gapSlider.dataset.random = 'false';
+  } else {
+    gapX = parseInt(gapSlider.value) || 0;
+    gapX = Math.max(0, Math.min(gapX, sliderMax));
+    gapSlider.value = gapX;
+  }
+  if (gapVal) gapVal.textContent = gapX + 'px';
+
+  // Extract piece
+  pieceCanvas.width = PW;
+  pieceCanvas.height = PH;
+  var pCtx = pieceCanvas.getContext('2d');
+  var pieceData = ctx.getImageData(gapX, gapY, PW, PH);
+  pCtx.putImageData(pieceData, 0, 0);
+  pCtx.strokeStyle = 'rgba(255,255,255,0.85)';
+  pCtx.lineWidth = 2;
+  pCtx.strokeRect(1, 1, PW - 2, PH - 2);
+
+  // Draw gap
+  drawGap(ctx, gapX, gapY, PW, PH, gapStyle);
+
+  ctx.strokeStyle = '#3a3a58';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(1, 1, bgW - 2, bgH - 2);
+
+  // Position piece
+  var pieceEl = pieceCanvas;
+  pieceEl.style.position = 'absolute';
+  pieceEl.style.top = gapY + 'px';
+  pieceEl.style.left = '0px';
+  pieceEl.style.width = PW + 'px';
+  pieceEl.style.height = PH + 'px';
+  pieceEl.style.display = 'block';
+
+  // Reset slider
+  currentSliderPos = 0;
+  updateSliderUI(0);
+  document.getElementById('toastArea').innerHTML = '';
+  document.getElementById('gapInfo').textContent = '缺口 X=' + gapX + 'px  |  容差 ±' + tolerance + 'px  |  拼图从背景裁剪';
+
+  if (save) {
+    var dataURL = bgCanvas.toDataURL('image/jpeg', 0.75);
+    var config = { pieceSize:pieceSize, gapStyle:gapStyle, tolerance:tolerance, gapX:gapX, gapY:gapY, canvasW:bgW, canvasH:bgH };
+    addToHistory('slide', '缺口 X=' + gapX + 'px', dataURL, config, gapX, gapY);
+  }
+}
+
+function drawGap(ctx, x, y, w, h, style) {
+  if (style === 'dark') {
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.55)';
+    ctx.fillRect(x, y, w, h);
+    ctx.save();
+    ctx.setLineDash([5, 3]);
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(x + 1, y + 1, w - 2, h - 2);
+    ctx.restore();
+    drawCornerMarkers(ctx, x, y, w, h);
+  } else if (style === 'blur') {
+    var sampleSize = 4;
+    var sw = Math.floor(w / sampleSize);
+    var sh = Math.floor(h / sampleSize);
+    var tempCanvas = document.createElement('canvas');
+    tempCanvas.width = sw; tempCanvas.height = sh;
+    var tCtx = tempCanvas.getContext('2d');
+    tCtx.drawImage(ctx.canvas, x, y, w, h, 0, 0, sw, sh);
+    tCtx.fillStyle = 'rgba(0,0,0,0.35)';
+    tCtx.fillRect(0, 0, sw, sh);
+    ctx.drawImage(tempCanvas, 0, 0, sw, sh, x, y, w, h);
+    ctx.save();
+    ctx.setLineDash([5, 3]);
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(x + 1, y + 1, w - 2, h - 2);
+    ctx.restore();
+    drawCornerMarkers(ctx, x, y, w, h);
+  } else if (style === 'cutout') {
+    ctx.fillStyle = 'rgba(20, 20, 30, 0.85)';
+    ctx.fillRect(x, y, w, h);
+    var grad = ctx.createLinearGradient(x, y, x + w, y + h);
+    grad.addColorStop(0, 'rgba(0,0,0,0.3)');
+    grad.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(x, y, w, h);
+    ctx.save();
+    ctx.setLineDash([5, 3]);
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(x + 1, y + 1, w - 2, h - 2);
+    ctx.restore();
+    drawCornerMarkers(ctx, x, y, w, h);
+  }
+}
+
+function drawCornerMarkers(ctx, x, y, w, h) {
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+  [[x,y],[x+w,y],[x,y+h],[x+w,y+h]].forEach(function(p) {
+    ctx.beginPath();
+    ctx.arc(p[0], p[1], 4.5, 0, Math.PI * 2);
+    ctx.fill();
+  });
+}
+
+// ═══════════════════════════════════
+//  SHOW / HIDE card
+// ═══════════════════════════════════
+function showCaptchaCard(type) {
+  document.getElementById('emptyState').style.display = 'none';
+  var card = document.getElementById('captchaCard');
+  card.style.display = 'flex';
+  document.getElementById('cardTypeTag').textContent = type === 'text' ? '🔤 数英验证码' : '🧩 滑块验证码（从背景裁剪）';
+  document.getElementById('btnExport').style.display = 'inline-block';
+
+  var isText = type === 'text';
+  document.getElementById('textCanvas').style.display   = isText ? 'block' : 'none';
+  document.getElementById('textVerifyRow').style.display = isText ? 'flex' : 'none';
+  document.getElementById('slideWrapper').style.display  = isText ? 'none' : 'flex';
+  if (!isText) {
+    document.getElementById('pieceOverlay').style.display = 'inline-block';
+    document.getElementById('pieceCanvas').style.display   = 'block';
+    document.getElementById('bgCanvas').style.display      = 'block';
+    document.getElementById('slideArea').style.display     = 'block';
+    document.getElementById('gapInfo').style.display       = 'block';
+  }
+}
+
+function hideCaptchaCard() {
+  document.getElementById('captchaCard').style.display = 'none';
+  document.getElementById('emptyState').style.display = 'flex';
+  document.getElementById('btnExport').style.display = 'none';
+}
+
+// ═══════════════════════════════════
+//  EXPORT
+// ═══════════════════════════════════
+document.getElementById('btnExport').addEventListener('click', function() {
+  var activeTab = document.querySelector('.left-tab.active');
+  if (!activeTab) return;
+  if (activeTab.dataset.config === 'textCfg' && currentTextAnswer) {
+    exportTextCaptcha();
+  } else if (activeTab.dataset.config === 'slideCfg' && uploadedBgImg) {
+    exportSlideCaptcha();
+  } else if (currentTextAnswer) {
+    exportTextCaptcha();
+  } else if (uploadedBgImg) {
+    exportSlideCaptcha();
+  }
+});
+
+function downloadHTML(filename, html) {
+  var blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function exportTextCaptcha() {
+  var canvas = document.getElementById('textCanvas');
+  var dataURL = canvas.toDataURL('image/png');
+  var answer = currentTextAnswer;
+  var w = canvas.width, h = canvas.height;
+
+  // Build with string concat — dataURL goes in <img src> attribute, never in a JS string literal
+  var p = [];
+  p.push('<!DOCTYPE html>\n<html lang="zh-CN">\n<head>\n<meta charset="UTF-8">\n');
+  p.push('<meta name="viewport" content="width=device-width,initial-scale=1.0">\n');
+  p.push('<title>数英验证码</title>\n<style>\n');
+  p.push('*{box-sizing:border-box;margin:0;padding:0}');
+  p.push("body{display:flex;align-items:center;justify-content:center;min-height:100vh;background:#0f0f1a;font-family:'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif}");
+  p.push('.card{background:#1a1a32;border-radius:16px;padding:24px;border:1px solid #2a2a48;display:flex;flex-direction:column;align-items:center;gap:14px}');
+  p.push('img{border-radius:8px;max-width:100%;display:block}');
+  p.push('.row{display:flex;gap:10px;width:100%}');
+  p.push('input{flex:1;padding:10px 14px;background:#0f0f22;border:1.5px solid #35355a;border-radius:10px;color:#e0e8ff;font-size:17px;letter-spacing:4px;text-align:center;font-weight:700;outline:none}');
+  p.push('input:focus{border-color:#6d8fff}');
+  p.push('.btn{padding:10px 20px;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;background:linear-gradient(135deg,#10b981,#059669);color:#fff}');
+  p.push('.btn:hover{box-shadow:0 4px 14px rgba(16,185,129,.35)}');
+  p.push('.toast{padding:9px 16px;border-radius:9px;font-weight:600;font-size:13px;text-align:center;width:100%;display:none}');
+  p.push('.toast.success{background:#0d3320;color:#4ade80;border:1px solid #1a5c35;display:block}');
+  p.push('.toast.error{background:#331010;color:#f87171;border:1px solid #5c1a1a;display:block}');
+  p.push('</style>\n</head>\n<body>\n<div class="card">\n');
+  // dataURL safely in src attribute
+  p.push('<img id="img" src="', dataURL, '" width="', String(w), '" height="', String(h), '" alt="验证码">\n');
+  p.push('<div class="row">\n');
+  p.push('<input type="text" id="inp" placeholder="输入验证码" maxlength="8" autocomplete="off">\n');
+  p.push('<button class="btn" id="btn">验证</button>\n');
+  p.push('</div>\n<div class="toast" id="t"></div>\n</div>\n');
+  // JS — answer via JSON.stringify for safety
+  p.push('<script>\n');
+  p.push('var A=' + JSON.stringify(answer) + ';\n');
+  p.push('document.getElementById("btn").onclick=function(){');
+  p.push('var v=document.getElementById("inp").value.trim(),t=document.getElementById("t");');
+  p.push('if(!v){t.className="toast error";t.textContent="\\u8bf7\\u8f93\\u5165\\u9a8c\\u8bc1\\u7801";return}');
+  p.push('if(v.toLowerCase()===A.toLowerCase()){t.className="toast success";t.textContent="\\u2705 \\u9a8c\\u8bc1\\u901a\\u8fc7\\uff01"}');
+  p.push('else{t.className="toast error";t.textContent="\\u274c \\u9a8c\\u8bc1\\u5931\\u8d25\\uff0c\\u6b63\\u786e\\u7b54\\u6848\\uff1a"+A}};\n');
+  p.push('document.getElementById("inp").addEventListener("keydown",function(e){if(e.key==="Enter")document.getElementById("btn").click()});\n');
+  p.push('<\/script>\n</body>\n</html>');
+
+  downloadHTML('数英验证码.html', p.join(''));
+}
+
+function exportSlideCaptcha() {
+  var bgCanvas = document.getElementById('bgCanvas');
+  var pieceCanvas = document.getElementById('pieceCanvas');
+  var bgDataURL = bgCanvas.toDataURL('image/png');
+  var pieceDataURL = pieceCanvas.toDataURL('image/png');
+  var bgW = bgCanvas.width, bgH = bgCanvas.height;
+  var pW = pieceCanvas.width, pH = pieceCanvas.height;
+  var correctX = gapX;
+  var correctY = gapY;
+  var tolerance = parseInt(document.getElementById('sTolerance').value);
+
+  var p = [];
+  p.push('<!DOCTYPE html>\n<html lang="zh-CN">\n<head>\n<meta charset="UTF-8">\n');
+  p.push('<meta name="viewport" content="width=device-width,initial-scale=1.0">\n');
+  p.push('<title>滑块验证码</title>\n<style>\n');
+  p.push('*{box-sizing:border-box;margin:0;padding:0}');
+  p.push("body{display:flex;align-items:center;justify-content:center;min-height:100vh;background:#0f0f1a;font-family:'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif}");
+  p.push('.card{background:#1a1a32;border-radius:16px;padding:24px;border:1px solid #2a2a48;display:flex;flex-direction:column;align-items:center;gap:12px}');
+  p.push('.ov{position:relative;display:inline-block;line-height:0}');
+  p.push('.ov .piece{position:absolute;top:' + String(correctY) + 'px;left:0;border-radius:4px;box-shadow:0 6px 22px rgba(0,0,0,.65);pointer-events:none;border:2px solid rgba(255,255,255,.8)}');
+  p.push('img{border-radius:8px;max-width:100%;display:block}');
+  p.push('.info{font-size:11px;color:#556688;text-align:center;background:#0f0f22;padding:6px 14px;border-radius:8px;width:100%}');
+  p.push('.slider-area{width:' + String(bgW) + 'px;max-width:100%}');
+  p.push('.slider-label{font-size:11px;color:#556688;margin-bottom:8px;text-align:center}');
+  p.push('.slider-track{width:100%;height:42px;background:#0f0f22;border-radius:21px;position:relative;border:1.5px solid #35355a;overflow:hidden;cursor:pointer;user-select:none;-webkit-user-select:none}');
+  p.push('.slider-fill{height:100%;background:linear-gradient(90deg,#4a6cf7,#6d8fff);border-radius:21px 0 0 21px}');
+  p.push('.slider-handle{position:absolute;top:2px;width:38px;height:38px;background:#e0e8ff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;color:#4a6cf7;cursor:grab;box-shadow:0 2px 10px rgba(0,0,0,.4);z-index:2}');
+  p.push('.slider-handle:active{cursor:grabbing}');
+  p.push('.toast{padding:9px 16px;border-radius:9px;font-weight:600;font-size:13px;text-align:center;width:100%;display:none}');
+  p.push('.toast.success{background:#0d3320;color:#4ade80;border:1px solid #1a5c35;display:block}');
+  p.push('.toast.error{background:#331010;color:#f87171;border:1px solid #5c1a1a;display:block}');
+  p.push('</style>\n</head>\n<body>\n<div class="card">\n');
+
+  // Images with dataURL in src
+  p.push('<div class="ov">\n');
+  p.push('<img id="bg" src="', bgDataURL, '" width="', String(bgW), '" height="', String(bgH), '" alt="背景">\n');
+  p.push('<img class="piece" id="pc" src="', pieceDataURL, '" width="', String(pW), '" height="', String(pH), '" alt="拼图">\n');
+  p.push('</div>\n');
+  p.push('<div class="info">拖动滑块对准缺口  ·  容差 ±' + String(tolerance) + 'px</div>\n');
+  p.push('<div class="slider-area">\n');
+  p.push('<div class="slider-label">→ 拖动滑块，使拼图块对准缺口 ←</div>\n');
+  p.push('<div class="slider-track" id="track">\n');
+  p.push('<div class="slider-fill" id="fill" style="width:20px"></div>\n');
+  p.push('<div class="slider-handle" id="handle" style="left:0">⟷</div>\n');
+  p.push('</div>\n</div>\n<div class="toast" id="t"></div>\n</div>\n');
+
+  // JS — no template literals, no dataURL in strings
+  p.push('<script>\n');
+  p.push('var GX=' + String(correctX) + ',TOL=' + String(tolerance) + ',MAX=' + String(bgW - pW) + ';\n');
+  p.push('var P=0,D=!1;\n');
+  p.push('function U(p){P=Math.max(0,Math.min(p,MAX));document.getElementById("handle").style.left=P+"px";');
+  p.push('document.getElementById("fill").style.width=(P+19)+"px";document.getElementById("pc").style.left=P+"px"}\n');
+  p.push('function X(e){var r=document.getElementById("track").getBoundingClientRect();');
+  p.push('var c=e.touches?e.touches[0].clientX:e.clientX;return Math.max(0,Math.min(c-r.left-19,MAX))}\n');
+  p.push('document.getElementById("handle").addEventListener("mousedown",function(e){D=!0;e.preventDefault()});\n');
+  p.push('document.addEventListener("mousemove",function(e){if(!D)return;U(X(e))});\n');
+  p.push('document.addEventListener("mouseup",function(){if(!D)return;D=!1;C()});\n');
+  p.push('document.getElementById("handle").addEventListener("touchstart",function(e){D=!0;e.preventDefault()},{passive:!1});\n');
+  p.push('document.addEventListener("touchmove",function(e){if(!D)return;U(X(e))},{passive:!1});\n');
+  p.push('document.addEventListener("touchend",function(){if(!D)return;D=!1;C()});\n');
+  p.push('document.getElementById("track").addEventListener("mousedown",function(e){if(e.target===document.getElementById("handle"))return;U(X(e));D=!0;e.preventDefault()});\n');
+  p.push('function C(){var d=Math.abs(P-GX),t=document.getElementById("t");');
+  p.push('if(d<=TOL){t.className="toast success";t.textContent="\\u2705 \\u9a8c\\u8bc1\\u901a\\u8fc7\\uff01\\u8bef\\u5dee "+d+"px"}');
+  p.push('else{t.className="toast error";t.textContent="\\u274c \\u504f\\u5dee "+d+"px\\uff0c\\u518d\\u8bd5\\u4e00\\u6b21";setTimeout(function(){U(0)},800)}}\n');
+  p.push('<\/script>\n</body>\n</html>');
+
+  downloadHTML('滑块验证码.html', p.join(''));
+}
+
+// ═══════════════════════════════════
+//  TEXT VERIFY
+// ═══════════════════════════════════
+document.getElementById('btnTextVerify').addEventListener('click', function() {
+  var input = document.getElementById('textInput').value.trim();
+  var toast = document.getElementById('toastArea');
+  if (!input) { toast.innerHTML = '<div class="toast error">⚠️ 请输入验证码</div>'; return; }
+  if (input.toLowerCase() === currentTextAnswer.toLowerCase()) {
+    toast.innerHTML = '<div class="toast success">✅ 验证通过！（不区分大小写）</div>';
+  } else {
+    toast.innerHTML = '<div class="toast error">❌ 验证失败，正确答案：' + currentTextAnswer + '</div>';
+  }
+});
+document.getElementById('textInput').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') document.getElementById('btnTextVerify').click();
+});
+
+// ═══════════════════════════════════
+//  SLIDER DRAG
+// ═══════════════════════════════════
+var sliderHandle = document.getElementById('sliderHandle');
+var sliderTrack  = document.getElementById('sliderTrack');
+
+function updateSliderUI(pos) {
+  var clamped = Math.max(0, Math.min(pos, sliderMax));
+  currentSliderPos = clamped;
+  sliderHandle.style.left = clamped + 'px';
+  document.getElementById('sliderFill').style.width = (clamped + 19) + 'px';
+  var piece = document.getElementById('pieceCanvas');
+  if (piece.style.position === 'absolute') { piece.style.left = clamped + 'px'; }
+}
+
+function getSliderX(e) {
+  var rect = sliderTrack.getBoundingClientRect();
+  var clientX = e.touches ? e.touches[0].clientX : e.clientX;
+  return Math.max(0, Math.min(clientX - rect.left - 19, sliderMax));
+}
+
+function onSliderStart(e) { dragging = true; e.preventDefault(); }
+function onSliderMove(e) { if (!dragging) return; updateSliderUI(getSliderX(e)); }
+function onSliderEnd() {
+  if (!dragging) return;
+  dragging = false;
+  var tolerance = parseInt(document.getElementById('sTolerance').value);
+  var diff = Math.abs(currentSliderPos - gapX);
+  var toast = document.getElementById('toastArea');
+  if (diff <= tolerance) {
+    toast.innerHTML = '<div class="toast success">✅ 验证通过！误差 ' + diff + 'px（容差 ±' + tolerance + 'px）</div>';
+  } else {
+    toast.innerHTML = '<div class="toast error">❌ 偏差 ' + diff + 'px（容差 ±' + tolerance + 'px），再试</div>';
+    setTimeout(function() { updateSliderUI(0); }, 1000);
+  }
+}
+
+sliderHandle.addEventListener('mousedown', onSliderStart);
+document.addEventListener('mousemove', onSliderMove);
+document.addEventListener('mouseup', onSliderEnd);
+sliderHandle.addEventListener('touchstart', onSliderStart, { passive: false });
+document.addEventListener('touchmove', onSliderMove, { passive: false });
+document.addEventListener('touchend', onSliderEnd);
+sliderTrack.addEventListener('mousedown', function(e) {
+  if (e.target === sliderHandle) return;
+  updateSliderUI(getSliderX(e));
+  onSliderStart(e);
+});
+
+// ═══════════════════════════════════
+//  HISTORY
+// ═══════════════════════════════════
+async function addToHistory(type, answer, dataURL, config, gX, gY) {
+  var bgFile = null;
+  if (type === 'slide' && document.getElementById('fileBg').files[0]) {
+    try { var r = await API.uploadImage(document.getElementById('fileBg').files[0]); bgFile = r.filename; } catch(e) {}
+  }
+  var entry = { type:type, answer:answer, dataURL:dataURL, config:config, gapX:gX, gapY:gY, bgFile:bgFile };
+  try {
+    var result = await API.saveHistory(entry);
+    entry.id = result.id;
+  } catch(e) { entry.id = String(Date.now()); }
+  getHistoryArr().unshift(entry);
+  currentEntry = entry;
+  renderHistory();
+}
+
+async function deleteHistory(id) {
+  try { await API.deleteHistory(id); } catch(e) {}
+  var h = getHistoryArr();
+  var idx = -1;
+  for (var i = 0; i < h.length; i++) { if (h[i] && h[i].id === id) { idx = i; break; } }
+  if (idx === -1) return;
+  h.splice(idx, 1);
+  if (currentEntry && currentEntry.id === id) {
+    currentEntry = h.length > 0 ? h[0] : null;
+    if (currentEntry) { loadHistoryEntry(currentEntry); } else { hideCaptchaCard(); }
+  }
+  renderHistory();
+}
+
+async function loadHistoryEntry(entry) {
+  currentEntry = entry;
+  showCaptchaCard(entry.type);
+
+  if (entry.type === 'text') {
+    currentTextAnswer = entry.answer || '';
+    var canvas = document.getElementById('textCanvas');
+    canvas.style.display = 'block';
+    var img = new Image();
+    img.onload = function() {
+      var ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0);
+    };
+    img.src = entry.dataURL;
+    document.getElementById('textInput').value = '';
+    document.getElementById('toastArea').innerHTML = '';
+    document.getElementById('slideWrapper').style.display = 'none';
+  } else {
+    gapX = entry.gapX || 0;
+    gapY = entry.gapY || 0;
+    var pieceSize = (entry.config && entry.config.pieceSize) || 60;
+    var gapStyle  = (entry.config && entry.config.gapStyle) || 'dark';
+    var tolerance = (entry.config && entry.config.tolerance) || 5;
+    var canvasW = (entry.config && entry.config.canvasW) || 500;
+    var canvasH = (entry.config && entry.config.canvasH) || 240;
+
+    var bgCanvas = document.getElementById('bgCanvas');
+    bgCanvas.width  = canvasW;
+    bgCanvas.height = canvasH;
+    bgCanvas.style.width  = canvasW + 'px';
+    bgCanvas.style.height = canvasH + 'px';
+    document.getElementById('slideWrapper').style.width = canvasW + 'px';
+    sliderMax = canvasW - pieceSize;
+    currentSliderPos = 0;
+    updateSliderUI(0);
+    document.getElementById('toastArea').innerHTML = '';
+
+    var ctx = bgCanvas.getContext('2d');
+
+    if (entry.bgFile) {
+      var bgImg = new Image();
+      bgImg.crossOrigin = 'anonymous';
+      await new Promise(function(resolve) {
+        bgImg.onload = function() {
+          ctx.clearRect(0, 0, canvasW, canvasH);
+          var imgAspect = bgImg.width / bgImg.height;
+          var canAspect = canvasW / canvasH;
+          var dw, dh, dx, dy;
+          if (imgAspect > canAspect) { dh = canvasH; dw = canvasH * imgAspect; dx = (canvasW-dw)/2; dy = 0; }
+          else { dw = canvasW; dh = canvasW / imgAspect; dx = 0; dy = (canvasH-dh)/2; }
+          ctx.drawImage(bgImg, dx, dy, dw, dh);
+          drawGap(ctx, gapX, gapY, pieceSize, pieceSize, gapStyle);
+          ctx.strokeStyle = '#3a3a58'; ctx.lineWidth = 1;
+          ctx.strokeRect(1, 1, canvasW-2, canvasH-2);
+
+          var pieceCanvas = document.getElementById('pieceCanvas');
+          pieceCanvas.width = pieceSize; pieceCanvas.height = pieceSize;
+          var pCtx = pieceCanvas.getContext('2d');
+          var pieceData = ctx.getImageData(gapX, gapY, pieceSize, pieceSize);
+          pCtx.putImageData(pieceData, 0, 0);
+          pCtx.strokeStyle = 'rgba(255,255,255,0.85)';
+          pCtx.lineWidth = 2;
+          pCtx.strokeRect(1, 1, pieceSize-2, pieceSize-2);
+
+          var pieceEl = pieceCanvas;
+          pieceEl.style.position = 'absolute';
+          pieceEl.style.top = gapY + 'px';
+          pieceEl.style.left = '0px';
+          pieceEl.style.width = pieceSize + 'px';
+          pieceEl.style.height = pieceSize + 'px';
+          pieceEl.style.display = 'block';
+          resolve();
+        };
+        bgImg.onerror = resolve;
+        bgImg.src = '/uploads/' + entry.bgFile;
+      });
+      uploadedBgImg = bgImg;
+    }
+
+    document.getElementById('textCanvas').style.display = 'none';
+    document.getElementById('textVerifyRow').style.display = 'none';
+    document.getElementById('pieceOverlay').style.display = 'inline-block';
+    document.getElementById('bgCanvas').style.display = 'block';
+    document.getElementById('slideArea').style.display = 'block';
+    document.getElementById('gapInfo').style.display = 'block';
+    document.getElementById('gapInfo').textContent = '缺口 X=' + gapX + 'px  |  容差 ±' + tolerance + 'px  |  从历史恢复';
+  }
+  document.getElementById('rightScroll').scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function renderHistory() {
+  var grid = document.getElementById('historyGrid');
+  var h = getHistoryArr();
+  document.getElementById('historyCount').textContent = '历史记录：' + h.length;
+
+  if (h.length === 0) {
+    grid.innerHTML = '<div class="hc-empty">暂无记录 — 制作一个验证码吧！</div>';
+    return;
+  }
+
+  var html = '';
+  for (var i = 0; i < h.length; i++) {
+    var e = h[i];
+    if (!e || !e.id) continue;
+    html += '<div class="history-card" data-id="' + e.id + '" onclick="window._loadHistory(\'' + e.id + '\')">';
+    html += '<span class="hc-type">' + (e.type === 'text' ? '🔤 数英' : '🧩 滑块') + '</span>';
+    html += '<button class="hc-delete" onclick="event.stopPropagation();window._deleteHistory(\'' + e.id + '\')" title="删除">✕</button>';
+    html += '<img src="' + (e.dataURL || '') + '" alt="验证码" style="width:100%;display:block;pointer-events:none;">';
+    html += '<div class="hc-info"><span class="hc-answer">' + (e.answer || '') + '</span></div>';
+    html += '</div>';
+  }
+  grid.innerHTML = html || '<div class="hc-empty">暂无记录</div>';
+}
+
+window._deleteHistory = deleteHistory;
+window._loadHistory = function(id) {
+  var h = getHistoryArr();
+  for (var i = 0; i < h.length; i++) {
+    if (h[i] && h[i].id === id) { loadHistoryEntry(h[i]); break; }
+  }
+};
+
+// ═══════════════════════════════════
+//  INIT
+// ═══════════════════════════════════
+async function init() {
+  try {
+    var data = await API.getHistory();
+    setHistoryArr(data);
+  } catch(e) {
+    setHistoryArr([]);
+    console.warn('无法加载历史记录', e);
+  }
+  renderHistory();
+}
+init();
+init();
+</script>
+
+
+</div>
+
+<script>
+// ═══════════════════════════════════
+//  API
+// ═══════════════════════════════════
+var API = {
+  getHistory: async function() {
+    try { var r=await fetch('/api/history'); return r.json(); }
+    catch(e) { return _localHistory(); }
+  },
+  saveHistory: async function(e) {
+    try { var r=await fetch('/api/history',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(e)}); var j=await r.json(); e.id=j.id; _localSave(e); return j; }
+    catch(err) { e.id=String(Date.now()); _localSave(e); return {ok:true,id:e.id}; }
+  },
+  deleteHistory: async function(id) {
+    try { await fetch('/api/history/'+id,{method:'DELETE'}); } catch(err) {}
+    _localDelete(id);
+  },
+  uploadImage: async function(f) {
+    try { var d=new FormData(); d.append('file',f); var r=await fetch('/api/upload',{method:'POST',body:d}); return r.json(); }
+    catch(err) { return {ok:false}; }
+  }
+};
+
+function _localHistory() {
+  try { var d = JSON.parse(localStorage.getItem('captcha_workshop_history') || '[]'); return Array.isArray(d) ? d : []; }
+  catch(e) { return []; }
+}
+function _localSave(entry) {
+  try { var h=_localHistory(); h.unshift(entry); localStorage.setItem('captcha_workshop_history',JSON.stringify(h)); }
+  catch(e) {}
+}
+function _localDelete(id) {
+  try { var h=_localHistory(); h=h.filter(function(e){return e.id!==id}); localStorage.setItem('captcha_workshop_history',JSON.stringify(h)); }
+  catch(e) {}
+}
+
+// ═══════════════════════════════════
+//  State
+// ═══════════════════════════════════
+var _historyArr = [];
+var currentEntry = null;
+var currentTextAnswer = '';
+
+function getHistoryArr() { if (!Array.isArray(_historyArr)) _historyArr = []; return _historyArr; }
+function setHistoryArr(v) { _historyArr = Array.isArray(v) ? v : []; }
+var dragging = false;
+var currentSliderPos = 0;
+var sliderMax = 0;
+var gapX = 0, gapY = 0;
+var uploadedBgImg = null;
+var uploadedBgFile = null;
+
+// ═══════════════════════════════════
+//  LEFT TABS
+// ═══════════════════════════════════
+document.querySelectorAll('.left-tab').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.left-tab').forEach(function(b) { b.classList.remove('active'); });
+    document.querySelectorAll('.config-section').forEach(function(s) { s.classList.remove('active'); });
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.config).classList.add('active');
+  });
+});
+
+// ═══════════════════════════════════
+//  LIVE LABELS
+// ═══════════════════════════════════
+document.getElementById('tCharCount').addEventListener('input', function(){ document.getElementById('tCharCountVal').textContent = this.value + ' 位'; });
+document.getElementById('tFontSize').addEventListener('input', function(){ document.getElementById('tFontSizeVal').textContent = this.value + 'px'; });
+document.getElementById('tNoise').addEventListener('input', function(){ document.getElementById('tNoiseVal').textContent = this.value + ' 个'; });
+document.getElementById('tLines').addEventListener('input', function(){ document.getElementById('tLinesVal').textContent = this.value + ' 条'; });
+document.getElementById('sTolerance').addEventListener('input', function(){ document.getElementById('sToleranceVal').textContent = '±' + this.value + 'px'; });
+document.getElementById('sPieceSize').addEventListener('input', function(){ document.getElementById('sPieceSizeVal').textContent = this.value + 'px'; });
+
+// ═══════════════════════════════════
+//  IMAGE UPLOAD
+// ═══════════════════════════════════
+(function() {
+  var fi = document.getElementById('fileBg');
+  var lbl = document.getElementById('lblBg');
+  var thumb = document.getElementById('thumbBg');
+  fi.addEventListener('change', function() {
+    var file = fi.files[0];
+    if (!file) return;
+    lbl.textContent = '📁 ' + file.name;
+    lbl.classList.add('loaded');
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      thumb.src = e.target.result;
+      thumb.classList.add('show');
+      var img = new Image();
+      img.onload = function() {
+        uploadedBgImg = img;
+        uploadedBgFile = file.name;
+        if ((document.querySelector('.left-tab.active')||{}).dataset||'' === 'slideCfg') {
+          buildSlideCaptcha(false);
+        }
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+})();
+
+// ── Live preview (real-time, no debounce) ──
+function liveRebuildSlide() {
+  if (!uploadedBgImg) return;
+  var activeTab = document.querySelector('.left-tab.active');
+  if (!activeTab || activeTab.dataset.config !== 'slideCfg') return;
+  buildSlideCaptcha(false);
+}
+
+['sPieceSize','sGapStyle','sTolerance','sGapX'].forEach(function(id) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  el.addEventListener('input', function() {
+    if (id === 'sTolerance') document.getElementById('sToleranceVal').textContent = '±' + el.value + 'px';
+    if (id === 'sPieceSize') document.getElementById('sPieceSizeVal').textContent = el.value + 'px';
+    if (id === 'sGapX') document.getElementById('sGapXVal').textContent = el.value + 'px';
+    liveRebuildSlide();
+  });
+  el.addEventListener('change', liveRebuildSlide);
+});
+
+document.getElementById('btnRandomGap').addEventListener('click', function() {
+  if (!uploadedBgImg) return;
+  document.getElementById('sGapX').dataset.random = 'true';
+  buildSlideCaptcha(false);
+});
+
+// ═══════════════════════════════════
+//  UTILS
+// ═══════════════════════════════════
+function randomInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+// ═══════════════════════════════════
+//  BUILD DISPATCH
+// ═══════════════════════════════════
+document.getElementById('btnBuild').addEventListener('click', function() {
+  var activeTab = document.querySelector('.left-tab.active');
+  if (!activeTab) return;
+  if (activeTab.dataset.config === 'textCfg') {
+    buildTextCaptcha();
+  } else {
+    if (!uploadedBgImg) { alert('请先上传一张背景图片！'); return; }
+    buildSlideCaptcha(true);
+  }
+});
+
+// ═══════════════════════════════════
+//  TEXT CAPTCHA
+// ═══════════════════════════════════
+var CHARS_UPPER = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+var CHARS_LOWER = 'abcdefghjkmnpqrstuvwxyz';
+var CHARS_DIGIT = '23456789';
+
+function getCharPool() {
+  var pool = '';
+  if (document.getElementById('tUseUpper').checked) pool += CHARS_UPPER;
+  if (document.getElementById('tUseLower').checked) pool += CHARS_LOWER;
+  if (document.getElementById('tUseDigit').checked) pool += CHARS_DIGIT;
+  if (!pool) pool = CHARS_UPPER + CHARS_LOWER + CHARS_DIGIT;
+  return pool;
+}
+
+function buildTextCaptcha() {
+  var pool = getCharPool();
+  var count = parseInt(document.getElementById('tCharCount').value);
+  var fontSize = parseInt(document.getElementById('tFontSize').value);
+  var rotLvl = parseInt(document.getElementById('tRotation').value);
+  var noiseN = parseInt(document.getElementById('tNoise').value);
+  var linesN = parseInt(document.getElementById('tLines').value);
+  var warpLvl = parseInt(document.getElementById('tWarp').value);
+  var bgColor = document.getElementById('tBgColor').value;
+  var colorMode = document.getElementById('tTextColorMode').value;
+
+  if (pool.length === 0) { alert('请至少选择一种字符类型'); return; }
+
+  showCaptchaCard('text');
+
+  var canvas = document.getElementById('textCanvas');
+  canvas.style.display = 'block';
+  var w = canvas.width, h = canvas.height;
+  var ctx = canvas.getContext('2d');
+
+  ctx.clearRect(0, 0, w, h);
+  ctx.fillStyle = bgColor;
+  ctx.fillRect(0, 0, w, h);
+  ctx.fillStyle = 'rgba(255,255,255,0.02)';
+  for (var i = 0; i < 25; i++) {
+    ctx.fillRect(randomInt(0, w-1), randomInt(0, h-1), randomInt(10, 50), randomInt(2, 6));
+  }
+
+  currentTextAnswer = '';
+  for (var i = 0; i < count; i++) {
+    currentTextAnswer += pool[randomInt(0, pool.length - 1)];
+  }
+
+  var rotRange = [0, 0.14, 0.31, 0.52][rotLvl];
+  var charWidth = w / (count + 1);
+
+  for (var i = 0; i < count; i++) {
+    var char = currentTextAnswer[i];
+    var x = charWidth * (i + 0.5) + randomInt(-10, 10);
+    var y = h / 2 + randomInt(-14, 14);
+    var angle = (Math.random() - 0.5) * 2 * rotRange;
+    var fs = fontSize + randomInt(-4, 4);
+
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(angle);
+
+    var color;
+    if (colorMode === 'random') color = 'rgb(' + randomInt(160,255) + ',' + randomInt(160,255) + ',' + randomInt(180,255) + ')';
+    else if (colorMode === 'light') color = 'rgb(' + randomInt(200,240) + ',' + randomInt(200,240) + ',' + randomInt(210,250) + ')';
+    else color = 'hsl(' + Math.round((i/count)*360 + randomInt(-20,20)) + ', 70%, 75%)';
+
+    ctx.fillStyle = color;
+    ctx.font = 'bold ' + fs + 'px "Segoe UI","PingFang SC","Microsoft YaHei",sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.shadowColor = 'rgba(0,0,0,0.35)';
+    ctx.shadowBlur = 3;
+    ctx.shadowOffsetX = 1; ctx.shadowOffsetY = 1;
+    ctx.fillText(char, 0, 0);
+    ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0;
+    ctx.shadowOffsetX = 0; ctx.shadowOffsetY = 0;
+
+    if (warpLvl > 0) {
+      var ws = [0, 1.5, 3, 5][warpLvl];
+      for (var py = Math.max(0, Math.floor(y-fs/2-5)); py < Math.min(h, Math.ceil(y+fs/2+5)); py++) {
+        var shift = Math.sin(py*0.3)*ws;
+        if (Math.abs(shift) > 0.5) {
+          var sx = Math.max(0, Math.floor(x-fs/2-5+shift));
+          var row = ctx.getImageData(sx, py, Math.min(w-sx, fs+15), 1);
+          ctx.putImageData(row, Math.max(0, Math.floor(x-fs/2-5)), py);
+        }
+      }
+    }
+    ctx.restore();
+  }
+
+  for (var i = 0; i < linesN; i++) {
+    ctx.beginPath();
+    ctx.moveTo(randomInt(0,w), randomInt(0,h));
+    ctx.lineTo(randomInt(0,w), randomInt(0,h));
+    ctx.strokeStyle = 'rgba(' + randomInt(100,200) + ',' + randomInt(100,200) + ',' + randomInt(130,220) + ',0.5)';
+    ctx.lineWidth = randomInt(1,3);
+    ctx.stroke();
+  }
+  for (var i = 0; i < noiseN; i++) {
+    ctx.beginPath();
+    ctx.arc(randomInt(0,w), randomInt(0,h), randomInt(1,2.5), 0, Math.PI*2);
+    ctx.fillStyle = 'rgba(' + randomInt(100,220) + ',' + randomInt(100,220) + ',' + randomInt(120,240) + ',' + (Math.random()*0.5+0.2) + ')';
+    ctx.fill();
+  }
+  ctx.strokeStyle = '#3a3a58'; ctx.lineWidth = 1;
+  ctx.strokeRect(1, 1, w-2, h-2);
+
+  document.getElementById('textInput').value = '';
+  document.getElementById('toastArea').innerHTML = '';
+  document.getElementById('textInput').focus();
+
+  var dataURL = canvas.toDataURL('image/png');
+  var config = { count:count, fontSize:fontSize, rotLvl:rotLvl, noiseN:noiseN, linesN:linesN, warpLvl:warpLvl, bgColor:bgColor, colorMode:colorMode };
+  addToHistory('text', currentTextAnswer, dataURL, config);
+}
+
+// ═══════════════════════════════════
+//  SLIDE CAPTCHA
+// ═══════════════════════════════════
+function buildSlideCaptcha(save) {
+  if (!uploadedBgImg) { alert('请先上传背景图'); return; }
+
+  var pieceSize  = parseInt(document.getElementById('sPieceSize').value);
+  var gapStyle   = document.getElementById('sGapStyle').value;
+  var tolerance  = parseInt(document.getElementById('sTolerance').value);
+
+  showCaptchaCard('slide');
+
+  // Canvas sizing
+  var rightScroll = document.getElementById('rightScroll');
+  var scrollStyle = window.getComputedStyle(rightScroll);
+  var scrollPad = parseFloat(scrollStyle.paddingLeft) + parseFloat(scrollStyle.paddingRight);
+  var cardPad = 20 + 20;
+  var availW = Math.min(rightScroll.clientWidth - scrollPad - cardPad - 4, 600);
+  var imgAspect = uploadedBgImg.width / uploadedBgImg.height;
+  var bgW = Math.max(availW, 300);
+  var bgH = Math.min(Math.round(bgW / imgAspect), 300);
+
+  var bgCanvas  = document.getElementById('bgCanvas');
+  var pieceCanvas = document.getElementById('pieceCanvas');
+
+  bgCanvas.width  = bgW;
+  bgCanvas.height = bgH;
+  bgCanvas.style.width  = bgW + 'px';
+  bgCanvas.style.height = bgH + 'px';
+
+  document.getElementById('slideWrapper').style.width = bgW + 'px';
+
+  var ctx = bgCanvas.getContext('2d');
+
+  // Cover mode
+  ctx.clearRect(0, 0, bgW, bgH);
+  var canAspect = bgW / bgH;
+  var drawW, drawH, drawX, drawY;
+  if (imgAspect > canAspect) {
+    drawH = bgH; drawW = bgH * imgAspect;
+    drawX = (bgW - drawW) / 2; drawY = 0;
+  } else {
+    drawW = bgW; drawH = bgW / imgAspect;
+    drawX = 0; drawY = (bgH - drawH) / 2;
+  }
+  ctx.drawImage(uploadedBgImg, drawX, drawY, drawW, drawH);
+
+  // Gap position
+  var PW = pieceSize, PH = pieceSize;
+  gapY = Math.floor((bgH - PH) / 2);
+  sliderMax = bgW - PW;
+
+  var gapSlider = document.getElementById('sGapX');
+  gapSlider.max = sliderMax;
+  var gapVal = document.getElementById('sGapXVal');
+  var useRandom = (gapSlider.dataset.random === 'true');
+  if (useRandom) {
+    gapX = randomInt(20, Math.max(20, sliderMax));
+    gapSlider.value = gapX;
+    gapSlider.dataset.random = 'false';
+  } else {
+    gapX = parseInt(gapSlider.value) || 0;
+    gapX = Math.max(0, Math.min(gapX, sliderMax));
+    gapSlider.value = gapX;
+  }
+  if (gapVal) gapVal.textContent = gapX + 'px';
+
+  // Extract piece
+  pieceCanvas.width = PW;
+  pieceCanvas.height = PH;
+  var pCtx = pieceCanvas.getContext('2d');
+  var pieceData = ctx.getImageData(gapX, gapY, PW, PH);
+  pCtx.putImageData(pieceData, 0, 0);
+  pCtx.strokeStyle = 'rgba(255,255,255,0.85)';
+  pCtx.lineWidth = 2;
+  pCtx.strokeRect(1, 1, PW - 2, PH - 2);
+
+  // Draw gap
+  drawGap(ctx, gapX, gapY, PW, PH, gapStyle);
+
+  ctx.strokeStyle = '#3a3a58';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(1, 1, bgW - 2, bgH - 2);
+
+  // Position piece
+  var pieceEl = pieceCanvas;
+  pieceEl.style.position = 'absolute';
+  pieceEl.style.top = gapY + 'px';
+  pieceEl.style.left = '0px';
+  pieceEl.style.width = PW + 'px';
+  pieceEl.style.height = PH + 'px';
+  pieceEl.style.display = 'block';
+
+  // Reset slider
+  currentSliderPos = 0;
+  updateSliderUI(0);
+  document.getElementById('toastArea').innerHTML = '';
+  document.getElementById('gapInfo').textContent = '缺口 X=' + gapX + 'px  |  容差 ±' + tolerance + 'px  |  拼图从背景裁剪';
+
+  if (save) {
+    var dataURL = bgCanvas.toDataURL('image/jpeg', 0.75);
+    var config = { pieceSize:pieceSize, gapStyle:gapStyle, tolerance:tolerance, gapX:gapX, gapY:gapY, canvasW:bgW, canvasH:bgH };
+    addToHistory('slide', '缺口 X=' + gapX + 'px', dataURL, config, gapX, gapY);
+  }
+}
+
+function drawGap(ctx, x, y, w, h, style) {
+  if (style === 'dark') {
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.55)';
+    ctx.fillRect(x, y, w, h);
+    ctx.save();
+    ctx.setLineDash([5, 3]);
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(x + 1, y + 1, w - 2, h - 2);
+    ctx.restore();
+    drawCornerMarkers(ctx, x, y, w, h);
+  } else if (style === 'blur') {
+    var sampleSize = 4;
+    var sw = Math.floor(w / sampleSize);
+    var sh = Math.floor(h / sampleSize);
+    var tempCanvas = document.createElement('canvas');
+    tempCanvas.width = sw; tempCanvas.height = sh;
+    var tCtx = tempCanvas.getContext('2d');
+    tCtx.drawImage(ctx.canvas, x, y, w, h, 0, 0, sw, sh);
+    tCtx.fillStyle = 'rgba(0,0,0,0.35)';
+    tCtx.fillRect(0, 0, sw, sh);
+    ctx.drawImage(tempCanvas, 0, 0, sw, sh, x, y, w, h);
+    ctx.save();
+    ctx.setLineDash([5, 3]);
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(x + 1, y + 1, w - 2, h - 2);
+    ctx.restore();
+    drawCornerMarkers(ctx, x, y, w, h);
+  } else if (style === 'cutout') {
+    ctx.fillStyle = 'rgba(20, 20, 30, 0.85)';
+    ctx.fillRect(x, y, w, h);
+    var grad = ctx.createLinearGradient(x, y, x + w, y + h);
+    grad.addColorStop(0, 'rgba(0,0,0,0.3)');
+    grad.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(x, y, w, h);
+    ctx.save();
+    ctx.setLineDash([5, 3]);
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(x + 1, y + 1, w - 2, h - 2);
+    ctx.restore();
+    drawCornerMarkers(ctx, x, y, w, h);
+  }
+}
+
+function drawCornerMarkers(ctx, x, y, w, h) {
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+  [[x,y],[x+w,y],[x,y+h],[x+w,y+h]].forEach(function(p) {
+    ctx.beginPath();
+    ctx.arc(p[0], p[1], 4.5, 0, Math.PI * 2);
+    ctx.fill();
+  });
+}
+
+// ═══════════════════════════════════
+//  SHOW / HIDE card
+// ═══════════════════════════════════
+function showCaptchaCard(type) {
+  document.getElementById('emptyState').style.display = 'none';
+  var card = document.getElementById('captchaCard');
+  card.style.display = 'flex';
+  document.getElementById('cardTypeTag').textContent = type === 'text' ? '🔤 数英验证码' : '🧩 滑块验证码（从背景裁剪）';
+  document.getElementById('btnExport').style.display = 'inline-block';
+
+  var isText = type === 'text';
+  document.getElementById('textCanvas').style.display   = isText ? 'block' : 'none';
+  document.getElementById('textVerifyRow').style.display = isText ? 'flex' : 'none';
+  document.getElementById('slideWrapper').style.display  = isText ? 'none' : 'flex';
+  if (!isText) {
+    document.getElementById('pieceOverlay').style.display = 'inline-block';
+    document.getElementById('pieceCanvas').style.display   = 'block';
+    document.getElementById('bgCanvas').style.display      = 'block';
+    document.getElementById('slideArea').style.display     = 'block';
+    document.getElementById('gapInfo').style.display       = 'block';
+  }
+}
+
+function hideCaptchaCard() {
+  document.getElementById('captchaCard').style.display = 'none';
+  document.getElementById('emptyState').style.display = 'flex';
+  document.getElementById('btnExport').style.display = 'none';
+}
+
+// ═══════════════════════════════════
+//  EXPORT
+// ═══════════════════════════════════
+document.getElementById('btnExport').addEventListener('click', function() {
+  var activeTab = document.querySelector('.left-tab.active');
+  if (!activeTab) return;
+  if (activeTab.dataset.config === 'textCfg' && currentTextAnswer) {
+    exportTextCaptcha();
+  } else if (activeTab.dataset.config === 'slideCfg' && uploadedBgImg) {
+    exportSlideCaptcha();
+  } else if (currentTextAnswer) {
+    exportTextCaptcha();
+  } else if (uploadedBgImg) {
+    exportSlideCaptcha();
+  }
+});
+
+function downloadHTML(filename, html) {
+  var blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function exportTextCaptcha() {
+  var canvas = document.getElementById('textCanvas');
+  var dataURL = canvas.toDataURL('image/png');
+  var answer = currentTextAnswer;
+  var w = canvas.width, h = canvas.height;
+
+  // Build with string concat — dataURL goes in <img src> attribute, never in a JS string literal
+  var p = [];
+  p.push('<!DOCTYPE html>\n<html lang="zh-CN">\n<head>\n<meta charset="UTF-8">\n');
+  p.push('<meta name="viewport" content="width=device-width,initial-scale=1.0">\n');
+  p.push('<title>数英验证码</title>\n<style>\n');
+  p.push('*{box-sizing:border-box;margin:0;padding:0}');
+  p.push("body{display:flex;align-items:center;justify-content:center;min-height:100vh;background:#0f0f1a;font-family:'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif}");
+  p.push('.card{background:#1a1a32;border-radius:16px;padding:24px;border:1px solid #2a2a48;display:flex;flex-direction:column;align-items:center;gap:14px}');
+  p.push('img{border-radius:8px;max-width:100%;display:block}');
+  p.push('.row{display:flex;gap:10px;width:100%}');
+  p.push('input{flex:1;padding:10px 14px;background:#0f0f22;border:1.5px solid #35355a;border-radius:10px;color:#e0e8ff;font-size:17px;letter-spacing:4px;text-align:center;font-weight:700;outline:none}');
+  p.push('input:focus{border-color:#6d8fff}');
+  p.push('.btn{padding:10px 20px;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;background:linear-gradient(135deg,#10b981,#059669);color:#fff}');
+  p.push('.btn:hover{box-shadow:0 4px 14px rgba(16,185,129,.35)}');
+  p.push('.toast{padding:9px 16px;border-radius:9px;font-weight:600;font-size:13px;text-align:center;width:100%;display:none}');
+  p.push('.toast.success{background:#0d3320;color:#4ade80;border:1px solid #1a5c35;display:block}');
+  p.push('.toast.error{background:#331010;color:#f87171;border:1px solid #5c1a1a;display:block}');
+  p.push('</style>\n</head>\n<body>\n<div class="card">\n');
+  // dataURL safely in src attribute
+  p.push('<img id="img" src="', dataURL, '" width="', String(w), '" height="', String(h), '" alt="验证码">\n');
+  p.push('<div class="row">\n');
+  p.push('<input type="text" id="inp" placeholder="输入验证码" maxlength="8" autocomplete="off">\n');
+  p.push('<button class="btn" id="btn">验证</button>\n');
+  p.push('</div>\n<div class="toast" id="t"></div>\n</div>\n');
+  // JS — answer via JSON.stringify for safety
+  p.push('<script>\n');
+  p.push('var A=' + JSON.stringify(answer) + ';\n');
+  p.push('document.getElementById("btn").onclick=function(){');
+  p.push('var v=document.getElementById("inp").value.trim(),t=document.getElementById("t");');
+  p.push('if(!v){t.className="toast error";t.textContent="\\u8bf7\\u8f93\\u5165\\u9a8c\\u8bc1\\u7801";return}');
+  p.push('if(v.toLowerCase()===A.toLowerCase()){t.className="toast success";t.textContent="\\u2705 \\u9a8c\\u8bc1\\u901a\\u8fc7\\uff01"}');
+  p.push('else{t.className="toast error";t.textContent="\\u274c \\u9a8c\\u8bc1\\u5931\\u8d25\\uff0c\\u6b63\\u786e\\u7b54\\u6848\\uff1a"+A}};\n');
+  p.push('document.getElementById("inp").addEventListener("keydown",function(e){if(e.key==="Enter")document.getElementById("btn").click()});\n');
+  p.push('<\/script>\n</body>\n</html>');
+
+  downloadHTML('数英验证码.html', p.join(''));
+}
+
+function exportSlideCaptcha() {
+  var bgCanvas = document.getElementById('bgCanvas');
+  var pieceCanvas = document.getElementById('pieceCanvas');
+  var bgDataURL = bgCanvas.toDataURL('image/png');
+  var pieceDataURL = pieceCanvas.toDataURL('image/png');
+  var bgW = bgCanvas.width, bgH = bgCanvas.height;
+  var pW = pieceCanvas.width, pH = pieceCanvas.height;
+  var correctX = gapX;
+  var correctY = gapY;
+  var tolerance = parseInt(document.getElementById('sTolerance').value);
+
+  var p = [];
+  p.push('<!DOCTYPE html>\n<html lang="zh-CN">\n<head>\n<meta charset="UTF-8">\n');
+  p.push('<meta name="viewport" content="width=device-width,initial-scale=1.0">\n');
+  p.push('<title>滑块验证码</title>\n<style>\n');
+  p.push('*{box-sizing:border-box;margin:0;padding:0}');
+  p.push("body{display:flex;align-items:center;justify-content:center;min-height:100vh;background:#0f0f1a;font-family:'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif}");
+  p.push('.card{background:#1a1a32;border-radius:16px;padding:24px;border:1px solid #2a2a48;display:flex;flex-direction:column;align-items:center;gap:12px}');
+  p.push('.ov{position:relative;display:inline-block;line-height:0}');
+  p.push('.ov .piece{position:absolute;top:' + String(correctY) + 'px;left:0;border-radius:4px;box-shadow:0 6px 22px rgba(0,0,0,.65);pointer-events:none;border:2px solid rgba(255,255,255,.8)}');
+  p.push('img{border-radius:8px;max-width:100%;display:block}');
+  p.push('.info{font-size:11px;color:#556688;text-align:center;background:#0f0f22;padding:6px 14px;border-radius:8px;width:100%}');
+  p.push('.slider-area{width:' + String(bgW) + 'px;max-width:100%}');
+  p.push('.slider-label{font-size:11px;color:#556688;margin-bottom:8px;text-align:center}');
+  p.push('.slider-track{width:100%;height:42px;background:#0f0f22;border-radius:21px;position:relative;border:1.5px solid #35355a;overflow:hidden;cursor:pointer;user-select:none;-webkit-user-select:none}');
+  p.push('.slider-fill{height:100%;background:linear-gradient(90deg,#4a6cf7,#6d8fff);border-radius:21px 0 0 21px}');
+  p.push('.slider-handle{position:absolute;top:2px;width:38px;height:38px;background:#e0e8ff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;color:#4a6cf7;cursor:grab;box-shadow:0 2px 10px rgba(0,0,0,.4);z-index:2}');
+  p.push('.slider-handle:active{cursor:grabbing}');
+  p.push('.toast{padding:9px 16px;border-radius:9px;font-weight:600;font-size:13px;text-align:center;width:100%;display:none}');
+  p.push('.toast.success{background:#0d3320;color:#4ade80;border:1px solid #1a5c35;display:block}');
+  p.push('.toast.error{background:#331010;color:#f87171;border:1px solid #5c1a1a;display:block}');
+  p.push('</style>\n</head>\n<body>\n<div class="card">\n');
+
+  // Images with dataURL in src
+  p.push('<div class="ov">\n');
+  p.push('<img id="bg" src="', bgDataURL, '" width="', String(bgW), '" height="', String(bgH), '" alt="背景">\n');
+  p.push('<img class="piece" id="pc" src="', pieceDataURL, '" width="', String(pW), '" height="', String(pH), '" alt="拼图">\n');
+  p.push('</div>\n');
+  p.push('<div class="info">拖动滑块对准缺口  ·  容差 ±' + String(tolerance) + 'px</div>\n');
+  p.push('<div class="slider-area">\n');
+  p.push('<div class="slider-label">→ 拖动滑块，使拼图块对准缺口 ←</div>\n');
+  p.push('<div class="slider-track" id="track">\n');
+  p.push('<div class="slider-fill" id="fill" style="width:20px"></div>\n');
+  p.push('<div class="slider-handle" id="handle" style="left:0">⟷</div>\n');
+  p.push('</div>\n</div>\n<div class="toast" id="t"></div>\n</div>\n');
+
+  // JS — no template literals, no dataURL in strings
+  p.push('<script>\n');
+  p.push('var GX=' + String(correctX) + ',TOL=' + String(tolerance) + ',MAX=' + String(bgW - pW) + ';\n');
+  p.push('var P=0,D=!1;\n');
+  p.push('function U(p){P=Math.max(0,Math.min(p,MAX));document.getElementById("handle").style.left=P+"px";');
+  p.push('document.getElementById("fill").style.width=(P+19)+"px";document.getElementById("pc").style.left=P+"px"}\n');
+  p.push('function X(e){var r=document.getElementById("track").getBoundingClientRect();');
+  p.push('var c=e.touches?e.touches[0].clientX:e.clientX;return Math.max(0,Math.min(c-r.left-19,MAX))}\n');
+  p.push('document.getElementById("handle").addEventListener("mousedown",function(e){D=!0;e.preventDefault()});\n');
+  p.push('document.addEventListener("mousemove",function(e){if(!D)return;U(X(e))});\n');
+  p.push('document.addEventListener("mouseup",function(){if(!D)return;D=!1;C()});\n');
+  p.push('document.getElementById("handle").addEventListener("touchstart",function(e){D=!0;e.preventDefault()},{passive:!1});\n');
+  p.push('document.addEventListener("touchmove",function(e){if(!D)return;U(X(e))},{passive:!1});\n');
+  p.push('document.addEventListener("touchend",function(){if(!D)return;D=!1;C()});\n');
+  p.push('document.getElementById("track").addEventListener("mousedown",function(e){if(e.target===document.getElementById("handle"))return;U(X(e));D=!0;e.preventDefault()});\n');
+  p.push('function C(){var d=Math.abs(P-GX),t=document.getElementById("t");');
+  p.push('if(d<=TOL){t.className="toast success";t.textContent="\\u2705 \\u9a8c\\u8bc1\\u901a\\u8fc7\\uff01\\u8bef\\u5dee "+d+"px"}');
+  p.push('else{t.className="toast error";t.textContent="\\u274c \\u504f\\u5dee "+d+"px\\uff0c\\u518d\\u8bd5\\u4e00\\u6b21";setTimeout(function(){U(0)},800)}}\n');
+  p.push('<\/script>\n</body>\n</html>');
+
+  downloadHTML('滑块验证码.html', p.join(''));
+}
+
+// ═══════════════════════════════════
+//  TEXT VERIFY
+// ═══════════════════════════════════
+document.getElementById('btnTextVerify').addEventListener('click', function() {
+  var input = document.getElementById('textInput').value.trim();
+  var toast = document.getElementById('toastArea');
+  if (!input) { toast.innerHTML = '<div class="toast error">⚠️ 请输入验证码</div>'; return; }
+  if (input.toLowerCase() === currentTextAnswer.toLowerCase()) {
+    toast.innerHTML = '<div class="toast success">✅ 验证通过！（不区分大小写）</div>';
+  } else {
+    toast.innerHTML = '<div class="toast error">❌ 验证失败，正确答案：' + currentTextAnswer + '</div>';
+  }
+});
+document.getElementById('textInput').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') document.getElementById('btnTextVerify').click();
+});
+
+// ═══════════════════════════════════
+//  SLIDER DRAG
+// ═══════════════════════════════════
+var sliderHandle = document.getElementById('sliderHandle');
+var sliderTrack  = document.getElementById('sliderTrack');
+
+function updateSliderUI(pos) {
+  var clamped = Math.max(0, Math.min(pos, sliderMax));
+  currentSliderPos = clamped;
+  sliderHandle.style.left = clamped + 'px';
+  document.getElementById('sliderFill').style.width = (clamped + 19) + 'px';
+  var piece = document.getElementById('pieceCanvas');
+  if (piece.style.position === 'absolute') { piece.style.left = clamped + 'px'; }
+}
+
+function getSliderX(e) {
+  var rect = sliderTrack.getBoundingClientRect();
+  var clientX = e.touches ? e.touches[0].clientX : e.clientX;
+  return Math.max(0, Math.min(clientX - rect.left - 19, sliderMax));
+}
+
+function onSliderStart(e) { dragging = true; e.preventDefault(); }
+function onSliderMove(e) { if (!dragging) return; updateSliderUI(getSliderX(e)); }
+function onSliderEnd() {
+  if (!dragging) return;
+  dragging = false;
+  var tolerance = parseInt(document.getElementById('sTolerance').value);
+  var diff = Math.abs(currentSliderPos - gapX);
+  var toast = document.getElementById('toastArea');
+  if (diff <= tolerance) {
+    toast.innerHTML = '<div class="toast success">✅ 验证通过！误差 ' + diff + 'px（容差 ±' + tolerance + 'px）</div>';
+  } else {
+    toast.innerHTML = '<div class="toast error">❌ 偏差 ' + diff + 'px（容差 ±' + tolerance + 'px），再试</div>';
+    setTimeout(function() { updateSliderUI(0); }, 1000);
+  }
+}
+
+sliderHandle.addEventListener('mousedown', onSliderStart);
+document.addEventListener('mousemove', onSliderMove);
+document.addEventListener('mouseup', onSliderEnd);
+sliderHandle.addEventListener('touchstart', onSliderStart, { passive: false });
+document.addEventListener('touchmove', onSliderMove, { passive: false });
+document.addEventListener('touchend', onSliderEnd);
+sliderTrack.addEventListener('mousedown', function(e) {
+  if (e.target === sliderHandle) return;
+  updateSliderUI(getSliderX(e));
+  onSliderStart(e);
+});
+
+// ═══════════════════════════════════
+//  HISTORY
+// ═══════════════════════════════════
+async function addToHistory(type, answer, dataURL, config, gX, gY) {
+  var bgFile = null;
+  if (type === 'slide' && document.getElementById('fileBg').files[0]) {
+    try { var r = await API.uploadImage(document.getElementById('fileBg').files[0]); bgFile = r.filename; } catch(e) {}
+  }
+  var entry = { type:type, answer:answer, dataURL:dataURL, config:config, gapX:gX, gapY:gY, bgFile:bgFile };
+  try {
+    var result = await API.saveHistory(entry);
+    entry.id = result.id;
+  } catch(e) { entry.id = String(Date.now()); }
+  getHistoryArr().unshift(entry);
+  currentEntry = entry;
+  renderHistory();
+}
+
+async function deleteHistory(id) {
+  try { await API.deleteHistory(id); } catch(e) {}
+  var h = getHistoryArr();
+  var idx = -1;
+  for (var i = 0; i < h.length; i++) { if (h[i] && h[i].id === id) { idx = i; break; } }
+  if (idx === -1) return;
+  h.splice(idx, 1);
+  if (currentEntry && currentEntry.id === id) {
+    currentEntry = h.length > 0 ? h[0] : null;
+    if (currentEntry) { loadHistoryEntry(currentEntry); } else { hideCaptchaCard(); }
+  }
+  renderHistory();
+}
+
+async function loadHistoryEntry(entry) {
+  currentEntry = entry;
+  showCaptchaCard(entry.type);
+
+  if (entry.type === 'text') {
+    currentTextAnswer = entry.answer || '';
+    var canvas = document.getElementById('textCanvas');
+    canvas.style.display = 'block';
+    var img = new Image();
+    img.onload = function() {
+      var ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0);
+    };
+    img.src = entry.dataURL;
+    document.getElementById('textInput').value = '';
+    document.getElementById('toastArea').innerHTML = '';
+    document.getElementById('slideWrapper').style.display = 'none';
+  } else {
+    gapX = entry.gapX || 0;
+    gapY = entry.gapY || 0;
+    var pieceSize = (entry.config && entry.config.pieceSize) || 60;
+    var gapStyle  = (entry.config && entry.config.gapStyle) || 'dark';
+    var tolerance = (entry.config && entry.config.tolerance) || 5;
+    var canvasW = (entry.config && entry.config.canvasW) || 500;
+    var canvasH = (entry.config && entry.config.canvasH) || 240;
+
+    var bgCanvas = document.getElementById('bgCanvas');
+    bgCanvas.width  = canvasW;
+    bgCanvas.height = canvasH;
+    bgCanvas.style.width  = canvasW + 'px';
+    bgCanvas.style.height = canvasH + 'px';
+    document.getElementById('slideWrapper').style.width = canvasW + 'px';
+    sliderMax = canvasW - pieceSize;
+    currentSliderPos = 0;
+    updateSliderUI(0);
+    document.getElementById('toastArea').innerHTML = '';
+
+    var ctx = bgCanvas.getContext('2d');
+
+    if (entry.bgFile) {
+      var bgImg = new Image();
+      bgImg.crossOrigin = 'anonymous';
+      await new Promise(function(resolve) {
+        bgImg.onload = function() {
+          ctx.clearRect(0, 0, canvasW, canvasH);
+          var imgAspect = bgImg.width / bgImg.height;
+          var canAspect = canvasW / canvasH;
+          var dw, dh, dx, dy;
+          if (imgAspect > canAspect) { dh = canvasH; dw = canvasH * imgAspect; dx = (canvasW-dw)/2; dy = 0; }
+          else { dw = canvasW; dh = canvasW / imgAspect; dx = 0; dy = (canvasH-dh)/2; }
+          ctx.drawImage(bgImg, dx, dy, dw, dh);
+          drawGap(ctx, gapX, gapY, pieceSize, pieceSize, gapStyle);
+          ctx.strokeStyle = '#3a3a58'; ctx.lineWidth = 1;
+          ctx.strokeRect(1, 1, canvasW-2, canvasH-2);
+
+          var pieceCanvas = document.getElementById('pieceCanvas');
+          pieceCanvas.width = pieceSize; pieceCanvas.height = pieceSize;
+          var pCtx = pieceCanvas.getContext('2d');
+          var pieceData = ctx.getImageData(gapX, gapY, pieceSize, pieceSize);
+          pCtx.putImageData(pieceData, 0, 0);
+          pCtx.strokeStyle = 'rgba(255,255,255,0.85)';
+          pCtx.lineWidth = 2;
+          pCtx.strokeRect(1, 1, pieceSize-2, pieceSize-2);
+
+          var pieceEl = pieceCanvas;
+          pieceEl.style.position = 'absolute';
+          pieceEl.style.top = gapY + 'px';
+          pieceEl.style.left = '0px';
+          pieceEl.style.width = pieceSize + 'px';
+          pieceEl.style.height = pieceSize + 'px';
+          pieceEl.style.display = 'block';
+          resolve();
+        };
+        bgImg.onerror = resolve;
+        bgImg.src = '/uploads/' + entry.bgFile;
+      });
+      uploadedBgImg = bgImg;
+    }
+
+    document.getElementById('textCanvas').style.display = 'none';
+    document.getElementById('textVerifyRow').style.display = 'none';
+    document.getElementById('pieceOverlay').style.display = 'inline-block';
+    document.getElementById('bgCanvas').style.display = 'block';
+    document.getElementById('slideArea').style.display = 'block';
+    document.getElementById('gapInfo').style.display = 'block';
+    document.getElementById('gapInfo').textContent = '缺口 X=' + gapX + 'px  |  容差 ±' + tolerance + 'px  |  从历史恢复';
+  }
+  document.getElementById('rightScroll').scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function renderHistory() {
+  var grid = document.getElementById('historyGrid');
+  var h = getHistoryArr();
+  document.getElementById('historyCount').textContent = '历史记录：' + h.length;
+
+  if (h.length === 0) {
+    grid.innerHTML = '<div class="hc-empty">暂无记录 — 制作一个验证码吧！</div>';
+    return;
+  }
+
+  var html = '';
+  for (var i = 0; i < h.length; i++) {
+    var e = h[i];
+    if (!e || !e.id) continue;
+    html += '<div class="history-card" data-id="' + e.id + '" onclick="window._loadHistory(\'' + e.id + '\')">';
+    html += '<span class="hc-type">' + (e.type === 'text' ? '🔤 数英' : '🧩 滑块') + '</span>';
+    html += '<button class="hc-delete" onclick="event.stopPropagation();window._deleteHistory(\'' + e.id + '\')" title="删除">✕</button>';
+    html += '<img src="' + (e.dataURL || '') + '" alt="验证码" style="width:100%;display:block;pointer-events:none;">';
+    html += '<div class="hc-info"><span class="hc-answer">' + (e.answer || '') + '</span></div>';
+    html += '</div>';
+  }
+  grid.innerHTML = html || '<div class="hc-empty">暂无记录</div>';
+}
+
+window._deleteHistory = deleteHistory;
+window._loadHistory = function(id) {
+  var h = getHistoryArr();
+  for (var i = 0; i < h.length; i++) {
+    if (h[i] && h[i].id === id) { loadHistoryEntry(h[i]); break; }
+  }
+};
+
+// ═══════════════════════════════════
+//  INIT
+// ═══════════════════════════════════
+async function init() {
+  try {
+    var data = await API.getHistory();
+    setHistoryArr(data);
+  } catch(e) {
+    setHistoryArr([]);
+    console.warn('无法加载历史记录', e);
+  }
+  renderHistory();
+}
+init();
+init();
+</script>
+</body>
+</html>

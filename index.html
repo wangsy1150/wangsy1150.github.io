@@ -5,13 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Python 数据采集作品集" />
     <title>王思洋 · Python 数据采集与 AI 开发作品集</title>
-    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <link rel="icon" type="image/svg+xml" href="favicon.svg?v=2" />
     <!-- 字体已本地化到 fonts/（见 style.css 的 @font-face），
          不再依赖 fonts.googleapis.com —— 国内直连 Google Fonts 曾导致首访等 25 秒。
          预加载正文最常用的 400 字重；500/600/700 由 CSS 按需加载。 -->
     <link rel="preload" href="fonts/NotoSansSC-400-subset.woff2" as="font"
           type="font/woff2" crossorigin />
-    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="style.css?v=28" />
   </head>
   <body>
     <canvas id="particle-canvas" aria-hidden="true"></canvas>
@@ -60,17 +60,32 @@
           </div>
         </div>
         <aside class="profile-panel" aria-label="个人资料">
-          <div class="portrait" aria-hidden="true"><span data-bind="initials">WSY</span></div>
-          <div class="profile-meta"><span>当前状态</span><strong data-bind="status">持续学习中</strong></div>
-          <div class="profile-meta"><span>所在地</span><strong data-bind="location">中国 · 四川</strong></div>
-          <div class="profile-line"><span></span><span></span><span></span><span></span><span></span></div>
+          <div class="profile-head">
+            <div class="portrait" aria-hidden="true"><span data-bind="initials">WSY</span></div>
+            <div class="profile-id">
+              <strong data-bind="name">王思洋</strong>
+              <span data-bind="title">Python 数据采集与AI开发</span>
+            </div>
+          </div>
+          <dl class="profile-meta-list">
+            <div class="profile-meta"><dt>当前状态</dt><dd data-bind="status">持续学习中</dd></div>
+            <div class="profile-meta"><dt>所在地</dt><dd data-bind="location">中国 · 四川</dd></div>
+            <div class="profile-meta"><dt>邮箱</dt><dd><a data-bind-href="emailLink" data-bind="email">hello@example.com</a></dd></div>
+            <div class="profile-meta"><dt>代码</dt><dd><a data-bind-href="github" target="_blank" rel="noreferrer">GitHub</a><span class="sep">/</span><a data-bind-href="csdn" target="_blank" rel="noreferrer">CSDN</a></dd></div>
+          </dl>
+          <div class="profile-dist">
+            <div class="dist-head"><span>项目方向分布</span><strong id="dist-total">00</strong></div>
+            <div class="dist-bar" id="dist-bar"></div>
+            <ul class="dist-legend" id="dist-legend"></ul>
+          </div>
         </aside>
       </section>
 
       <section class="stats section-shell" aria-label="作品数据">
         <div><strong id="project-count">0</strong><span>精选项目</span></div>
+        <div><strong id="dir-count">00</strong><span>覆盖方向</span></div>
+        <div><strong id="tool-count">00</strong><span>常用工具</span></div>
         <div><strong data-bind="studyHours">120+</strong><span>学习时长</span></div>
-        <div><strong data-bind="skillCount">06</strong><span>掌握工具</span></div>
       </section>
 
       <section class="work-section section-shell" id="work" aria-labelledby="work-title">
@@ -95,20 +110,48 @@
           <p data-bind="about">我正在系统学习 Python 数据采集与自动化。每个项目都从一个具体问题出发，完成从抓取、清洗到可视化展示的完整流程。</p>
           <div class="skills" id="skills"></div>
         </div>
+        <ol class="about-steps">
+          <li>
+            <span class="step-no">STEP 01</span>
+            <strong>先取数</strong>
+            <p>DrissionPage 或 Requests 把页面落到本地，字段和原始记录一起存下来，保证每一步都还能回溯到出处。</p>
+          </li>
+          <li>
+            <span class="step-no">STEP 02</span>
+            <strong>再核验</strong>
+            <p>跟原始记录逐条对，对不上的地方一定查到底：贝壳那三个故障、价格雷达里「50 秒跌 3392 元」，都是这么查出来的。</p>
+          </li>
+          <li>
+            <span class="step-no">STEP 03</span>
+            <strong>后出结论</strong>
+            <p>最后落成一个数字或一句能复述的判断，比如复合技能岗的时薪比单技能最强的那一个还高 50%。</p>
+          </li>
+        </ol>
       </section>
 
       <section class="contact-section" id="contact" aria-labelledby="contact-title">
         <div class="section-shell contact-inner">
-          <p class="eyebrow">GET IN TOUCH</p>
-          <h2 id="contact-title">期待和你交流<br />有趣的数据问题。</h2>
-          <a class="contact-mail" data-bind-href="emailLink" data-bind="email">hello@example.com</a>
+          <div class="contact-copy">
+            <p class="eyebrow">GET IN TOUCH</p>
+            <h2 id="contact-title">期待和你交流<br />有趣的数据问题。</h2>
+            <a class="contact-mail" data-bind-href="emailLink" data-bind="email">hello@example.com</a>
+          </div>
+          <div class="contact-side">
+            <span class="side-label">找我的地方</span>
+            <div class="contact-links">
+              <a data-bind-href="github" target="_blank" rel="noreferrer">GitHub<span aria-hidden="true">↗</span></a>
+              <a data-bind-href="csdn" target="_blank" rel="noreferrer">CSDN<span aria-hidden="true">↗</span></a>
+              <a data-bind-href="gitee" target="_blank" rel="noreferrer">Gitee<span aria-hidden="true">↗</span></a>
+            </div>
+          </div>
         </div>
       </section>
     </main>
 
     <footer class="section-shell"><span>&copy; <span id="year"></span> <span data-bind="name">王思洋</span></span><span>Built with GitHub Pages</span></footer>
-    <script src="content.js?v=4"></script>
-    <script src="script.js"></script>
-    <script src="effects.js"></script>
+    <!-- 三个脚本都要带版本号：只给 content.js 加的话，改 script.js/style.css 时会读到旧缓存 -->
+    <script src="content.js?v=28"></script>
+    <script src="script.js?v=28"></script>
+    <script src="effects.js?v=28"></script>
   </body>
 </html>

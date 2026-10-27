@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>商品价格监控雷达 · 项目详情</title>
+<link rel="icon" href="../../favicon.svg?v=2" type="image/svg+xml">
+<style>
+  /* ============================================================
+     配色：近白底 / 近黑字 / 浅蓝主色 / 粉点缀 / 红做强调点
+     ============================================================ */
+  :root{
+    --bg:#FBFCFE;
+    --ink:#1A1D24;
+    --ink2:#525B6B;
+    --ink3:#8B95A6;
+    --blue:#4FA8E8;
+    --blue-d:#2E8BD0;
+    --blue-s:#EAF5FD;
+    --pink:#FF8FB1;
+    --pink-d:#E0568A;
+    --pink-s:#FFF0F5;
+    --red:#E8455F;
+    --red-d:#C9304A;
+    --red-s:#FFEBEE;
+    --orange:#FF8A1E;
+    --orange-d:#D96A00;
+    --orange-s:#FFF1DC;
+    --teal:#10B6A6;
+    --teal-d:#0B8578;
+    --teal-s:#E2F8F5;
+    --green:#1F9D55;
+    --line:#E4EBF5;
+  }
+
+  @font-face{font-family:"Noto Sans SC";font-style:normal;font-weight:400;
+    font-display:swap;src:url("../../fonts/NotoSansSC-400-subset.woff2") format("woff2")}
+  @font-face{font-family:"Noto Sans SC";font-style:normal;font-weight:500;
+    font-display:swap;src:url("../../fonts/NotoSansSC-500-subset.woff2") format("woff2")}
+  @font-face{font-family:"Noto Sans SC";font-style:normal;font-weight:600;
+    font-display:swap;src:url("../../fonts/NotoSansSC-600-subset.woff2") format("woff2")}
+  @font-face{font-family:"Noto Sans SC";font-style:normal;font-weight:700;
+    font-display:swap;src:url("../../fonts/NotoSansSC-700-subset.woff2") format("woff2")}
+  @font-face{font-family:"Noto Sans SC";font-style:normal;font-weight:800;
+    font-display:swap;src:url("../../fonts/NotoSansSC-700-subset.woff2") format("woff2")}
+
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"Noto Sans SC","Microsoft YaHei","PingFang SC",Arial,sans-serif;
+    font-weight:400;color:var(--ink);background:var(--bg);line-height:1.75;overflow-x:hidden}
+
+  .glow{position:fixed;inset:0;pointer-events:none;z-index:0;
+    background:
+      radial-gradient(circle at 8% 0%, rgba(79,168,232,.20), transparent 42%),
+      radial-gradient(circle at 94% 4%, rgba(232,69,95,.16), transparent 40%),
+      radial-gradient(circle at 50% 102%, rgba(255,138,30,.09), transparent 46%)}
+
+  .wrap{position:relative;z-index:1;max-width:min(1600px,100%);margin:0 auto;padding:56px clamp(16px,3vw,40px) 96px}
+
+  .back{display:flex;width:fit-content;align-items:center;gap:8px;color:var(--ink3);
+    text-decoration:none;font-size:14px;margin-bottom:34px;transition:color .2s}
+  .back:hover{color:var(--blue-d)}
+
+  .num{display:inline-block;font-size:12.5px;font-weight:600;letter-spacing:.14em;
+    color:#fff;background:linear-gradient(100deg,#3E9FE0 0%,#E8455F 72%,#D62F4A 100%);
+    border-radius:999px;padding:6px 16px;margin-bottom:16px;
+    box-shadow:0 8px 22px rgba(214,47,74,.34)}
+
+  h1{font-size:clamp(28px,4.6vw,44px);line-height:1.25;font-weight:800;
+    color:var(--ink);margin-bottom:14px;letter-spacing:-.01em;position:relative}
+  h1::after{content:"";display:inline-block;width:11px;height:11px;border-radius:3px;
+    background:var(--red);margin-left:12px;vertical-align:.22em;
+    box-shadow:0 3px 10px rgba(232,69,95,.45)}
+
+  .lede{font-size:17px;color:var(--ink2);max-width:770px;margin-bottom:28px}
+  .lede strong{color:var(--ink);font-weight:600;
+    background:linear-gradient(transparent 60%, rgba(232,69,95,.22) 60%);
+    padding:0 2px;border-radius:2px}
+
+  .tags{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:34px}
+  .tag{font-size:12.5px;padding:6px 14px;border-radius:999px;
+    background:#fff;border:1px solid var(--line);color:var(--ink2);
+    box-shadow:0 1px 2px rgba(26,29,36,.04)}
+  .tag:nth-child(3n+1){border-color:#D6EAF8;color:var(--blue-d);background:var(--blue-s)}
+  .tag:nth-child(3n+2){border-color:#FBD0D7;color:var(--red-d);background:var(--red-s)}
+
+  h2{font-size:20px;color:var(--ink);margin:44px 0 18px;padding-left:15px;position:relative;
+    font-weight:700}
+  h2::before{content:"";position:absolute;left:0;top:6px;bottom:6px;width:4px;
+    border-radius:3px;background:linear-gradient(180deg,var(--blue),var(--red))}
+
+  .card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:19px 21px;
+    box-shadow:0 2px 10px rgba(26,29,36,.045);transition:transform .22s,box-shadow .22s,border-color .22s}
+  .card:hover{transform:translateY(-3px);box-shadow:0 12px 28px rgba(79,168,232,.14);
+    border-color:#D6EAF8}
+  .card h3{font-size:14px;color:var(--blue-d);margin-bottom:9px;font-weight:700}
+  .card p{font-size:14px;color:var(--ink2);margin:0}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+
+  /* ---------- 舞台 ---------- */
+  .stage{position:relative;margin:0 0 30px;border-radius:20px;overflow:hidden;
+    border:1px solid var(--line);background:#fff;
+    box-shadow:0 22px 60px rgba(79,168,232,.16), 0 4px 14px rgba(26,29,36,.05)}
+  .stage-bar{display:flex;align-items:center;gap:8px;padding:11px 16px;
+    background:linear-gradient(90deg,#F7FBFE,#FEF7FA);border-bottom:1px solid var(--line)}
+  .stage-dot{width:9px;height:9px;border-radius:50%}
+  .stage-dot:nth-child(1){background:#FFC9D9}
+  .stage-dot:nth-child(2){background:#CFE8F9}
+  .stage-dot:nth-child(3){background:#D9E6F2}
+  .stage-title{font-size:12.5px;color:var(--ink3);margin-left:6px}
+  .stage-live{display:inline-flex;align-items:center;gap:6px;margin-left:8px;
+    font-size:11.5px;font-weight:600;color:var(--red-d)}
+  .stage-live::before{content:"";width:6px;height:6px;border-radius:50%;
+    background:var(--red);box-shadow:0 0 0 3px rgba(232,69,95,.24);
+    animation:livePulse 1.6s ease-in-out infinite}
+  @keyframes livePulse{0%,100%{opacity:1}50%{opacity:.3}}
+  .stage-note{margin-left:auto;font-size:12px;color:var(--ink3);transition:color .3s}
+  .stage-note.pass{color:var(--red-d);font-weight:700}
+
+  .fs-btn{font:inherit;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;
+    padding:5px 13px;border-radius:999px;border:1px solid #D6EAF8;background:#fff;
+    color:var(--blue-d);margin-left:10px;transition:background .18s,border-color .18s}
+  .fs-btn:hover{background:var(--blue-s);border-color:#B9DDF4}
+  .stage.fs .fs-btn{background:var(--red-s);border-color:#F8C9D0;color:var(--red-d)}
+
+  .stage.fs{position:fixed;inset:0;z-index:9999;margin:0;border:0;border-radius:0;
+    display:flex;flex-direction:column;overflow:auto;background:#fff;box-shadow:none}
+  .stage.fs .stage-bar{border-radius:0;flex:none;position:sticky;top:0;z-index:2}
+  .stage.fs .demo{max-width:1300px;margin:0 auto;width:100%;padding:26px 32px 28px}
+  .stage.fs .cw{grid-template-columns:1fr 320px;gap:22px}
+  .stage.fs .chartbox{min-height:calc(100vh - 330px)}
+  body.fs-lock{overflow:hidden}
+
+  .demo{padding:20px 22px 20px}
+
+  /* 四色统计块 */
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+  .stat{border-radius:12px;padding:11px 14px;border:1px solid var(--line);background:#FDFEFF;
+    transition:transform .2s,box-shadow .2s}
+  .stat .v{font-size:23px;font-weight:800;line-height:1.15;letter-spacing:-.01em;
+    font-variant-numeric:tabular-nums;color:var(--ink)}
+  .stat .v small{font-size:11.5px;font-weight:700;margin-left:2px;opacity:.75}
+  .stat .k{font-size:11.5px;color:var(--ink3);margin-top:3px;font-weight:500}
+  .stat.c1{background:linear-gradient(160deg,#F2F9FE,#E4F2FC);border-color:#CDE7F8}
+  .stat.c1 .v{color:var(--blue-d)}
+  .stat.c2{background:linear-gradient(160deg,#F0FBF9,#DFF6F2);border-color:#BEEBE4}
+  .stat.c2 .v{color:var(--teal-d)}
+  .stat.c3{background:linear-gradient(160deg,#FFEFF2,#FFE3E8);border-color:#F8C9D0}
+  .stat.c3 .v{color:var(--red-d)}
+  .stat.c4{background:linear-gradient(160deg,#FFF7EC,#FFEBD1);border-color:#FFDCB3}
+  .stat.c4 .v{color:var(--orange-d)}
+
+  /* 图 + 右侧面板 */
+  .cw{display:grid;grid-template-columns:1fr 296px;gap:16px;align-items:start}
+  .chartbox{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,#FDFEFF,#F8FBFF);
+    padding:12px 10px 6px;min-height:330px;position:relative;display:flex;flex-direction:column}
+  .chartbox svg{width:100%;height:100%;min-height:0;display:block;flex:1}
+  .chartbox .axl{fill:var(--ink3);font-size:10px;font-family:Consolas,Monaco,monospace}
+  .chartbox .gl{stroke:#E9EFF7;stroke-width:1}
+  .chartbox .ln{fill:none;stroke:var(--blue);stroke-width:2.6;stroke-linejoin:round;stroke-linecap:round}
+  .chartbox .dot{fill:#fff;stroke:var(--blue);stroke-width:2.4;cursor:pointer;transition:r .15s}
+  .chartbox .dot:hover{r:7}
+  .chartbox .dot.on{fill:var(--blue);stroke:#fff;stroke-width:2.6;r:6.5}
+  .chartbox .dot.low{fill:var(--red);stroke:#fff;stroke-width:2.6;r:7}
+  .chartbox .dot.nul{fill:#fff;stroke:var(--red);stroke-width:2}
+  .chartbox .band{fill:rgba(232,69,95,.09)}
+  .chartbox .baline{stroke:var(--red);stroke-width:1.4;stroke-dasharray:4 3}
+  .chartbox .bnote{fill:var(--red-d);font-size:10.5px;font-weight:700}
+  .chartbox .bnote2{fill:#B0566A;font-size:9.5px}
+  .cbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:8px 6px 2px}
+  .cbar .sp{flex:1}
+
+  .side{display:flex;flex-direction:column;gap:10px}
+  .rec{border:1px solid var(--line);border-radius:13px;background:#fff;padding:12px 14px}
+  .rec .rh{display:flex;align-items:center;justify-content:space-between;gap:8px;
+    font-size:11.5px;color:var(--ink3);margin-bottom:5px}
+  .rec .rh b{color:var(--ink);font-weight:700}
+  .rec .price{font-size:27px;font-weight:800;line-height:1.1;color:var(--red-d);
+    font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+  .rec .price small{font-size:12px;font-weight:700;opacity:.7;margin-right:2px}
+  .rec .tt{font-size:11.5px;color:var(--ink2);line-height:1.6;margin-top:6px;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .rec .uu{font-size:10.5px;color:var(--blue-d);margin-top:4px;word-break:break-all;
+    font-family:Consolas,Monaco,monospace}
+  .rec .flag{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;
+    border-radius:999px;padding:2px 9px;background:var(--teal-s);color:var(--teal-d);margin-top:7px}
+  .rec .flag.bad{background:var(--red-s);color:var(--red-d)}
+  .rec .flag.nul{background:#F1F4F8;color:var(--ink3)}
+
+  .war{border:1px solid #FFDCB3;border-radius:13px;background:linear-gradient(160deg,#FFFCF6,#FFF4E4);
+    padding:12px 14px}
+  .war .wh{font-size:11.5px;font-weight:700;color:var(--orange-d);letter-spacing:.04em;
+    margin-bottom:7px;display:flex;align-items:center;justify-content:space-between}
+  .war .row2{display:flex;align-items:baseline;gap:6px;font-size:11.5px;color:var(--ink3);
+    margin-bottom:2px}
+  .war .big{font-size:15px;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums}
+  input[type=range]{width:100%;accent-color:var(--orange);height:18px;cursor:pointer;margin:2px 0 6px}
+  .war .mini{display:flex;justify-content:space-between;font-size:10.5px;color:var(--ink3)}
+  .dupline{display:flex;align-items:center;gap:7px;font-size:11.5px;color:var(--ink2);
+    margin-top:8px;padding-top:8px;border-top:1px dashed #F3DFC0}
+  .switch{position:relative;width:34px;height:19px;border-radius:99px;background:#E3E9F2;
+    cursor:pointer;transition:background .2s;flex:none}
+  .switch::after{content:"";position:absolute;top:2px;left:2px;width:15px;height:15px;
+    border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:transform .2s}
+  .switch.on{background:var(--orange)}
+  .switch.on::after{transform:translateX(15px)}
+  .war .res{font-size:11.5px;color:var(--ink2);margin-top:8px;line-height:1.65}
+  .war .res b{color:var(--red-d)}
+
+  .btn{font:inherit;font-size:13px;font-weight:600;cursor:pointer;padding:7px 16px;
+    border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--ink2);
+    transition:all .18s}
+  .btn:hover{border-color:#B9DDF4;color:var(--blue-d)}
+  .btn.pri{background:linear-gradient(100deg,var(--blue),var(--red-d));border:0;color:#fff;
+    box-shadow:0 8px 20px rgba(214,47,74,.28)}
+  .btn.pri:hover{filter:brightness(1.05);color:#fff}
+  .chip{font:inherit;font-size:11.5px;font-weight:600;cursor:pointer;padding:4px 12px;
+    border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--ink3);
+    transition:all .18s}
+  .chip:hover{border-color:#B9DDF4;color:var(--blue-d)}
+  .chip.on{background:var(--ink);border-color:var(--ink);color:#fff}
+
+  /* 五师徒 */
+  .team{display:grid;grid-template-columns:repeat(5,1fr);gap:9px;margin-bottom:14px}
+  .who{border:1px solid var(--line);border-radius:13px;background:#fff;padding:10px 12px;
+    cursor:pointer;transition:all .18s;text-align:left;font:inherit}
+  .who:hover{transform:translateY(-2px);border-color:#D6EAF8;box-shadow:0 8px 20px rgba(79,168,232,.12)}
+  .who .rn{font-size:14px;font-weight:800;color:var(--ink);line-height:1.3}
+  .who .fn{font-size:10.5px;font-family:Consolas,Monaco,monospace;color:var(--blue-d);
+    margin-top:1px;word-break:break-all}
+  .who .jb{font-size:11px;color:var(--ink3);margin-top:4px;line-height:1.5}
+  .who.on{border-color:#F8C9D0;background:var(--red-s);box-shadow:0 8px 22px rgba(232,69,95,.14)}
+  .who.on .rn{color:var(--red-d)}
+  .who.on .fn{color:var(--red-d)}
+
+  .codebox{border:1px solid var(--line);border-radius:13px;overflow:hidden;background:#1E1F22}
+  .codehd{display:flex;align-items:center;gap:8px;padding:8px 14px;background:#26272B;
+    border-bottom:1px solid #33343A}
+  .codehd .fn{font-family:Consolas,Monaco,monospace;font-size:11.5px;color:#9EA3AC}
+  .codehd .li{font-size:10.5px;color:#6E747D;margin-left:auto}
+  .code{font-family:Consolas,"Cascadia Code",Monaco,monospace;font-size:12px;line-height:1.72;
+    background:#1E1F22;color:#BCBEC4;padding:12px 14px;white-space:pre-wrap;word-break:break-word;
+    overflow-x:hidden;max-height:342px;overflow-y:auto}
+  .code .k{color:#CF8E6D}
+  .code .s{color:#6AAB73}
+  .code .c{color:#7A7E85}
+  .code .f{color:#56A8F5}
+  .code .n{color:#E8BF6A}
+
+  /* 坑 */
+  .pits{display:flex;flex-direction:column;gap:12px}
+  .pit{display:flex;gap:14px;background:#fff;border:1px solid var(--line);border-radius:14px;
+    padding:15px 17px}
+  .pit .pn{flex:none;width:26px;height:26px;border-radius:8px;display:flex;align-items:center;
+    justify-content:center;font-size:12.5px;font-weight:800;color:#fff;
+    background:linear-gradient(135deg,var(--blue),var(--red-d));
+    box-shadow:0 5px 14px rgba(214,47,74,.3)}
+  .pit h3{font-size:14px;font-weight:700;color:var(--ink);margin-bottom:5px}
+  .pit p{font-size:13px;color:var(--ink2);line-height:1.75;margin:0}
+  .pit p+p{margin-top:5px}
+  .pit .ev{font-family:Consolas,Monaco,monospace;font-size:11.5px;color:var(--blue-d);
+    background:var(--blue-s);border-radius:6px;padding:1px 7px}
+
+  .note{border-left:4px solid var(--red);background:linear-gradient(90deg,var(--red-s),#fff);
+    border-radius:0 13px 13px 0;padding:15px 18px;font-size:13.5px;color:var(--ink2);
+    line-height:1.8}
+  .note b{color:var(--red-d)}
+  .note.doubt{border-left-color:var(--orange);
+    background:linear-gradient(90deg,var(--orange-s),#fff)}
+  .note.doubt b{color:var(--orange-d)}
+
+  footer{margin-top:46px;padding-top:20px;border-top:1px solid var(--line);
+    font-size:12.5px;color:var(--ink3);line-height:1.9}
+  footer a{color:var(--blue-d);text-decoration:none;font-weight:600}
+  footer a:hover{text-decoration:underline}
+
+  @media(max-width:860px){
+    .grid3{grid-template-columns:1fr}
+    .stats{grid-template-columns:repeat(2,1fr)}
+    .cw{grid-template-columns:1fr}
+    .team{grid-template-columns:repeat(2,1fr)}
+    .chartbox{min-height:260px}
+  }
+</style>
+</head>
+<body>
+<div class="glow"></div>
+
+<nav style="position:relative;z-index:1;max-width:min(1600px,100%);margin:0 auto;padding:56px clamp(16px,3vw,40px) 0">
+  <a class="back" href="../../index.html">← 返回作品集</a>
+</nav>
+
+<div class="wrap" style="padding-top:0">
+
+  <span class="num">PROJECT 06</span>
+  <h1>商品价格监控雷达</h1>
+  <p class="lede">
+    我想让程序替我盯价格，就去写了——浏览器自己打开淘宝搜索页，把整个 body 丢给大模型，
+    让它按规则挑出最便宜那件，再把价格一条条存下来画成曲线。
+    <strong>它真的跑通了，10 次扫描画出一条从 4480 跌到 1088 的线。</strong>
+    然后我盯着这条线，发现它跌得太快了，快到不可能是真的。
+  </p>
+  <div class="tags">
+    <span class="tag">DrissionPage</span><span class="tag">大模型提取</span><span class="tag">schedule 定时</span>
+    <span class="tag">不写选择器</span><span class="tag">JSON 落盘</span><span class="tag">自绘曲线</span>
+  </div>
+
+  <!-- ================= 舞台一：真实数据 ================= -->
+  <section class="stage" id="stage1">
+    <div class="stage-bar">
+      <span class="stage-dot"></span><span class="stage-dot"></span><span class="stage-dot"></span>
+      <span class="stage-title">真实扫描记录 · 不是我编的示例</span>
+      <span class="stage-live">REAL DATA</span>
+      <span class="stage-note" id="note1">打开自动扫一遍</span>
+      <button class="fs-btn" id="fs1">全屏 ↗</button>
+    </div>
+    <div class="demo">
+
+      <div class="stats">
+        <div class="stat c1"><div class="v" id="s1">10<small>次</small></div><div class="k" id="s1k">taobao.json 里的真实记录</div></div>
+        <div class="stat c2"><div class="v" id="s2">50<small>秒</small></div><div class="k" id="s2k">跑完这 10 次（5 秒一轮）</div></div>
+        <div class="stat c3"><div class="v" id="s3">3392<small>元</small></div><div class="k">最高到最低的落差</div></div>
+        <div class="stat c4"><div class="v">1<small>个</small></div><div class="k">其实只有 1 个商品链接</div></div>
+      </div>
+
+      <div class="cw">
+        <div class="chartbox" id="chartbox">
+          <svg id="chart" viewBox="0 0 640 300"></svg>
+          <div class="cbar">
+            <button class="btn pri" id="play">扫一遍 ↻</button>
+            <button class="btn" id="jumpBad">直接看那个坑 ↓</button>
+            <span class="sp"></span>
+            <button class="chip on" data-ds="taobao">taobao.json · 10 条</button>
+            <button class="chip" data-ds="phone">phone.json · 7 条</button>
+          </div>
+        </div>
+
+        <div class="side">
+          <div class="rec" id="rec"></div>
+          <div class="war">
+            <div class="wh"><span>心理价位预警</span><span id="thrv">¥3500</span></div>
+            <input type="range" id="thr" min="1000" max="4500" step="50" value="3500">
+            <div class="mini"><span>¥1000</span><span>¥4500</span></div>
+            <div class="dupline">
+              <span class="switch" id="dedup"></span>
+              <span>同一个链接只算一次</span>
+            </div>
+            <div class="res" id="res"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="note" style="margin-bottom:34px">
+    <b>这条曲线不能当行情看。</b>理由很硬：横轴是 10 次扫描，按代码里 <span style="font-family:Consolas,monospace">schedule.every(5).seconds</span>
+    算，全部跑完大约 50 秒。50 秒里同一件商品从 4480 掉到 1088、中间还反弹过两次 —— 真实市场不会这样。
+    这条线画出来的其实是<b>"AI 每次从同一页里挑到的那个数字"</b>，不是价格。
+  </div>
+
+  <h2>它到底怎么跑的：五个角色，一人一件事</h2>
+  <p style="font-size:14.5px;color:var(--ink2);max-width:780px;margin-bottom:16px">
+    写的时候我给每一段起了个名字（猪八戒跑腿、猴哥读数、沙和尚存档、唐僧掐表、白龙马画图），
+    点击卡片看那一段的真实代码 —— 全都在 <code style="font-family:Consolas,monospace;font-size:12.5px;background:var(--blue-s);color:var(--blue-d);border-radius:5px;padding:1px 6px">demo01-价格监控雷达.py</code> 里。
+  </p>
+
+  <section class="stage" id="stage2">
+    <div class="stage-bar">
+      <span class="stage-dot"></span><span class="stage-dot"></span><span class="stage-dot"></span>
+      <span class="stage-title">五师徒流水线 · 114 行</span>
+      <span class="stage-note">点上面的人名换代码</span>
+      <button class="fs-btn" id="fs2">全屏 ↗</button>
+    </div>
+    <div class="demo">
+      <div class="team" id="team"></div>
+      <div class="codebox">
+        <div class="codehd"><span class="fn" id="cfn">bajie()</span><span class="li" id="cli"></span></div>
+        <div class="code" id="code"></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="grid3" style="margin-bottom:8px">
+    <div class="card">
+      <h3>为什么整页丢给 AI</h3>
+      <p>淘宝的搜索结果页 class 名是乱的、还天天变，写选择器就是在追着它改。所以我干脆不选：把整个 body 给模型，用五条规则约束它输出 JSON。省的是维护成本，赔的是稳定性。</p>
+    </div>
+    <div class="card">
+      <h3>为什么 JSON 一条条追加</h3>
+      <p>每轮结果 append 进同一个文件，不覆盖 —— 这样才有历史可比。代价是文件会越来越长、同一商品重复一堆，画图前还得自己去重（下面第四个坑）。</p>
+    </div>
+    <div class="card">
+      <h3>为什么画图不用 CDN</h3>
+      <p>原来那版用 Chart.js，要联网拉 CDN。搬到作品集里我改成自己用 SVG 画：不联网也能看，而且我能把第 9 次那个点单独标红 —— 这个标注比图本身重要。</p>
+    </div>
+  </div>
+
+  <h2>我踩过的坑</h2>
+  <div class="pits">
+    <div class="pit">
+      <div class="pn">1</div>
+      <div>
+        <h3>同一链接，50 秒跌 3211 元 —— 这不是行情，是我的提取不稳</h3>
+        <p>10 条记录里的 <span class="ev">url</span> 全都是同一个 <span class="ev">id=1069191610233</span>，
+        也就是同一个商品。价格却是 4299 → 4150.5 → 4480 → 3999 → 3728.8 → 3510 → 3266.25 → 2988 → <b>1088</b> → 1250。</p>
+        <p>我当时的规则是"取页面上最低的那个数字"。一个商品页上同时有原价、券后价、定金/首付、每期分期……
+        模型每次读到的、觉得"最低"的那个数字不一样，于是曲线就"跌"了。
+        <b>最贵的错误不是抓错，是把不稳定当成结论。</b></p>
+      </div>
+    </div>
+    <div class="pit">
+      <div class="pn">2</div>
+      <div>
+        <h3>换了搜索词之后，7 次里 3 次直接返回 null</h3>
+        <p>另一份 <span class="ev">phone.json</span> 里 7 条记录有 3 条是 <span class="ev">null</span>（点上面那个 chip 切过去就能看到断点）。
+        那是我在 prompt 里写的容错分支 —— "找不到商品或确定不了价格就输出全 null"。</p>
+        <p>问题是：<b>我只写了"认输"，没写"重试"。</b>主循环 <span class="ev">while True</span> 里
+        拿到 null 也照样存档，于是空数据混进了历史，画图时还得手动跳过。
+        正确做法是 null 当场重试一次、连续失败就告警，而不是记一笔空的。</p>
+      </div>
+    </div>
+    <div class="pit">
+      <div class="pn">3</div>
+      <div>
+        <h3>它挑的"最低价"是个引流款</h3>
+        <p>phone.json 那 4 次成功记录，价格全是 <b>1088</b>，标题是
+        "Huawei/华为 Mate 80 Pro新款正品鸿蒙mAtE70Pro官方官网<b>直播手机</b>" —— 一个标题里塞了三个型号关键词的店。
+        同一台 Mate 80 Pro 不可能 1088。</p>
+        <p>我的 prompt 只说了"价格最低"，没说"型号必须一致、标题不能堆关键词"。
+        <b>规则写窄了，模型就会给你一个技术上正确、实际上没用的答案。</b></p>
+      </div>
+    </div>
+    <div class="pit">
+      <div class="pn">4</div>
+      <div>
+        <h3>追加式存档，把"重复"存成了"历史"</h3>
+        <p>每轮都 append，于是一个商品扫 10 次就有 10 条看起来不同的记录。
+        打开右边的开关「同一个链接只算一次」能看到真实情况：<b>10 条记录 = 1 个商品 = 1 个价格</b>。
+        所谓"监控了 10 次"，其实一次都没换过对象。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="note doubt" style="margin-top:20px">
+    <b>有一件事我只能说"我猜"，不能说"我查到"。</b>
+    上面第一条我给的因果是"页面上有多个价格数字，模型每次挑到的不一样"。这是最合理的解释，
+    但我当时<b>没有把那一轮的页面 HTML 存下来</b>，所以这只是推断，不是证据。
+    要验证得重跑一次、把 body 一起落盘再比对 —— 我记在这儿，没验证就不写死。
+  </div>
+
+  <h2>边界：哪些是我做的</h2>
+  <div class="note">
+    这套五段式结构（猪八戒 → 猴哥 → 沙和尚 → 唐僧）和 prompt 的骨架是照着现成套路搭的，
+    <b>不是我从零设计的架构</b>。<br>
+    属于我的是：<b>①</b> 按这段代码真跑出来的两份数据（10 条 + 7 条，都在仓库里）；
+    <b>②</b> 上面四个问题，是我自己盯数据盯出来的，没人替我把它们总结好；
+    <b>③</b> 这一页的曲线、预警器、去重开关，是我为了把问题说清楚重新写的，没引 CDN。<br>
+    还有个更大的实话：<b>这个"监控"其实没在监控任何东西</b> —— 它扫的是搜索结果页，不是商品详情页；
+    没有价格历史基线，也没有通知。真正的价格监控应该是每天固定时间扫一次、只扫自己收藏的那几个商品、跌了才叫我。
+  </div>
+
+  <footer>
+    数据来源：<b>day03 / 02-课程代码 / taobao.json</b>（10 条）与 <b>phone.json</b>（7 条，含 3 条 null），
+    都是这段代码真实跑出来的原始记录，一条没改。<br>
+    图上所有数字（落差 3392、点 8→9 的 −1900、失败率 3/7）都是这两个文件里算出来的，不是估的。<br>
+    和首页那篇《多平台价格监控》不是同一件事：那篇是按各平台固定接口/选择器抓；这篇是把整个 body 交给大模型、不写选择器，代价就是不稳定 —— 上面的曲线就是代价。<br>
+    <a href="../../index.html">← 回到全部作品</a>
+  </footer>
+
+</div>
+
+<script>
+/* ============================================================
+   真实数据（来自 taobao.json / phone.json，未改动）
+   ============================================================ */
+var DS = {
+  taobao: {
+    name: 'taobao.json',
+    title: 'Huawei/华为 Mate 80 Pro正品政府补贴鸿蒙pUrA90pRO官方官网手机',
+    url: 'https://item.taobao.com/item.htm?id=1069191610233',
+    prices: [4299.00, 4150.50, 4480.00, 3999.00, 3728.80, 3510.00, 3266.25, 2988.00, 1088.00, 1250.00]
+  },
+  phone: {
+    name: 'phone.json',
+    title: 'Huawei/华为 Mate 80 Pro新款正品鸿蒙mAtE70Pro官方官网直播手机',
+    url: 'https://item.taobao.com/item.htm?id=1072047277924',
+    prices: [1088, 1088, null, null, null, 1088, 1088]
+  }
+};
+
+function $(id){ return document.getElementById(id); }
+function esc(s){
+  return String(s === null || s === undefined ? '' : s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function money(n){
+  if (n === null || n === undefined) return 'null';
+  var s = (Math.round(n * 100) / 100).toFixed(2);
+  if (s.slice(-3) === '.00') s = s.slice(0, -3);
+  return s;
+}
+
+/* ============================================================
+   画图：纯 SVG，无依赖
+   ============================================================ */
+var W = 640, H = 300, PL = 46, PR = 16, PT = 26, PB = 34;
+var cur = { ds: 'taobao', idx: -1, shown: 0 };
+
+/* 画布按实际像素重算，这样全屏时字和图都不会被拉伸 */
+function fit(){
+  var s = $('chart');
+  W = Math.max(340, Math.round(s.clientWidth || 640));
+  H = Math.max(200, Math.round(s.clientHeight || 300));
+}
+
+function plotArea(){
+  return { x0: PL, x1: W - PR, y0: PT, y1: H - PB };
+}
+function bounds(prices){
+  var vals = prices.filter(function(p){ return p !== null; });
+  var mn = Math.min.apply(null, vals), mx = Math.max.apply(null, vals);
+  var lo = Math.floor(mn / 1000) * 1000;
+  var hi = Math.ceil(mx / 1000) * 1000;
+  /* 让 4 等分后的刻度是整数（1000 的倍数） */
+  if (hi - lo < 2000) hi = lo + 2000;
+  var span = hi - lo;
+  if (span % 2000 !== 0) hi = lo + Math.ceil(span / 2000) * 2000;
+  return { lo: lo, hi: hi };
+}
+function px(i, n){
+  var a = plotArea();
+  if (n <= 1) return (a.x0 + a.x1) / 2;
+  return a.x0 + (a.x1 - a.x0) * i / (n - 1);
+}
+function py(p, b){
+  var a = plotArea();
+  return a.y1 - (p - b.lo) / (b.hi - b.lo) * (a.y1 - a.y0);
+}
+
+function drawChart(){
+  fit();
+  var d = DS[cur.ds], n = d.prices.length, b = bounds(d.prices);
+  var a = plotArea(), svg = $('chart'), out = '';
+
+  /* 横向网格 + 左侧价格刻度 */
+  var step = (b.hi - b.lo) / 4, k;
+  for (k = 0; k <= 4; k++){
+    var v = b.lo + step * k, yy = py(v, b);
+    out += '<line class="gl" x1="' + a.x0 + '" y1="' + yy + '" x2="' + a.x1 + '" y2="' + yy + '"/>';
+    out += '<text class="axl" x="' + (a.x0 - 7) + '" y="' + (yy + 3.5) + '" text-anchor="end">' + Math.round(v) + '</text>';
+  }
+
+  /* 第 8→9 次的异常带（只在 taobao 数据集） */
+  if (cur.ds === 'taobao'){
+    var xa = px(7, n), xb = px(8, n);
+    out += '<rect class="band" x="' + (xa + 3) + '" y="' + (a.y0 - 4) + '" width="' + (xb - xa - 6) +
+           '" height="' + (a.y1 - a.y0 + 8) + '" rx="6"/>';
+    var yTop = py(2988, b), yBot = py(1088, b);
+    out += '<line class="baline" x1="' + (xa + 8) + '" y1="' + yTop + '" x2="' + (xb - 8) + '" y2="' + yBot + '"/>';
+    if (cur.shown >= 9){
+      out += '<text class="bnote" x="' + (a.x1 - 2) + '" y="' + (a.y0 + 12) + '" text-anchor="end">↓ 第 8→9 次：2988 → 1088</text>';
+      out += '<text class="bnote2" x="' + (a.x1 - 2) + '" y="' + (a.y0 + 25) + '" text-anchor="end">一个 5 秒周期内 −1900 元，同一链接</text>';
+    }
+  }
+
+  /* 折线：只画到 shown 个点；遇到 null 断开 */
+  var seg = [], path = '', started = false, i;
+  for (i = 0; i < cur.shown && i < n; i++){
+    var p = d.prices[i];
+    if (p === null){ if (started){ seg.push(path); path = ''; started = false; } continue; }
+    var X = px(i, n), Y = py(p, b);
+    if (!started){ path = 'M' + X.toFixed(1) + ' ' + Y.toFixed(1); started = true; }
+    else path += 'L' + X.toFixed(1) + ' ' + Y.toFixed(1);
+  }
+  if (started) seg.push(path);
+  for (i = 0; i < seg.length; i++){
+    if (seg[i].length > 4) out += '<path class="ln" d="' + seg[i] + '"/>';
+  }
+
+  /* 点 */
+  var minP = Math.min.apply(null, d.prices.filter(function(x){ return x !== null; }));
+  for (i = 0; i < n; i++){
+    if (i >= cur.shown) break;
+    var pp = d.prices[i], cx = px(i, n);
+    if (pp === null){
+      out += '<g class="hit" data-i="' + i + '"><circle class="dot nul" cx="' + cx + '" cy="' + (a.y1 - 6) + '" r="4.5"/>' +
+             '<text class="axl" x="' + cx + '" y="' + (a.y1 + 3) + '" text-anchor="middle" style="fill:#C9304A;font-size:9px">✕</text></g>';
+      out += '<text class="axl" x="' + cx + '" y="' + (a.y1 + 16) + '" text-anchor="middle">' + (i + 1) + '</text>';
+      continue;
+    }
+    var cy = py(pp, b);
+    var cls = 'dot' + (pp === minP ? ' low' : '') + (i === cur.idx ? ' on' : '');
+    out += '<g class="hit" data-i="' + i + '"><circle class="' + cls + '" cx="' + cx.toFixed(1) + '" cy="' + cy.toFixed(1) + '" r="4.5"/></g>';
+    out += '<text class="axl" x="' + cx + '" y="' + (a.y1 + 16) + '" text-anchor="middle">' + (i + 1) + '</text>';
+  }
+  svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+  svg.innerHTML = out;
+
+  /* 点击点 → 看那一次 */
+  var hits = svg.querySelectorAll('.hit');
+  for (var h = 0; h < hits.length; h++){
+    hits[h].addEventListener('click', function(){
+      var idx = parseInt(this.getAttribute('data-i'), 10);
+      cur.idx = idx;
+      if (cur.shown < idx + 1) cur.shown = idx + 1;
+      drawChart(); drawRec();
+    });
+  }
+}
+
+function drawRec(){
+  var d = DS[cur.ds], i = cur.idx, box = $('rec');
+  if (i < 0 || i >= d.prices.length){
+    box.innerHTML = '<div class="rh"><b>还没选</b><span>点图上的圆点</span></div>' +
+      '<div class="price"><small>¥</small>—</div>' +
+      '<div class="tt">下面这条线一共 ' + d.prices.length + ' 个点，点任意一个看那一次的原始记录。</div>';
+    return;
+  }
+  var p = d.prices[i];
+  var isNull = (p === null);
+  var valid = d.prices.filter(function(x){ return x !== null; });
+  var minP = Math.min.apply(null, valid);
+  var maxP = Math.max.apply(null, valid);
+  var flat = (maxP === minP);
+  var h = '<div class="rh"><b>第 ' + (i + 1) + ' 次扫描</b><span>' + (isNull ? '失败' : '成功') + '</span></div>';
+  h += '<div class="price">' + (isNull ? 'null' : '<small>¥</small>' + money(p)) + '</div>';
+  h += '<div class="tt">' + esc(d.title) + '</div>';
+  h += '<div class="uu">' + esc(d.url) + '</div>';
+  if (isNull) h += '<div class="flag nul">✕ 模型回了全 null（容错分支）</div>';
+  else if (flat) h += '<div class="flag nul">= 这几轮全是一个价，曲线是平的</div>';
+  else if (p === minP) h += '<div class="flag bad">↓ 最低点 · 就是这个数字让我以为跌了</div>';
+  else h += '<div class="flag">✓ 与本站最低价差 ¥' + money(p - minP) + '</div>';
+  box.innerHTML = h;
+}
+
+/* ============================================================
+   预警器：真算
+   ============================================================ */
+var dedupOn = false;
+function calcWarn(){
+  var d = DS[cur.ds], thr = parseInt($('thr').value, 10);
+  var list = [];
+  if (dedupOn){
+    var seen = {};
+    for (var i = 0; i < d.prices.length; i++){
+      if (seen[d.url]) break;
+      seen[d.url] = 1;
+      list.push(d.prices[i]);
+    }
+  } else {
+    for (var j = 0; j < d.prices.length; j++) list.push(d.prices[j]);
+  }
+  var ok = list.filter(function(x){ return x !== null && x <= thr; });
+  var valid = list.filter(function(x){ return x !== null; });
+  var h = '';
+  h += '<div class="row2">监控笔数<span class="big" style="margin-left:auto">' + list.length + '</span></div>';
+  h += '<div class="row2">有效价格<span class="big" style="margin-left:auto">' + valid.length + ' / ' + list.length + '</span></div>';
+  h += '<div class="row2">低于 ¥' + thr + '<span class="big" style="margin-left:auto">' + ok.length + ' 次</span></div>';
+  if (ok.length){
+    var first = list.indexOf(ok[0]) + 1;
+    var seq = ok.map(function(x){ return money(x); }).join(' / ');
+    var uniq = {};
+    for (var u = 0; u < ok.length; u++) uniq[ok[u]] = 1;
+    var nu = 0;
+    for (var q in uniq) nu++;
+    h += '<div class="res">第一次触发在第 <b>' + first + '</b> 次扫描，一共触发 <b>' + ok.length + '</b> 次。' +
+         '那 ' + ok.length + ' 次的价格分别是 <b>' + seq + '</b> —— ' +
+         (nu > 1 ? '同一件商品在几秒内给出这么多个不同价位，只可能是提取不稳，不是它真的在降价。'
+                 : (ok.length > 1 ? '每次都一样，说明它稳定地锁住同一个价 —— 稳定，但不代表这个价是真的。'
+                                  : '只碰到一次，不足以说明什么。')) + '</div>';
+  } else {
+    h += '<div class="res">这个价位一次都没触发。' +
+         (dedupOn ? '去重后你只监控了 <b>1</b> 件商品，1 个价格 —— 它要是一直不变，就永远等不到通知。' : '') +
+         '</div>';
+  }
+  if (dedupOn && list.length === 1){
+    h += '<div class="res">去重结果：<b>1 个链接 = 1 条记录</b>。所谓"' +
+         DS[cur.ds].prices.length + ' 次扫描"，对象从头到尾没换过。</div>';
+  }
+  $('res').innerHTML = h;
+  $('thrv').textContent = '¥' + thr;
+}
+
+/* ============================================================
+   播放：一点一点扫出来
+   ============================================================ */
+var playToken = 0;
+function play(){
+  var token = ++playToken;
+  var d = DS[cur.ds], n = d.prices.length;
+  cur.shown = 0; cur.idx = -1;
+  $('note1').className = 'stage-note';
+  $('note1').textContent = '正在扫…';
+  drawChart(); drawRec();
+  var i = 0;
+  function step(){
+    if (token !== playToken) return;
+    i++;
+    cur.shown = i;
+    cur.idx = i - 1;
+    drawChart(); drawRec();
+    if (i < n){
+      setTimeout(step, 220);
+    } else {
+      $('note1').className = 'stage-note pass';
+      $('note1').textContent = cur.ds === 'taobao' ? '10 次扫完 · 50 秒内"跌"了 3392 元' : '7 次扫完 · 3 次是 null';
+    }
+  }
+  setTimeout(step, 180);
+}
+
+$('play').addEventListener('click', play);
+$('jumpBad').addEventListener('click', function(){
+  playToken++;
+  var d = DS[cur.ds], n = d.prices.length;
+  cur.shown = n; cur.idx = (cur.ds === 'taobao') ? 8 : 2;
+  drawChart(); drawRec();
+  $('note1').className = 'stage-note pass';
+  $('note1').textContent = cur.ds === 'taobao'
+    ? '第 9 次：2988 → 1088，一个周期内 −1900'
+    : '第 3 次：null，模型什么都没读出来';
+});
+
+/* 数据集切换 */
+var chips = document.querySelectorAll('.chip[data-ds]');
+for (var ci = 0; ci < chips.length; ci++){
+  chips[ci].addEventListener('click', function(){
+    for (var z = 0; z < chips.length; z++) chips[z].classList.remove('on');
+    this.classList.add('on');
+    cur.ds = this.getAttribute('data-ds');
+    cur.idx = -1; cur.shown = 0;
+    var dn = DS[cur.ds].prices.length;
+    $('s1').innerHTML = dn + '<small>次</small>';
+    $('s1k').textContent = DS[cur.ds].name + ' 里的真实记录';
+    $('s2').innerHTML = (dn * 5) + '<small>秒</small>';
+    $('s2k').textContent = '跑完这 ' + dn + ' 次（5 秒一轮）';
+    var vals = DS[cur.ds].prices.filter(function(x){ return x !== null; });
+    $('s3').innerHTML = Math.round(Math.max.apply(null, vals) - Math.min.apply(null, vals)) + '<small>元</small>';
+    play();
+    calcWarn();
+  });
+}
+
+$('thr').addEventListener('input', calcWarn);
+$('dedup').addEventListener('click', function(){
+  dedupOn = !dedupOn;
+  this.classList.toggle('on', dedupOn);
+  calcWarn();
+});
+
+/* ============================================================
+   五师徒：真实代码
+   ============================================================ */
+var TEAM = [
+  { rn:'猪八戒', fn:'bajie()', jb:'开浏览器，把搜索页的 body 整个抱回来',
+    lines:[
+      ['', '# 1. 猪八戒  网页跑腿员  获取商品搜索页的 body'],
+      ['', 'def bajie():'],
+      ['', '    page = ChromiumPage()'],
+      ['', '    page.get("https://s.taobao.com/search?...&q=华为手机mate80")'],
+      ['', '    page.wait.doc_loaded()'],
+      ['c', '    # 整页 html，不做任何筛选 —— 选择器一个都不写'],
+      ['', '    body = page.ele("tag:body").html'],
+      ['', '    return body']
+    ]},
+  { rn:'猴哥', fn:'houge(body)', jb:'把整页丢给大模型，要它只回一条 JSON',
+    lines:[
+      ['', 'def houge(body):'],
+      ['c', '    # 本地桥接服务（127.0.0.1:3010）转给模型'],
+      ['', '    prompt = f"""你是严谨的比价专家。'],
+      ['c', '    1. 只提取价格最低的那一件，不要返回多个'],
+      ['c', '    2. 标题要完整，不要广告词'],
+      ['c', '    3. 价格只留数字，区间取最低'],
+      ['c', '    4. 链接只留 id=xxx，删掉 spm/scm 尾巴'],
+      ['c', '    5. 标题/价格/链接必须来自同一件商品'],
+      ['c', '    找不到就输出 {{"title":null,"price":null,"url":null}}'],
+      ['', '    页面内容：{body}"""'],
+      ['', '    res = requests.post(BASE_URL + "/v1/chat/completions", json=payload, headers=headers)'],
+      ['', '    answer = res.json()["choices"][0]["message"]["content"]'],
+      ['k', '    return json.loads(answer)   # 直接当 JSON 解，没做容错']
+    ]},
+  { rn:'沙和尚', fn:'shaheshang()', jb:'一条条追加进 json，不覆盖',
+    lines:[
+      ['', 'def shaheshang(answer_dict):'],
+      ['', '    file = "phone.json"'],
+      ['', '    if not os.path.exists(file):'],
+      ['', '        json.dump([answer_dict], f, ensure_ascii=False, indent=2)'],
+      ['', '    else:'],
+      ['', '        data = json.load(f)'],
+      ['k', '        data.append(answer_dict)      # ← 重复记录就是这么来的'],
+      ['', '        json.dump(data, f, ensure_ascii=False, indent=2)']
+    ]},
+  { rn:'唐僧', fn:'tangseng()', jb:'每 5 秒念一次经，永不停止',
+    lines:[
+      ['', 'def tangseng():'],
+      ['', '    body = bajie()'],
+      ['', '    answer = houge(body)'],
+      ['', '    shaheshang(answer)'],
+      ['', ''],
+      ['k', 'schedule.every(5).seconds.do(tangseng)   # 5 秒一轮'],
+      ['k', 'while True:                              # 拿不到也不重试'],
+      ['', '    schedule.run_pending()'],
+      ['', '    time.sleep(1)']
+    ]},
+  { rn:'白龙马', fn:'price_chart.html', jb:'读 json 画折线（原来靠 CDN）',
+    lines:[
+      ['', '// 原来这版：fetch("./taobao.json") 然后交给 Chart.js'],
+      ['c', '// 问题：CDN 一断，图就没了；而且它只会画线，不会提示"这个点有问题"'],
+      ['', ''],
+      ['c', '// 作品集里这一页改成自己画（就是上面那张图）：'],
+      ['', 'const path = prices.map((p,i) => (i?"L":"M") + px(i) + " " + py(p)).join("")'],
+      ['', 'svg.innerHTML = <path class="ln" d=${path}/>'],
+      ['c', '// 再加一条红色标注带，把「一个周期内 -1900」直接标在图上']
+    ]}
+];
+
+function renderTeam(){
+  var h = '';
+  for (var i = 0; i < TEAM.length; i++){
+    h += '<button class="who' + (i === teamCur ? ' on' : '') + '" data-i="' + i + '">' +
+         '<div class="rn">' + TEAM[i].rn + '</div>' +
+         '<div class="fn">' + esc(TEAM[i].fn) + '</div>' +
+         '<div class="jb">' + TEAM[i].jb + '</div></button>';
+  }
+  $('team').innerHTML = h;
+}
+function renderCode(i){
+  var t = TEAM[i], h = '';
+  for (var k = 0; k < t.lines.length; k++){
+    var cls = t.lines[k][0], txt = t.lines[k][1];
+    h += (cls ? '<span class="' + cls + '">' + esc(txt) + '</span>' : esc(txt)) + '\n';
+  }
+  $('code').innerHTML = h;
+  $('cfn').textContent = t.fn;
+  $('cli').textContent = t.lines.length + ' 行节选';
+}
+var teamCur = 0;
+$('team').addEventListener('click', function(e){
+  var b = e.target.closest ? e.target.closest('.who') : null;
+  if (!b) return;
+  var i = parseInt(b.getAttribute('data-i'), 10);
+  if (i === teamCur) return;
+  var all = $('team').querySelectorAll('.who');
+  for (var z = 0; z < all.length; z++) all[z].classList.remove('on');
+  b.classList.add('on');
+  teamCur = i;
+  renderCode(i);
+});
+
+/* ============================================================
+   全屏（Esc 退）
+   ============================================================ */
+function bindFS(stageId, btnId){
+  var st = $(stageId), btn = $(btnId);
+  function set(on){
+    st.classList.toggle('fs', on);
+    document.body.classList.toggle('fs-lock', on);
+    btn.textContent = on ? '退出全屏 ✕' : '全屏 ↗';
+    if (on && stageId === 'stage1') setTimeout(drawChart, 30);
+  }
+  btn.addEventListener('click', function(){ set(!st.classList.contains('fs')); });
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape' && st.classList.contains('fs')) set(false);
+  });
+}
+bindFS('stage1', 'fs1');
+bindFS('stage2', 'fs2');
+
+/* ============================================================
+   打开就跑
+   ============================================================ */
+renderTeam();
+renderCode(0);
+calcWarn();
+cur.idx = -1; cur.shown = 0;
+drawChart(); drawRec();
+setTimeout(play, 320);
+window.addEventListener('resize', function(){
+  clearTimeout(window.__rz);
+  window.__rz = setTimeout(drawChart, 120);
+});
+</script>
+</body>
+</html>

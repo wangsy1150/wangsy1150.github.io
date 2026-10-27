@@ -4,12 +4,34 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>语音交互助手 · 项目详情</title>
-<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg?v=2">
 <link rel="preload" href="../../fonts/NotoSansSC-400-subset.woff2" as="font"
       type="font/woff2" crossorigin>
 <style>
+  /* ============================================================
+     配色：近白底 / 近黑字 / 浅蓝主色 / 粉点缀
+     （原来是深夜紫渐变，看着压抑，也不符合本人偏好）
+     ============================================================ */
+  :root{
+    --bg:#FBFCFE;
+    --ink:#1A1D24;
+    --ink2:#525B6B;
+    --ink3:#8B95A6;
+    --blue:#4FA8E8;
+    --blue-d:#2E8BD0;
+    --blue-s:#EAF5FD;
+    --pink:#FF8FB1;
+    --pink-d:#E0568A;
+    --pink-s:#FFF0F5;
+    /* 加一点红：整体浅蓝+粉太柔，用红在「编号/竖线/序号/播放键/LIVE」这些小点上提力度，
+       面积小、对比高，不会把页面变土 */
+    --red:#E8455F;
+    --red-d:#C9304A;
+    --red-s:#FFEBEE;
+    --line:#E4EBF5;
+  }
+
   /* 字体本地化：与首页统一用 Noto Sans SC 子集（16.9MB → 505KB） */
-  /* 静态字重子集（该浏览器不支持可变字体 @font-face，改用 4 个静态字重） */
   @font-face{font-family:"Noto Sans SC";font-style:normal;font-weight:400;
     font-display:swap;src:url("../../fonts/NotoSansSC-400-subset.woff2") format("woff2")}
   @font-face{font-family:"Noto Sans SC";font-style:normal;font-weight:500;
@@ -20,96 +42,180 @@
     font-display:swap;src:url("../../fonts/NotoSansSC-700-subset.woff2") format("woff2")}
   @font-face{font-family:"Noto Sans SC";font-style:normal;font-weight:800;
     font-display:swap;src:url("../../fonts/NotoSansSC-700-subset.woff2") format("woff2")}
+
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:"Noto Sans SC","Microsoft YaHei","PingFang SC",Arial,sans-serif;
-    font-weight:400;
-    color:#eae6f5;background:#0d0a17;line-height:1.75;overflow-x:hidden}
+    font-weight:400;color:var(--ink);background:var(--bg);line-height:1.75;overflow-x:hidden}
+
+  /* 背景光晕：左上浅蓝、右上淡粉，整体像晨光 */
   .glow{position:fixed;inset:0;pointer-events:none;z-index:0;
     background:
-      radial-gradient(circle at 18% 6%, rgba(139,92,246,.26), transparent 45%),
-      radial-gradient(circle at 84% 14%, rgba(56,189,248,.16), transparent 40%),
-      radial-gradient(circle at 50% 96%, rgba(236,72,153,.14), transparent 45%)}
-  .wrap{position:relative;z-index:1;max-width:960px;margin:0 auto;padding:56px 24px 96px}
-  .back{display:inline-flex;align-items:center;gap:8px;color:#a89ec9;text-decoration:none;
-    font-size:14px;margin-bottom:36px;transition:color .2s}
-  .back:hover{color:#c4b5fd}
-  .num{display:inline-block;font-size:13px;letter-spacing:.18em;color:#8b7fc7;
-    border:1px solid rgba(139,92,246,.35);border-radius:999px;padding:5px 14px;margin-bottom:18px}
+      radial-gradient(circle at 8% 0%, rgba(79,168,232,.20), transparent 42%),
+      radial-gradient(circle at 94% 4%, rgba(232,69,95,.16), transparent 40%),
+      radial-gradient(circle at 50% 102%, rgba(79,168,232,.09), transparent 46%)}
+
+  .wrap{position:relative;z-index:1;max-width:min(1600px,100%);margin:0 auto;padding:56px clamp(16px,3vw,40px) 96px}
+
+  .back{display:flex;align-items:center;gap:8px;color:var(--ink3);text-decoration:none;
+    font-size:14px;margin-bottom:34px;transition:color .2s}
+  .back:hover{color:var(--blue-d)}
+
+  .num{display:inline-block;font-size:12.5px;font-weight:600;letter-spacing:.14em;
+    color:#fff;background:linear-gradient(100deg,#3E9FE0 0%,#E8455F 72%,#D62F4A 100%);
+    border-radius:999px;padding:6px 16px;margin-bottom:16px;
+    box-shadow:0 8px 20px rgba(232,69,95,.28)}
+
   h1{font-size:clamp(28px,4.6vw,44px);line-height:1.25;font-weight:800;
-    background:linear-gradient(120deg,#c4b5fd 0%,#a78bfa 40%,#7dd3fc 100%);
-    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:16px}
-  .lede{font-size:17px;color:#b9b0d6;max-width:660px;margin-bottom:30px}
-  .tags{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:46px}
-  .tag{font-size:12.5px;padding:5px 13px;border-radius:999px;
-    background:rgba(139,92,246,.14);border:1px solid rgba(139,92,246,.32);color:#c9bff0}
-  h2{font-size:20px;color:#ddd6f3;margin:0 0 16px;padding-left:14px;position:relative}
-  h2::before{content:"";position:absolute;left:0;top:5px;bottom:5px;width:3px;
-    border-radius:2px;background:linear-gradient(180deg,#a78bfa,#38bdf8)}
-  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:46px}
-  .card{background:rgba(255,255,255,.035);border:1px solid rgba(139,92,246,.18);
-    border-radius:13px;padding:18px 20px}
-  .card h3{font-size:14px;color:#a78bfa;margin-bottom:8px}
-  .card p{font-size:14px;color:#b3aacd;margin:0}
-  .card code{font-family:Consolas,Monaco,monospace;font-size:12.5px;color:#c9bff0;
-    background:rgba(139,92,246,.16);border-radius:4px;padding:1px 5px}
+    color:var(--ink);margin-bottom:14px;letter-spacing:-.01em}
+  /* 标题最后一个字压低一点粉，破掉纯黑的板正感 */
+  /* 标题右侧一个小红块：首屏唯一的高饱和点，把整体偏柔的感觉压住（纯 CSS，不动文字）
+     注意 h1 不能改成 inline-block，否则会和上面的编号胶囊挤成一行 */
+  h1{position:relative}
+  h1::after{content:"";display:inline-block;width:11px;height:11px;border-radius:3px;
+    background:var(--red);margin-left:12px;vertical-align:.22em;
+    box-shadow:0 3px 10px rgba(232,69,95,.45)}
+  h1 .dot{color:var(--red)}
+
+  .lede{font-size:17px;color:var(--ink2);max-width:680px;margin-bottom:28px}
+  .lede strong{color:var(--ink);font-weight:600;
+    background:linear-gradient(transparent 60%, rgba(232,69,95,.22) 60%);
+    padding:0 2px;border-radius:2px}
+
+  .tags{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:34px}
+  .tag{font-size:12.5px;padding:6px 14px;border-radius:999px;
+    background:#fff;border:1px solid var(--line);color:var(--ink2);
+    box-shadow:0 1px 2px rgba(26,29,36,.04)}
+  .tag:nth-child(3n+1){border-color:#D6EAF8;color:var(--blue-d);background:var(--blue-s)}
+  .tag:nth-child(3n+2){border-color:#FBD0D7;color:var(--red-d);background:var(--red-s)}
+
+  h2{font-size:20px;color:var(--ink);margin:0 0 18px;padding-left:15px;position:relative;
+    font-weight:700}
+  h2::before{content:"";position:absolute;left:0;top:6px;bottom:6px;width:4px;
+    border-radius:3px;background:linear-gradient(180deg,var(--blue),var(--red))}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px;margin-bottom:46px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:19px 21px;
+    box-shadow:0 2px 10px rgba(26,29,36,.045);transition:transform .22s,box-shadow .22s,border-color .22s}
+  .card:hover{transform:translateY(-3px);box-shadow:0 12px 28px rgba(79,168,232,.14);
+    border-color:#D6EAF8}
+  .card h3{font-size:14px;color:var(--blue-d);margin-bottom:9px;font-weight:700}
+  .card p{font-size:14px;color:var(--ink2);margin:0}
+  .card code{font-family:Consolas,Monaco,monospace;font-size:12.5px;color:var(--blue-d);
+    background:var(--blue-s);border-radius:5px;padding:1px 6px}
+
   ul.flow{list-style:none;counter-reset:step;margin-bottom:46px}
-  ul.flow li{position:relative;padding-left:32px;margin-bottom:16px;font-size:14.5px;color:#b8afd3}
-  ul.flow li::before{content:counter(step);counter-increment:step;position:absolute;left:0;top:1px;
-    width:21px;height:21px;border-radius:50%;font-size:12px;font-weight:700;color:#0d0a17;
-    text-align:center;line-height:21px;background:linear-gradient(135deg,#a78bfa,#7dd3fc)}
-  ul.flow li strong{color:#ddd6f3;font-weight:600}
-  .code{background:#120f1f;border:1px solid rgba(139,92,246,.2);border-radius:12px;
-    padding:18px 20px;font-family:Consolas,Monaco,monospace;font-size:13px;color:#c9d6f5;
-    overflow-x:auto;margin-bottom:46px;line-height:1.7}
-  .code .c{color:#6f6690}.code .k{color:#c4b5fd}.code .s{color:#7dd3fc}
-  .cap{font-size:12.5px;color:#6f6690;margin:-36px 0 46px}
-  .lede+p strong{color:#ddd6f3}
+  ul.flow li{position:relative;padding-left:34px;margin-bottom:16px;font-size:14.5px;color:var(--ink2)}
+  ul.flow li::before{content:counter(step);counter-increment:step;position:absolute;left:0;top:2px;
+    width:22px;height:22px;border-radius:50%;font-size:12px;font-weight:700;color:#fff;
+    text-align:center;line-height:22px;
+    background:linear-gradient(135deg,var(--blue),var(--red))}
+  ul.flow li strong{color:var(--ink);font-weight:600}
+
+  /* 代码块：深色底（页面是浅的，代码块压深一档，对比出来更专业）
+     配色沿用主题：关键字浅蓝、字符串粉、注释灰 */
+  /* 代码块：Deep 底 + Python IDE 的语法配色（PyCharm Darcula 那一套）
+     关键字橙、字符串绿、注释灰 —— 写 Python 的一眼就认得 */
+  .code{white-space:pre-wrap;word-break:break-word;
+    background:#1E1F22;border:1px solid #2B2D33;border-radius:14px;
+    padding:19px 21px;font-family:Consolas,"Cascadia Code",Monaco,monospace;font-size:13px;
+    color:#BCBEC4;
+    overflow-x:auto;margin-bottom:46px;line-height:1.8;
+    box-shadow:0 10px 28px rgba(26,29,36,.22), inset 0 1px 0 rgba(255,255,255,.045)}
+  .code .c{color:#7A7E85}   /* 注释：灰 */
+  .code .k{color:#CF8E6D}   /* 关键字 for / in / if / else / break：橙 */
+  .code .s{color:#6AAB73}   /* 字符串：绿 */
+  .cap{font-size:12.5px;color:var(--ink3);margin:-36px 0 46px}
 
   /* ---------- 运行截图 ---------- */
   .shots{display:grid;gap:26px;margin-bottom:46px}
-  .shot{background:rgba(255,255,255,.035);border:1px solid rgba(139,92,246,.18);
-    border-radius:14px;overflow:hidden;transition:border-color .25s,transform .25s}
-  .shot:hover{border-color:rgba(139,92,246,.42);transform:translateY(-2px)}
+  .shot{background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden;
+    box-shadow:0 2px 12px rgba(26,29,36,.05);
+    transition:border-color .25s,transform .25s,box-shadow .25s}
+  .shot:hover{border-color:#D6EAF8;transform:translateY(-3px);
+    box-shadow:0 16px 34px rgba(79,168,232,.16)}
   .shot img{display:block;width:100%;height:auto}
-  .shot-body{padding:15px 20px 18px}
-  .shot-body h4{font-size:14.5px;color:#ddd6f3;margin-bottom:7px;font-weight:600}
-  .shot-body p{font-size:13.5px;color:#a89ec9;margin:0}
-  .shot-body code{font-family:Consolas,Monaco,monospace;font-size:12.5px;color:#c9bff0;
-    background:rgba(139,92,246,.16);border-radius:4px;padding:1px 5px}
-  .shot-num{display:inline-block;font-size:11.5px;letter-spacing:.1em;color:#8b7fc7;
-    border:1px solid rgba(139,92,246,.35);border-radius:999px;padding:2px 10px;margin-right:9px}
+  .shot-body{padding:16px 21px 19px}
+  .shot-body h4{font-size:14.5px;color:var(--ink);margin-bottom:8px;font-weight:700}
+  .shot-body p{font-size:13.5px;color:var(--ink2);margin:0}
+  .shot-body code{font-family:Consolas,Monaco,monospace;font-size:12.5px;color:var(--blue-d);
+    background:var(--blue-s);border-radius:5px;padding:1px 6px}
+  .shot-num{display:inline-block;font-size:11.5px;letter-spacing:.08em;font-weight:600;
+    color:var(--red-d);background:var(--red-s);border:1px solid #FBD0D7;
+    border-radius:999px;padding:2px 11px;margin-right:9px}
 
-  /* ---------- 在线体验入口 ---------- */
+  /* ---------- 第二入口（录播） ---------- */
   .cta{display:flex;align-items:center;gap:16px;text-decoration:none;
-    padding:16px 22px;margin:0 0 46px;border-radius:14px;
-    background:linear-gradient(100deg,rgba(139,92,246,.2),rgba(56,189,248,.14));
-    border:1px solid rgba(139,92,246,.42);
-    transition:border-color .22s,transform .22s,background .22s}
-  .cta:hover{border-color:rgba(167,139,250,.8);transform:translateY(-2px);
-    background:linear-gradient(100deg,rgba(139,92,246,.3),rgba(56,189,248,.2))}
-  .cta-play{flex:none;width:42px;height:42px;border-radius:50%;
-    display:flex;align-items:center;justify-content:center;font-size:15px;
-    color:#0d0a17;background:linear-gradient(135deg,#a78bfa,#7dd3fc);
-    padding-left:3px}
+    padding:17px 23px;margin:0 0 46px;border-radius:16px;
+    background:linear-gradient(100deg,#EAF5FD,#FFEDEF);
+    border:1px solid #D6EAF8;
+    box-shadow:0 4px 16px rgba(79,168,232,.10);
+    transition:transform .22s,box-shadow .22s,border-color .22s}
+  .cta:hover{transform:translateY(-2px);box-shadow:0 14px 32px rgba(79,168,232,.20);
+    border-color:#B9DDF4}
+  .cta-play{flex:none;width:44px;height:44px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;font-size:15px;color:#fff;
+    background:linear-gradient(135deg,var(--blue),var(--red));padding-left:3px;
+    box-shadow:0 8px 20px rgba(232,69,95,.32)}
   .cta-text{flex:1;display:flex;flex-direction:column;gap:3px}
-  .cta-text b{font-size:16px;color:#eae6f5;font-weight:700}
-  .cta-text i{font-style:normal;font-size:13px;color:#a89ec9}
-  .cta-arrow{flex:none;font-size:19px;color:#a78bfa;transition:transform .22s}
+  .cta-text b{font-size:16px;color:var(--ink);font-weight:700}
+  .cta-text i{font-style:normal;font-size:13px;color:var(--ink2)}
+  .cta-arrow{flex:none;font-size:19px;color:var(--blue);transition:transform .22s}
   .cta:hover .cta-arrow{transform:translateX(4px)}
 
-  footer{text-align:center;font-size:13px;color:#6f6690;padding-top:36px;
-    border-top:1px solid rgba(139,92,246,.14)}
-  footer a{color:#a78bfa;text-decoration:none}
+  /* ---------- 首屏演示：零点击就能直接对话 ---------- */
+  .stage{position:relative;margin:0 0 26px;border-radius:20px;overflow:hidden;
+    border:1px solid var(--line);background:#fff;
+    box-shadow:0 22px 60px rgba(79,168,232,.16), 0 4px 14px rgba(26,29,36,.05)}
+  .stage-bar{display:flex;align-items:center;gap:8px;padding:11px 16px;
+    background:linear-gradient(90deg,#F7FBFE,#FEF7FA);border-bottom:1px solid var(--line)}
+  .stage-dot{width:9px;height:9px;border-radius:50%;background:#D6EAF8}
+  .stage-dot:nth-child(1){background:#FFC9D9}
+  .stage-dot:nth-child(2){background:#CFE8F9}
+  .stage-dot:nth-child(3){background:#D9E6F2}
+  .stage-title{font-size:12.5px;color:var(--ink3);margin-left:6px;letter-spacing:.01em}
+  .stage-live{display:inline-flex;align-items:center;gap:6px;margin-left:8px;
+    font-size:11.5px;font-weight:600;color:var(--red-d)}
+  .stage-live::before{content:"";width:6px;height:6px;border-radius:50%;
+    background:var(--red);box-shadow:0 0 0 3px rgba(232,69,95,.24);
+    animation:livePulse 1.6s ease-in-out infinite}
+  @keyframes livePulse{0%,100%{opacity:1}50%{opacity:.3}}
+  .stage-full{margin-left:auto;font-size:12.5px;color:var(--blue-d);text-decoration:none;
+    white-space:nowrap;transition:color .2s;font-weight:600}
+  .stage-full:hover{color:var(--red-d)}
+  /* 直接对话页是聊天应用布局（height:100vh + 内部滚动），所以 iframe 用固定高度 */
+  .stage iframe{display:block;width:100%;height:720px;border:0;background:var(--bg)}
+  @media (max-width:720px){
+    .stage iframe{height:600px}
+    .stage-title{display:none}
+  }
+
+  footer{text-align:center;font-size:13px;color:var(--ink3);padding-top:38px;
+    border-top:1px solid var(--line)}
+  footer a{color:var(--blue-d);text-decoration:none;font-weight:600}
+  footer a:hover{color:var(--red-d)}
 </style>
 </head>
 <body>
 <div class="glow"></div>
 <div class="wrap">
-  <a class="back" href="../index.html">← 返回作品集</a>
-  <div class="num">PROJECT 19 · AI 应用</div>
+  <a class="back" href="../../index.html">← 返回作品集</a>
+  <div class="num">PROJECT 04 · AI 应用</div>
   <h1>语音交互助手</h1>
+
+  <!-- ============ 首屏演示：打开就能直接对话，不用点任何按钮 ============ -->
+  <div class="stage">
+    <div class="stage-bar">
+      <span class="stage-dot"></span><span class="stage-dot"></span><span class="stage-dot"></span>
+      <span class="stage-title">可以直接打字或说话 · 检索在你浏览器里真实运行</span>
+      <span class="stage-live">LIVE</span>
+      <a class="stage-full" href="live/index.html" target="_blank" rel="noopener">全屏打开 ↗</a>
+    </div>
+    <iframe id="vaDemo" src="live/index.html"
+            title="语音交互助手 · 可直接对话" loading="eager"></iframe>
+  </div>
+
   <p class="lede">对着麦克风说话 → DeepSeek 思考 → edge-tts 朗读的本地语音应用。从 v3 起它不只会聊天，
-  更是一个 <strong style="color:#ddd6f3">Agent</strong>：<strong style="color:#ddd6f3">要不要查资料由模型自己决定</strong>，
+  更是一个 <strong style="color:var(--ink)">Agent</strong>：<strong style="color:var(--ink)">要不要查资料由模型自己决定</strong>，
   查不到就如实回答「资料里没有提到」，整个决策过程在前端摊开给你看。</p>
   <div class="tags">
     <span class="tag">Python</span>
@@ -121,22 +227,22 @@
     <span class="tag">102 个单元测试</span>
   </div>
 
-  <!-- ============ 在线演示入口 ============ -->
+  <!-- ============ 第二入口：真模型跑出来的录播 ============ -->
   <a class="cta" href="demo/index.html">
     <span class="cta-play">▶</span>
     <span class="cta-text">
-      <b>在线体验界面</b>
-      <i>不必装环境 —— 回放真实运行的对话与决策过程</i>
+      <b>看一段真模型跑的录播</b>
+      <i>上面是可以自己玩的检索版；这里回放的是接上 DeepSeek 后真实运行、原样保存的对话</i>
     </span>
     <span class="cta-arrow">→</span>
   </a>
 
   <h2>项目背景</h2>
-  <p style="font-size:15px;color:#b8afd3;margin-bottom:46px">
+  <p style="font-size:15px;color:var(--ink2);margin-bottom:46px">
     常见语音助手只能「问一句答一句」，答案对不对全靠模型自由发挥。这个项目想验证另一条路：
-    把本地文档交给 AI 当资料库，<strong style="color:#ddd6f3">让它自己判断什么时候该去查、什么时候不该查</strong>，
+    把本地文档交给 AI 当资料库，<strong style="color:var(--ink)">让它自己判断什么时候该去查、什么时候不该查</strong>，
     并且把「查没查、查到什么、来源是哪个文件」全部暴露出来。整条链路
-    <strong style="color:#ddd6f3">listen → think → speak</strong> 三层互不依赖，任何一层都能单独替换或测试。
+    <strong style="color:var(--ink)">listen → think → speak</strong> 三层互不依赖，任何一层都能单独替换或测试。
   </p>
 
   <h2>运行截图</h2>
@@ -222,8 +328,7 @@
   </ul>
 
   <h2>关键代码结构</h2>
-  <div class="code">
-<span class="c"># agent_core.py —— 交给模型的工具说明（节选，真实文案）</span>
+  <div class="code"><span class="c"># agent_core.py —— 交给模型的工具说明（节选，真实文案）</span>
 SEARCH_TOOL_DESCRIPTION = (
     <span class="s">"在用户上传的本地知识库（.md / .txt 文档）中做相关性检索……"</span>
     <span class="s">"【什么时候必须调用】当用户的问题涉及事实、定义、数字、流程、政策、规则时，"</span>
@@ -233,12 +338,10 @@ SEARCH_TOOL_DESCRIPTION = (
 )
 
 <span class="c"># 工具箱：一个工具一项，这份说明会原样发给模型</span>
-TOOLBOX = [{<span class="s">"name"</span>: <span class="s">"search_knowledge_base"</span>, <span class="s">"description"</span>: SEARCH_TOOL_DESCRIPTION, ...}]
-  </div>
+TOOLBOX = [{<span class="s">"name"</span>: <span class="s">"search_knowledge_base"</span>, <span class="s">"description"</span>: SEARCH_TOOL_DESCRIPTION, ...}]</div>
   <p class="cap">模型能否正确判断「该不该查」，全靠这段说明 —— 所以它写得足够具体。</p>
 
-  <div class="code">
-<span class="c"># 一轮 Agent 对话（ReAct 风格结构示意，实现见源码 agent_core.py）</span>
+  <div class="code"><span class="c"># 一轮 Agent 对话（ReAct 风格结构示意，实现见源码 agent_core.py）</span>
 messages = build_messages(text, history)
 
 <span class="k">for</span> step <span class="k">in</span> range(AGENT_MAX_STEPS):          <span class="c"># 最多 3 轮决策</span>
@@ -253,21 +356,18 @@ messages = build_messages(text, history)
 <span class="c"># 一致性校验：没查过就说「没有」，系统替它补查再让它重答</span>
 <span class="k">if</span> decision.says_not_found <span class="k">and</span> <span class="k">not</span> trace.has_tool_call <span class="k">and</span> kb.has_documents():
     messages.append(observation(run_tool(SEARCH_TOOL_NAME, {<span class="s">"query"</span>: text})))
-    decision = decide(messages)
-  </div>
+    decision = decide(messages)</div>
   <p class="cap">真实案例：问「我们几点下班？」模型一度直接答「资料里没有提到」，补查后它才正确回答「下午 18:00 下班」。</p>
 
   <h2>怎么运行</h2>
-  <div class="code">
-<span class="c"># 1) 配置密钥（代码里没有任何硬编码，全部从环境变量读取）</span>
+  <div class="code"><span class="c"># 1) 配置密钥（代码里没有任何硬编码，全部从环境变量读取）</span>
 <span class="k">set</span> DEEPSEEK_API_KEY=sk-你的密钥
 
 <span class="c"># 2) 双击 start.bat 即可：自动建虚拟环境、装依赖、启动并打开浏览器</span>
 <span class="c">#    麦克风需要 Chrome 或 Edge，通过 http://127.0.0.1:5000 访问</span>
 
 <span class="c"># 3) 离线跑测试：不联网、不需要 API Key</span>
-.venv\Scripts\python.exe -m unittest test_app -v
-  </div>
+.venv\Scripts\python.exe -m unittest test_app -v</div>
 
   <h2>工程细节</h2>
   <div class="grid">

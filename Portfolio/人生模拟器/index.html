@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg?v=2">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>地球 Online · 人生模拟器</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--g:#00ff9f;--b:#0088ff;--r:#ff0066;--y:#ffcc00;--bg:#0a0a0f}
+body{background:var(--bg);color:var(--g);font-family:'Share Tech Mono',monospace;min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,255,159,.03) 2px,rgba(0,255,159,.03) 4px);pointer-events:none;z-index:0}
+.scanline{position:fixed;inset:0;background:linear-gradient(transparent 50%,rgba(0,0,0,.05) 50%);background-size:100% 4px;pointer-events:none;z-index:1;animation:scan 8s linear infinite}
+@keyframes scan{to{background-position:0 100%}}
+
+/* ===== INTRO ===== */
+#intro{position:fixed;inset:0;background:#000;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px}
+#intro canvas{position:absolute;inset:0;width:100%;height:100%}
+.intro-content{position:relative;z-index:2;text-align:center}
+.intro-logo{font-size:4em;letter-spacing:12px;text-shadow:0 0 30px var(--g),0 0 60px var(--g);animation:flicker 2s infinite}
+.intro-sub{color:var(--b);letter-spacing:6px;font-size:.9em;margin-top:10px}
+.intro-bar{width:300px;height:3px;background:#111;border:1px solid #333;margin:30px auto 0;overflow:hidden}
+.intro-bar-fill{height:100%;background:linear-gradient(90deg,var(--b),var(--g));width:0%;transition:width .05s linear}
+.intro-status{color:#555;font-size:.75em;margin-top:8px;letter-spacing:2px}
+.intro-press{color:var(--g);font-size:.85em;letter-spacing:4px;animation:blink 1s infinite;display:none}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+@keyframes flicker{0%,100%{opacity:1}93%{opacity:.7}94%{opacity:1}97%{opacity:.85}98%{opacity:1}}
+
+/* ===== MAIN LAYOUT ===== */
+#main{position:relative;z-index:2;display:none;height:100vh;padding:10px;gap:10px;flex-direction:column}
+.top-bar{display:flex;align-items:center;justify-content:space-between;padding:8px 15px;border-bottom:1px solid #00ff9f22;flex-shrink:0}
+.top-title{font-size:1.3em;letter-spacing:6px;text-shadow:0 0 15px var(--g)}
+.top-info{color:#555;font-size:.75em;letter-spacing:2px}
+.layout{display:flex;gap:10px;flex:1;overflow:hidden}
+
+/* LEFT PANEL */
+.left-panel{width:320px;flex-shrink:0;display:flex;flex-direction:column;gap:8px;overflow-y:auto}
+.left-panel::-webkit-scrollbar{width:3px}
+.left-panel::-webkit-scrollbar-thumb{background:#00ff9f33}
+
+/* RIGHT PANEL */
+.right-panel{flex:1;display:flex;flex-direction:column;gap:8px;overflow:hidden}
+
+/* PANEL BOX */
+.box{background:rgba(0,255,159,.04);border:1px solid #00ff9f22;border-radius:3px;padding:12px;position:relative}
+.box::before{content:'';position:absolute;top:-1px;left:15px;width:40px;height:2px;background:var(--g)}
+.box-title{font-size:.7em;letter-spacing:4px;color:#00ff9f88;margin-bottom:10px;text-transform:uppercase}
+
+/* CHARACTER SVG AREA */
+.char-box{display:flex;flex-direction:column;align-items:center;padding:15px;background:rgba(0,136,255,.05);border:1px solid #0088ff22}
+.char-box::before{background:var(--b)}
+.char-box .box-title{color:#0088ff88}
+#live2d-container{width:150px;height:220px;position:absolute;left:20px;top:120px;border-radius:4px;pointer-events:none}
+#live2d-container canvas{width:150px!important;height:220px!important;border-radius:4px}
+
+/* STATS */
+.stat-row{display:flex;align-items:center;gap:8px;margin:10px 0}
+.stat-lbl{width:40px;font-size:.75em;color:#888}
+.stat-track{flex:1;height:6px;background:#111;border:1px solid #222;border-radius:1px;overflow:hidden}
+.stat-fill{height:100%;border-radius:1px;transition:width .6s cubic-bezier(.4,0,.2,1)}
+.sf-g{background:linear-gradient(90deg,#00ff9f44,var(--g))}
+.sf-b{background:linear-gradient(90deg,#0088ff44,var(--b))}
+.sf-r{background:linear-gradient(90deg,#ff006644,var(--r))}
+.sf-y{background:linear-gradient(90deg,#ffcc0044,var(--y))}
+.stat-v{width:35px;text-align:right;font-size:.75em}
+
+/* TASK BOX */
+.task-display{background:rgba(0,136,255,.08);border:1px solid #0088ff33;border-radius:2px;padding:10px;color:var(--b);font-size:.8em;line-height:1.6}
+
+/* LOG */
+.log{background:#000;border:1px solid #00ff9f11;border-radius:2px;padding:10px;flex:1;overflow-y:auto;font-size:.78em;line-height:1.9;min-height:0}
+.log::-webkit-scrollbar{width:3px}
+.log::-webkit-scrollbar-thumb{background:#00ff9f22}
+.ll{padding:1px 0;border-bottom:1px solid #ffffff05}
+.ll.ev{color:var(--y)}.ll.ok{color:var(--g)}.ll.bad{color:var(--r)}.ll.inf{color:var(--b)}.ll.sys{color:#555}
+
+/* ACTION TERMINAL */
+.action-terminal{flex:1;display:flex;flex-direction:column;overflow:hidden;position:relative}
+.terminal-bg{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:0.3}
+.terminal-header{display:flex;align-items:center;gap:8px;padding:8px 12px;background:#000;border:1px solid #00ff9f22;border-bottom:none;border-radius:3px 3px 0 0}
+.terminal-dot{width:8px;height:8px;border-radius:50%}
+.terminal-body{flex:1;background:#000;border:1px solid #00ff9f22;border-radius:0 0 3px 3px;padding:15px;overflow-y:auto;position:relative;z-index:1}
+.terminal-body::-webkit-scrollbar{width:3px}
+.terminal-body::-webkit-scrollbar-thumb{background:#00ff9f22}
+.phase-title{font-size:1em;color:var(--y);letter-spacing:3px;margin-bottom:12px;text-shadow:0 0 8px #ffcc0066}
+.choices{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.btn{background:transparent;border:1px solid var(--g);color:var(--g);padding:8px 16px;cursor:pointer;font-family:inherit;font-size:.82em;letter-spacing:2px;transition:all .2s;position:relative;overflow:hidden}
+.btn::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(0,255,159,.08),transparent);transform:translateX(-100%);transition:transform .3s}
+.btn:hover::after{transform:translateX(100%)}
+.btn:hover{background:rgba(0,255,159,.08);box-shadow:0 0 12px #00ff9f33}
+.btn.bb{border-color:var(--b);color:var(--b)}.btn.bb:hover{background:rgba(0,136,255,.08);box-shadow:0 0 12px #0088ff33}
+.btn.br{border-color:var(--r);color:var(--r)}.btn.br:hover{background:rgba(255,0,102,.08);box-shadow:0 0 12px #ff006633}
+.input-row{display:flex;gap:8px;margin:10px 0}
+.cyber-input{background:#000;border:1px solid #00ff9f33;color:var(--g);padding:8px 12px;font-family:inherit;font-size:.85em;flex:1;outline:none;transition:border-color .2s}
+.cyber-input:focus{border-color:var(--g);box-shadow:0 0 8px #00ff9f22}
+.cyber-input::placeholder{color:#333}
+.tag{display:inline-block;padding:1px 7px;border-radius:2px;font-size:.72em;margin:2px}
+.tm{background:#ff006615;border:1px solid #ff006633;color:var(--r)}
+.tf{background:#ff66cc15;border:1px solid #ff66cc33;color:#ff66cc}
+.result-box{text-align:center;padding:20px}
+.grade{font-size:5em;text-shadow:0 0 40px currentColor;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+.char-name-display{color:var(--y);font-size:.85em;letter-spacing:3px;margin:8px 0 4px;text-align:center}
+.char-id{color:#555;font-size:.7em;text-align:center;letter-spacing:2px}
+</style>
+<style>
+/* ── 站点外壳 ── */
+:root{
+  --bg:#FBFCFE; --ink:#1A1D24; --ink2:#525B6B; --ink3:#8B95A6;
+  --blue:#4FA8E8; --blue-d:#2E8BD0; --blue-s:#EAF5FD;
+  --red:#E8455F; --line:#E4EBF5;
+}
+html,body{min-height:0!important;height:auto!important;overflow:visible!important}
+body{
+  background:var(--bg)!important;color:var(--ink)!important;
+  font-family:"Noto Sans SC","Microsoft YaHei","PingFang SC",Arial,sans-serif!important;
+  line-height:1.75;overflow-x:hidden;
+}
+.wrap{max-width:min(1600px,100%);margin:0 auto;padding:56px clamp(16px,3vw,40px) 96px}
+.back{display:flex;width:fit-content;align-items:center;gap:8px;color:var(--ink3);
+  text-decoration:none;font-size:14px;margin-bottom:34px;transition:color .2s}
+.back:hover{color:var(--blue-d)}
+.num{display:inline-block;font-size:12.5px;font-weight:600;letter-spacing:.14em;
+  color:#fff;background:linear-gradient(100deg,#3E9FE0 0%,#E8455F 72%,#D62F4A 100%);
+  border-radius:999px;padding:6px 16px;margin-bottom:16px;
+  box-shadow:0 8px 22px rgba(214,47,74,.34)}
+.wrap > h1{font-size:clamp(26px,3.6vw,38px);line-height:1.28;font-weight:700;
+  color:var(--ink);margin:0 0 14px;letter-spacing:-.01em}
+.lede{font-size:17px;color:var(--ink2);max-width:780px;margin:0 0 22px;line-height:1.8}
+.tags{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:26px}
+.tags .tag{font-size:12.5px;color:var(--blue-d);background:var(--blue-s);
+  border:1px solid #D6E9F8;border-radius:999px;padding:4px 12px}
+
+/* 这个页面本身是一块全屏 CRT，收进一个「显示器」框里 */
+.screen{
+  position:relative;
+  height:min(880px,88vh);
+  border-radius:18px;overflow:hidden;
+  border:1px solid #1d3a2d;
+  background:#0a0a0f;
+  box-shadow:0 20px 50px rgba(20,22,40,.22);
+}
+.scanline{position:absolute!important}
+#intro{position:absolute!important}
+#main{height:100%!important}
+/* 顶栏原来的颜色继承 body，换成深色屏幕后看不见 */
+.top-bar{color:#00ff9f!important;border-bottom-color:#00ff9f33!important}
+
+@media (max-width:900px){
+  .screen{height:min(700px,78vh);border-radius:14px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="../../index.html">← 返回作品集</a>
+  <div class="num">PROJECT 34</div>
+  <h1>地球 Online · 人生模拟器</h1>
+  <p class="lede">
+    一个纯前端的文字人生模拟器：开局随机抽角色（家境、智力、体质、快乐值都随机），
+    然后一年一年往下过——答题影响智力，打工影响金钱，每个选择都会改变结局。
+    整个存档在浏览器里跑，没有任何后端。点开那块屏幕就能玩。
+  </p>
+  <div class="tags">
+    <span class="tag">原生 JS</span><span class="tag">Canvas</span>
+    <span class="tag">状态机</span><span class="tag">纯前端</span>
+  </div>
+<div class="screen">
+
+<div class="scanline"></div>
+
+<!-- INTRO SCREEN -->
+<div id="intro">
+  <canvas id="introCanvas"></canvas>
+  <div class="intro-content">
+    <div class="intro-logo">地球ONLINE</div>
+    <div class="intro-sub">>> 热梗资料片 · 人生模拟器 v2.0 <<</div>
+    <div class="intro-bar"><div class="intro-bar-fill" id="introFill"></div></div>
+    <div class="intro-status" id="introStatus">INITIALIZING SYSTEM...</div>
+    <div class="intro-press" id="introPress">[ 点击任意处开始 ]</div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div id="main" style="display:flex">
+  <div class="top-bar">
+    <span class="top-title">地球ONLINE</span>
+    <span class="top-info" id="clock"></span>
+  </div>
+  <div class="layout">
+    <!-- LEFT -->
+    <div class="left-panel">
+      <!-- 角色 -->
+      <div class="box char-box">
+        <div class="box-title">>> 虚拟角色</div>
+        <iframe src="live2d_embed.html" width="150" height="220" frameborder="0" scrolling="no" style="background:transparent;border-radius:4px"></iframe>
+        <div class="char-name-display" id="charName">[ 未载入 ]</div>
+        <div class="char-id" id="charId">ID: ----</div>
+      </div>
+      <!-- 主线任务 -->
+      <div class="box">
+        <div class="box-title">>> 主线任务</div>
+        <div class="task-display" id="taskDisplay">正在加载...</div>
+      </div>
+      <!-- 属性 -->
+      <div class="box">
+        <div class="box-title">>> 属性面板</div>
+        <div class="stat-row"><span class="stat-lbl">资产</span><div class="stat-track"><div class="stat-fill sf-g" id="bar-home" style="width:0%"></div></div><span class="stat-v" id="val-home">0万</span></div>
+        <div class="stat-row"><span class="stat-lbl">智力</span><div class="stat-track"><div class="stat-fill sf-b" id="bar-iq" style="width:0%"></div></div><span class="stat-v" id="val-iq">0</span></div>
+        <div class="stat-row"><span class="stat-lbl">体力</span><div class="stat-track"><div class="stat-fill sf-r" id="bar-health" style="width:0%"></div></div><span class="stat-v" id="val-health">0</span></div>
+        <div class="stat-row"><span class="stat-lbl">快乐</span><div class="stat-track"><div class="stat-fill sf-y" id="bar-happy" style="width:0%"></div></div><span class="stat-v" id="val-happy">0</span></div>
+      </div>
+      <!-- 日志已移至右侧 -->
+    </div>
+    <!-- RIGHT -->
+    <div class="right-panel">
+      <!-- 日志 -->
+      <div class="box" style="height:320px;display:flex;flex-direction:column">
+        <div class="box-title">>> 系统日志</div>
+        <div class="log" id="log"></div>
+      </div>
+      <div class="action-terminal">
+        <canvas class="terminal-bg" id="terminalBg"></canvas>
+        <div class="terminal-header">
+          <div class="terminal-dot" style="background:#ff0066"></div>
+          <div class="terminal-dot" style="background:#ffcc00"></div>
+          <div class="terminal-dot" style="background:#00ff9f"></div>
+          <span style="color:#555;font-size:.75em;margin-left:8px;letter-spacing:2px">OPERATION TERMINAL</span>
+        </div>
+        <div class="terminal-body" id="actionContent"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const AC=new(window.AudioContext||window.webkitAudioContext)();
+function beep(f=440,d=.1,v=.3,t='square'){
+  const o=AC.createOscillator(),g=AC.createGain();
+  o.connect(g);g.connect(AC.destination);
+  o.type=t;o.frequency.value=f;
+  g.gain.setValueAtTime(v,AC.currentTime);
+  g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+d);
+  o.start();o.stop(AC.currentTime+d);
+}
+function playBoot(){[200,300,400,600,800].forEach((f,i)=>setTimeout(()=>beep(f,.15,.2,'sawtooth'),i*120))}
+function playClick(){beep(880,.05,.1)}
+function playGood(){beep(660,.08,.15);setTimeout(()=>beep(880,.1,.15),100)}
+function playBad(){beep(180,.2,.2,'sawtooth')}
+
+const cv=document.getElementById('introCanvas'),cx=cv.getContext('2d');
+function rsz(){cv.width=innerWidth;cv.height=innerHeight}rsz();
+window.addEventListener('resize',rsz);
+const pts=Array.from({length:80},()=>({x:Math.random()*innerWidth,y:Math.random()*innerHeight,vy:.3+Math.random()*.7,s:Math.random()*2+.5}));
+(function draw(){
+  cx.clearRect(0,0,cv.width,cv.height);
+  pts.forEach(p=>{cx.fillStyle='rgba(0,255,159,.4)';cx.fillRect(p.x,p.y,p.s,p.s*4);p.y+=p.vy;if(p.y>cv.height){p.y=0;p.x=Math.random()*cv.width}});
+  requestAnimationFrame(draw);
+})();
+
+const msgs=['LOADING KERNEL...','INIT WORLD ENGINE...','SPAWNING NPC DATABASE...','LOADING MEME PACK v9.9...','CALIBRATING FATE ALGORITHM...','SYSTEM READY'];
+let bi=0;
+const fillEl=document.getElementById('introFill'),statusEl=document.getElementById('introStatus'),pressEl=document.getElementById('introPress');
+function bootStep(){
+  if(bi>=msgs.length){pressEl.style.display='block';return}
+  statusEl.textContent=msgs[bi];fillEl.style.width=((bi+1)/msgs.length*100)+'%';
+  beep(200+bi*80,.08,.12,'square');bi++;
+  setTimeout(bootStep,bi===msgs.length?600:380);
+}
+setTimeout(()=>{playBoot();bootStep()},500);
+document.getElementById('intro').addEventListener('click',()=>{
+  if(bi<msgs.length)return;AC.resume();
+  const el=document.getElementById('intro');
+  el.style.transition='opacity .8s';el.style.opacity='0';
+  setTimeout(()=>el.style.display='none',800);playGood();
+});
+
+setInterval(()=>{document.getElementById('clock').textContent=new Date().toLocaleTimeString('zh',{hour12:false})},1000);
+
+const G={name:'',sex:'',iq:0,home:0,health:0,happy:0,rerollCount:0,task:null,taskCheck:null,quizScore:0,quizTotal:0};
+const tasks=[
+  {desc:'💰 主线：资产达到10万',check:(h,i,hh,ha)=>h>=10},
+  {desc:'💪 主线：体能超过9点',check:(h,i,hh,ha)=>hh>=9},
+  {desc:'💖 主线：通关恋爱副本且资产≥5万',check:(h,i,hh,ha)=>ha>=7&&h>=5},
+  {desc:'🧠 主线：智力突破9点',check:(h,i,hh,ha)=>i>=9},
+  {desc:'😊 主线：快乐值拉满10',check:(h,i,hh,ha)=>ha>=10}
+];
+const quizBank={
+  study:[
+    {q:'以下哪个是正确的学习方法？',opts:['熬夜刷题','合理规划时间','只看不练','抄答案'],ans:1},
+    {q:'内卷的本质是什么？',opts:['努力学习','恶性竞争','合作共赢','放松心态'],ans:1},
+    {q:'如何提高学习效率？',opts:['连续学12小时','番茄工作法','边玩边学','不做笔记'],ans:1}
+  ],
+  game:[
+    {q:'王者峡谷中最重要的是？',opts:['团队配合','单杀对面','骂队友','挂机'],ans:0},
+    {q:'游戏时间过长会导致？',opts:['智力提升','视力下降','学习进步','身体健康'],ans:1},
+    {q:'适度游戏的好处是？',opts:['逃避现实','放松心情','荒废学业','熬夜通宵'],ans:1}
+  ],
+  love:[
+    {q:'恋爱中最重要的是？',opts:['金钱','外貌','真诚沟通','控制对方'],ans:2},
+    {q:'恋爱失败后应该？',opts:['报复对方','自我反思','放弃人生','立即开始下一段'],ans:1},
+    {q:'健康的恋爱关系是？',opts:['互相尊重','单方付出','完全依赖','频繁争吵'],ans:0}
+  ],
+  startup:[
+    {q:'创业最需要的是？',opts:['运气','充足准备','盲目自信','家庭背景'],ans:1},
+    {q:'创业失败后应该？',opts:['一蹶不振','总结经验','怪罪他人','立即再创业'],ans:1},
+    {q:'创业成功的关键是？',opts:['市场需求','投机取巧','关系网','烧钱营销'],ans:0}
+  ],
+  work:[
+    {q:'996工作制的问题是？',opts:['效率提升','过度劳累','工资更高','能力增强'],ans:1},
+    {q:'职场中最重要的是？',opts:['拍马屁','专业能力','勾心斗角','摸鱼划水'],ans:1},
+    {q:'如何平衡工作与生活？',opts:['只工作不生活','合理安排时间','只生活不工作','随便应付'],ans:1}
+  ]
+};
+const rv=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+const cl=(v,a,b)=>Math.max(a,Math.min(b,v));
+
+function showQuiz(type,callback){
+  const qs=quizBank[type];
+  const selected=[];
+  while(selected.length<2){
+    const q=qs[rv(0,qs.length-1)];
+    if(!selected.includes(q))selected.push(q);
+  }
+  G.quizScore=0;G.quizTotal=selected.length;
+  let currentQ=0;
+  function nextQ(){
+    if(currentQ>=selected.length){callback(G.quizScore/G.quizTotal);return}
+    const q=selected[currentQ];
+    setAction(`<div class="phase-title">>> 答题挑战 [${currentQ+1}/${selected.length}]</div>
+      <div style="color:#ffcc00;font-size:.9em;margin-bottom:15px">${q.q}</div>
+      <div class="choices">
+        ${q.opts.map((opt,i)=>`<button class="btn ${i===0?'':'bb'}" onclick="answerQ(${i},${q.ans},${currentQ})">${opt}</button>`).join('')}
+      </div>
+      <div style="color:#555;font-size:.75em;margin-top:10px">答对率：${G.quizScore}/${currentQ}</div>`);
+    currentQ++;
+  }
+  window.answerQ=(selected,correct,idx)=>{
+    playClick();
+    if(selected===correct){
+      G.quizScore++;
+      addLog(`✅ 第${idx+1}题：回答正确！`,'ok');
+      playGood();
+    }else{
+      addLog(`❌ 第${idx+1}题：回答错误...`,'bad');
+      playBad();
+    }
+    setTimeout(nextQ,800);
+  };
+  nextQ();
+}
+
+function addLog(msg,type=''){
+  const el=document.getElementById('log'),d=document.createElement('div');
+  d.className='ll '+(type||'');d.textContent=msg;el.appendChild(d);el.scrollTop=el.scrollHeight;
+}
+function setAction(html){document.getElementById('actionContent').innerHTML=html}
+
+function updateStats(){
+  document.getElementById('bar-home').style.width=(G.home/20*100)+'%';
+  document.getElementById('bar-iq').style.width=(G.iq/10*100)+'%';
+  document.getElementById('bar-health').style.width=(G.health/10*100)+'%';
+  document.getElementById('bar-happy').style.width=(G.happy/10*100)+'%';
+  document.getElementById('val-home').textContent=G.home+'万';
+  document.getElementById('val-iq').textContent=G.iq;
+  document.getElementById('val-health').textContent=G.health;
+  document.getElementById('val-happy').textContent=G.happy;
+  if(G.name){
+    document.getElementById('charName').textContent=`[ ${G.name} · ${G.sex}性 ]`;
+    document.getElementById('charId').textContent=`ID: ${G.name.charCodeAt(0)}-${G.iq}${G.home}${G.health}`;
+  }
+}
+
+function init(){
+  const t=tasks[rv(0,tasks.length-1)];
+  G.task=t.desc;G.taskCheck=t.check;
+  document.getElementById('taskDisplay').textContent=t.desc;
+  addLog('>> 地球Online 正在初始化...','sys');
+  addLog('>> 欢迎来到【地球Online · 热梗资料片】','inf');
+  addLog('>> 主线任务：'+t.desc,'inf');
+  phaseCreate();
+}
+
+function phaseCreate(){
+  G.sex=Math.random()<.5?'男':'女';
+  G.iq=rv(1,10);G.home=rv(1,10);G.health=rv(5,10);G.happy=rv(5,10);
+  addLog(`\n✨ 刷新出一个${G.sex}性角色`,'ev');
+  addLog(`【初始面板】智力${G.iq}|资产${G.home}万|体力${G.health}|快乐${G.happy}`,'sys');
+  updateStats();
+  const warn=(G.iq<5&&G.home<5)&&G.rerollCount<2;
+  setAction(`<div class="phase-title">>> 捏人阶段 · 角色创建</div>
+    <div style="color:#888;font-size:.8em;margin-bottom:10px">
+      性别：<span class="tag ${G.sex==='男'?'tm':'tf'}">${G.sex}性</span>
+      &nbsp;智力：<span style="color:${G.iq<5?'#ff0066':'#00ff9f'}">${G.iq}</span>
+      &nbsp;资产：<span style="color:${G.home<5?'#ff0066':'#00ff9f'}">${G.home}万</span>
+    </div>
+    ${warn?'<div style="color:#ff0066;font-size:.8em;margin-bottom:8px">⚠️ 天崩开局，建议重开</div>':''}
+    <div class="input-row">
+      <input class="cyber-input" id="nameInput" placeholder="输入角色名..." maxlength="10">
+      <button class="btn" onclick="confirmName()">载入</button>
+    </div>
+    ${warn?`<div class="choices"><button class="btn br" onclick="reroll()">重开 (剩余${2-G.rerollCount}次)</button></div>`:''}`);
+}
+
+function reroll(){
+  if(G.rerollCount>=2){addLog('重开次数已用完','bad');return;}
+  G.rerollCount++;playClick();addLog('>> 触发新手保护，重新刷新...','sys');phaseCreate();
+}
+function confirmName(){
+  const n=document.getElementById('nameInput').value.trim();
+  if(!n){addLog('请输入角色名','bad');playBad();return;}
+  G.name=n;playGood();addLog(`\n✅ 角色【${G.name}】已载入地球Online`,'ok');
+  updateStats();phaseGrowth();
+}
+function phaseGrowth(){
+  addLog('\n>>> 进入【新手村·成长副本】','inf');
+  setAction(`<div class="phase-title">>> 新手村 · 成长副本</div>
+    <div style="color:#555;font-size:.8em;margin-bottom:12px">你在新手村度过了漫长的学生时代...</div>
+    <div class="choices">
+      <button class="btn" onclick="growthEvent('study')">📖 内卷学习</button>
+      <button class="btn bb" onclick="growthEvent('game')">🎮 王者峡谷</button>
+    </div>`);
+}
+function growthEvent(c){
+  playClick();
+  addLog(`>> 选择：${c==='study'?'内卷学习':'王者峡谷'}，开始答题验证...`,'inf');
+  showQuiz(c==='study'?'study':'game',(score)=>{
+    if(c==='study'){
+      const bonus=score>=1?2:0;
+      addLog(`📖 内卷学习 → 智力+${bonus}${bonus===0?' (答题太差，没学进去)':''}`,bonus>0?'ok':'bad');
+      G.iq=cl(G.iq+bonus,1,10);bonus>0?playGood():playBad();
+    }else{
+      const penalty=score>=1?-1:-2;
+      addLog(`🎮 王者峡谷 → 智力${penalty}${score>=1?' (还好没太沉迷)':''}`,penalty<-1?'bad':'ev');
+      G.iq=cl(G.iq+penalty,1,10);playBad();
+    }
+    addLog(`【属性更新】智力 ${G.iq}`,'sys');updateStats();phaseGaokao();
+  });
+}
+function phaseGaokao(){
+  addLog('\n>>> 进入【精英副本 · 高考】','inf');
+  setAction(`<div class="phase-title">>> 精英副本 · 高考</div>
+    <div style="color:#ffcc00;font-size:.8em;margin-bottom:8px">⚠️ 是否挑战「恋爱副本」(氪金警告)？</div>
+    <div style="color:#555;font-size:.75em;margin-bottom:12px">当前资产：${G.home}万 | 预计消耗：2~5万</div>
+    <div class="choices">
+      <button class="btn" onclick="gaokaoChoice(true)">💖 挑战恋爱副本</button>
+      <button class="btn bb" onclick="gaokaoChoice(false)">📖 专心学习</button>
+    </div>`);
+}
+function gaokaoChoice(love){
+  playClick();
+  if(love){
+    const cost=rv(2,5);
+    if(G.home>=cost){
+      G.home-=cost;addLog(`💸 消耗${cost}万，恋爱副本开启，先答题...`,'ev');
+      showQuiz('love',(score)=>{
+        if(score>=1){addLog('💖 副本通关！智力+3 快乐+2','ok');G.iq+=3;G.happy+=2;playGood();}
+        else{addLog('💔 副本失败... 智力-2 快乐-3','bad');G.iq-=2;G.happy-=3;playBad();}
+        G.iq=cl(G.iq,1,10);G.home=cl(G.home,1,15);G.happy=cl(G.happy,0,10);
+        addLog(`【属性更新】智力${G.iq}|资产${G.home}万|快乐${G.happy}`,'sys');
+        updateStats();phaseWork();
+      });
+    }else{addLog('💰 资产不足 → 安心学习 智力+1','ev');G.iq+=1;G.iq=cl(G.iq,1,10);updateStats();phaseWork();}
+  }else{
+    addLog('📖 独行学霸，先答题验证学习成果...','inf');
+    showQuiz('study',(score)=>{
+      const bonus=score>=1?2:1;
+      addLog(`📖 独行学霸 → 智力+${bonus} 资产+1万`,'ok');
+      G.iq+=bonus;G.home+=1;playGood();
+      G.iq=cl(G.iq,1,10);G.home=cl(G.home,1,15);G.happy=cl(G.happy,0,10);
+      addLog(`【属性更新】智力${G.iq}|资产${G.home}万|快乐${G.happy}`,'sys');
+      updateStats();phaseWork();
+    });
+  }
+}
+function phaseWork(){
+  addLog('\n>>> 进入【转职副本 · 职场】','inf');
+  setAction(`<div class="phase-title">>> 转职副本 · 职场</div>
+    <div style="color:#555;font-size:.8em;margin-bottom:12px">选择你的人生路线：</div>
+    <div class="choices">
+      <button class="btn" onclick="workChoice(true)">🚀 创业 (30%成功率)</button>
+      <button class="btn bb" onclick="workChoice(false)">🐂 996打工</button>
+    </div>`);
+}
+function workChoice(s){
+  playClick();
+  addLog(`>> 选择：${s?'创业':'996打工'}，先答题验证能力...`,'inf');
+  showQuiz(s?'startup':'work',(score)=>{
+    if(s){
+      const successRate=score>=1?.5:.15;
+      if(Math.random()<successRate){addLog('🚀 创业大成功！资产+5万','ok');G.home+=5;playGood();}
+      else{addLog('📉 创业失败... 资产-3万 体力-2','bad');G.home-=3;G.health-=2;playBad();}
+    }else{
+      const bonus=score>=1?3:2;
+      addLog(`🐂 996打工 → 资产+${bonus}万 体力-1 快乐-2`,'ev');
+      G.home+=bonus;G.health-=1;G.happy-=2;
+    }
+    G.home=cl(G.home,1,20);G.health=cl(G.health,1,10);G.happy=cl(G.happy,0,10);
+    addLog(`【属性更新】资产${G.home}万|体力${G.health}|快乐${G.happy}`,'sys');
+    updateStats();randomEvent();
+  });
+}
+function randomEvent(){
+  const evs=[
+    {d:"🐕 奇遇『二舅』→ 体力+1 快乐+2",m:[0,1,2],t:'ok'},
+    {d:"📉 遭遇『基金绿光』→ 资产-2万",m:[-2,0,0],t:'bad'},
+    {d:"🍺 『深夜网抑云』→ 快乐-2",m:[0,0,-2],t:'bad'},
+    {d:"💪 奇遇『刘畊宏』→ 体力+2",m:[0,2,0],t:'ok'},
+    {d:"💰 彩蛋『天降横财』→ 资产+3万",m:[3,0,0],t:'ok'}
+  ];
+  const e=evs[rv(0,evs.length-1)];
+  addLog('\n⚡ 【野怪出现】随机事件触发','ev');
+  addLog(e.d,e.t);e.t==='ok'?playGood():playBad();
+  G.home=cl(G.home+e.m[0],1,20);G.health=cl(G.health+e.m[1],1,10);G.happy=cl(G.happy+e.m[2],0,10);
+  addLog(`【当前面板】资产${G.home}万|体力${G.health}|快乐${G.happy}`,'sys');
+  updateStats();settle();
+}
+function settle(){
+  const ok=G.taskCheck(G.home,G.iq,G.health,G.happy);
+  addLog('\n📋 【主线任务·结算】'+G.task,'inf');
+  if(ok){addLog('✅ 任务完成！获得隐藏成就『天选之人』','ok');G.happy=cl(G.happy+2,0,10);G.home+=1;playGood();}
+  else{addLog('❌ 任务失败... 下次规划好加点','bad');playBad();}
+  updateStats();
+  const score=G.home+G.iq+G.health+G.happy;
+  let grade,color,msg;
+  if(score>=30){grade='S';color='#00ff9f';msg='人生赢家！'}
+  else if(score>=22){grade='A';color='#0088ff';msg='小康生活'}
+  else if(G.iq<=3){grade='D';color='#ff0066';msg='智力低下，流口水结局'}
+  else if(G.health<=2){grade='E';color='#ff0066';msg='健康崩坏，英年早逝'}
+  else if(G.happy<=2){grade='E';color='#ff0066';msg='重度抑郁，躺平退游'}
+  else{grade='B';color='#ffcc00';msg='平凡NPC，平淡一生'}
+  addLog(`\n🏆 通关评价：${grade}级 · ${msg}`,'ev');
+  setAction(`<div class="result-box">
+    <div style="color:#555;letter-spacing:4px;margin-bottom:15px;font-size:.8em">>> 地球Online · 通关评价 <<</div>
+    <div class="grade" style="color:${color}">${grade}</div>
+    <div style="color:${color};margin:12px 0;font-size:1em;letter-spacing:2px">${G.name} · ${msg}</div>
+    <div style="color:#555;font-size:.78em;margin:8px 0">资产${G.home}万 | 智力${G.iq} | 体力${G.health} | 快乐${G.happy} | 总分${score}</div>
+    <div style="color:${ok?'#00ff9f':'#ff0066'};font-size:.78em;margin:8px 0">主线任务：${ok?'✅ 完成':'❌ 失败'}</div>
+    <div class="choices" style="justify-content:center;margin-top:15px">
+      <button class="btn" onclick="restart()">>> 重新开始</button>
+    </div>
+  </div>`);
+}
+function restart(){
+  Object.assign(G,{name:'',sex:'',iq:0,home:0,health:0,happy:0,rerollCount:0,task:null,taskCheck:null});
+  document.getElementById('log').innerHTML='';
+  document.getElementById('charName').textContent='[ 未载入 ]';
+  document.getElementById('charId').textContent='ID: ----';
+  updateStats();init();playClick();
+}
+
+// Terminal background animation
+const tbg=document.getElementById('terminalBg');
+const tbgCtx=tbg.getContext('2d');
+function rszTbg(){const p=tbg.parentElement;tbg.width=p.offsetWidth;tbg.height=p.offsetHeight}
+rszTbg();window.addEventListener('resize',rszTbg);
+const dots=Array.from({length:30},()=>({x:Math.random()*tbg.width,y:Math.random()*tbg.height,vx:(Math.random()-.5)*.3,vy:(Math.random()-.5)*.3,r:Math.random()*2+1}));
+(function drawTbg(){
+  tbgCtx.fillStyle='rgba(0,0,0,.1)';tbgCtx.fillRect(0,0,tbg.width,tbg.height);
+  dots.forEach(d=>{
+    tbgCtx.fillStyle='rgba(0,255,159,.6)';tbgCtx.beginPath();tbgCtx.arc(d.x,d.y,d.r,0,Math.PI*2);tbgCtx.fill();
+    d.x+=d.vx;d.y+=d.vy;
+    if(d.x<0||d.x>tbg.width)d.vx*=-1;
+    if(d.y<0||d.y>tbg.height)d.vy*=-1;
+  });
+  requestAnimationFrame(drawTbg);
+})();
+
+init();
+</script>
+
+</div>
+</div>
+
+<script>
+const AC=new(window.AudioContext||window.webkitAudioContext)();
+function beep(f=440,d=.1,v=.3,t='square'){
+  const o=AC.createOscillator(),g=AC.createGain();
+  o.connect(g);g.connect(AC.destination);
+  o.type=t;o.frequency.value=f;
+  g.gain.setValueAtTime(v,AC.currentTime);
+  g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+d);
+  o.start();o.stop(AC.currentTime+d);
+}
+function playBoot(){[200,300,400,600,800].forEach((f,i)=>setTimeout(()=>beep(f,.15,.2,'sawtooth'),i*120))}
+function playClick(){beep(880,.05,.1)}
+function playGood(){beep(660,.08,.15);setTimeout(()=>beep(880,.1,.15),100)}
+function playBad(){beep(180,.2,.2,'sawtooth')}
+
+const cv=document.getElementById('introCanvas'),cx=cv.getContext('2d');
+function rsz(){cv.width=innerWidth;cv.height=innerHeight}rsz();
+window.addEventListener('resize',rsz);
+const pts=Array.from({length:80},()=>({x:Math.random()*innerWidth,y:Math.random()*innerHeight,vy:.3+Math.random()*.7,s:Math.random()*2+.5}));
+(function draw(){
+  cx.clearRect(0,0,cv.width,cv.height);
+  pts.forEach(p=>{cx.fillStyle='rgba(0,255,159,.4)';cx.fillRect(p.x,p.y,p.s,p.s*4);p.y+=p.vy;if(p.y>cv.height){p.y=0;p.x=Math.random()*cv.width}});
+  requestAnimationFrame(draw);
+})();
+
+const msgs=['LOADING KERNEL...','INIT WORLD ENGINE...','SPAWNING NPC DATABASE...','LOADING MEME PACK v9.9...','CALIBRATING FATE ALGORITHM...','SYSTEM READY'];
+let bi=0;
+const fillEl=document.getElementById('introFill'),statusEl=document.getElementById('introStatus'),pressEl=document.getElementById('introPress');
+function bootStep(){
+  if(bi>=msgs.length){pressEl.style.display='block';return}
+  statusEl.textContent=msgs[bi];fillEl.style.width=((bi+1)/msgs.length*100)+'%';
+  beep(200+bi*80,.08,.12,'square');bi++;
+  setTimeout(bootStep,bi===msgs.length?600:380);
+}
+setTimeout(()=>{playBoot();bootStep()},500);
+document.getElementById('intro').addEventListener('click',()=>{
+  if(bi<msgs.length)return;AC.resume();
+  const el=document.getElementById('intro');
+  el.style.transition='opacity .8s';el.style.opacity='0';
+  setTimeout(()=>el.style.display='none',800);playGood();
+});
+
+setInterval(()=>{document.getElementById('clock').textContent=new Date().toLocaleTimeString('zh',{hour12:false})},1000);
+
+const G={name:'',sex:'',iq:0,home:0,health:0,happy:0,rerollCount:0,task:null,taskCheck:null,quizScore:0,quizTotal:0};
+const tasks=[
+  {desc:'💰 主线：资产达到10万',check:(h,i,hh,ha)=>h>=10},
+  {desc:'💪 主线：体能超过9点',check:(h,i,hh,ha)=>hh>=9},
+  {desc:'💖 主线：通关恋爱副本且资产≥5万',check:(h,i,hh,ha)=>ha>=7&&h>=5},
+  {desc:'🧠 主线：智力突破9点',check:(h,i,hh,ha)=>i>=9},
+  {desc:'😊 主线：快乐值拉满10',check:(h,i,hh,ha)=>ha>=10}
+];
+const quizBank={
+  study:[
+    {q:'以下哪个是正确的学习方法？',opts:['熬夜刷题','合理规划时间','只看不练','抄答案'],ans:1},
+    {q:'内卷的本质是什么？',opts:['努力学习','恶性竞争','合作共赢','放松心态'],ans:1},
+    {q:'如何提高学习效率？',opts:['连续学12小时','番茄工作法','边玩边学','不做笔记'],ans:1}
+  ],
+  game:[
+    {q:'王者峡谷中最重要的是？',opts:['团队配合','单杀对面','骂队友','挂机'],ans:0},
+    {q:'游戏时间过长会导致？',opts:['智力提升','视力下降','学习进步','身体健康'],ans:1},
+    {q:'适度游戏的好处是？',opts:['逃避现实','放松心情','荒废学业','熬夜通宵'],ans:1}
+  ],
+  love:[
+    {q:'恋爱中最重要的是？',opts:['金钱','外貌','真诚沟通','控制对方'],ans:2},
+    {q:'恋爱失败后应该？',opts:['报复对方','自我反思','放弃人生','立即开始下一段'],ans:1},
+    {q:'健康的恋爱关系是？',opts:['互相尊重','单方付出','完全依赖','频繁争吵'],ans:0}
+  ],
+  startup:[
+    {q:'创业最需要的是？',opts:['运气','充足准备','盲目自信','家庭背景'],ans:1},
+    {q:'创业失败后应该？',opts:['一蹶不振','总结经验','怪罪他人','立即再创业'],ans:1},
+    {q:'创业成功的关键是？',opts:['市场需求','投机取巧','关系网','烧钱营销'],ans:0}
+  ],
+  work:[
+    {q:'996工作制的问题是？',opts:['效率提升','过度劳累','工资更高','能力增强'],ans:1},
+    {q:'职场中最重要的是？',opts:['拍马屁','专业能力','勾心斗角','摸鱼划水'],ans:1},
+    {q:'如何平衡工作与生活？',opts:['只工作不生活','合理安排时间','只生活不工作','随便应付'],ans:1}
+  ]
+};
+const rv=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+const cl=(v,a,b)=>Math.max(a,Math.min(b,v));
+
+function showQuiz(type,callback){
+  const qs=quizBank[type];
+  const selected=[];
+  while(selected.length<2){
+    const q=qs[rv(0,qs.length-1)];
+    if(!selected.includes(q))selected.push(q);
+  }
+  G.quizScore=0;G.quizTotal=selected.length;
+  let currentQ=0;
+  function nextQ(){
+    if(currentQ>=selected.length){callback(G.quizScore/G.quizTotal);return}
+    const q=selected[currentQ];
+    setAction(`<div class="phase-title">>> 答题挑战 [${currentQ+1}/${selected.length}]</div>
+      <div style="color:#ffcc00;font-size:.9em;margin-bottom:15px">${q.q}</div>
+      <div class="choices">
+        ${q.opts.map((opt,i)=>`<button class="btn ${i===0?'':'bb'}" onclick="answerQ(${i},${q.ans},${currentQ})">${opt}</button>`).join('')}
+      </div>
+      <div style="color:#555;font-size:.75em;margin-top:10px">答对率：${G.quizScore}/${currentQ}</div>`);
+    currentQ++;
+  }
+  window.answerQ=(selected,correct,idx)=>{
+    playClick();
+    if(selected===correct){
+      G.quizScore++;
+      addLog(`✅ 第${idx+1}题：回答正确！`,'ok');
+      playGood();
+    }else{
+      addLog(`❌ 第${idx+1}题：回答错误...`,'bad');
+      playBad();
+    }
+    setTimeout(nextQ,800);
+  };
+  nextQ();
+}
+
+function addLog(msg,type=''){
+  const el=document.getElementById('log'),d=document.createElement('div');
+  d.className='ll '+(type||'');d.textContent=msg;el.appendChild(d);el.scrollTop=el.scrollHeight;
+}
+function setAction(html){document.getElementById('actionContent').innerHTML=html}
+
+function updateStats(){
+  document.getElementById('bar-home').style.width=(G.home/20*100)+'%';
+  document.getElementById('bar-iq').style.width=(G.iq/10*100)+'%';
+  document.getElementById('bar-health').style.width=(G.health/10*100)+'%';
+  document.getElementById('bar-happy').style.width=(G.happy/10*100)+'%';
+  document.getElementById('val-home').textContent=G.home+'万';
+  document.getElementById('val-iq').textContent=G.iq;
+  document.getElementById('val-health').textContent=G.health;
+  document.getElementById('val-happy').textContent=G.happy;
+  if(G.name){
+    document.getElementById('charName').textContent=`[ ${G.name} · ${G.sex}性 ]`;
+    document.getElementById('charId').textContent=`ID: ${G.name.charCodeAt(0)}-${G.iq}${G.home}${G.health}`;
+  }
+}
+
+function init(){
+  const t=tasks[rv(0,tasks.length-1)];
+  G.task=t.desc;G.taskCheck=t.check;
+  document.getElementById('taskDisplay').textContent=t.desc;
+  addLog('>> 地球Online 正在初始化...','sys');
+  addLog('>> 欢迎来到【地球Online · 热梗资料片】','inf');
+  addLog('>> 主线任务：'+t.desc,'inf');
+  phaseCreate();
+}
+
+function phaseCreate(){
+  G.sex=Math.random()<.5?'男':'女';
+  G.iq=rv(1,10);G.home=rv(1,10);G.health=rv(5,10);G.happy=rv(5,10);
+  addLog(`\n✨ 刷新出一个${G.sex}性角色`,'ev');
+  addLog(`【初始面板】智力${G.iq}|资产${G.home}万|体力${G.health}|快乐${G.happy}`,'sys');
+  updateStats();
+  const warn=(G.iq<5&&G.home<5)&&G.rerollCount<2;
+  setAction(`<div class="phase-title">>> 捏人阶段 · 角色创建</div>
+    <div style="color:#888;font-size:.8em;margin-bottom:10px">
+      性别：<span class="tag ${G.sex==='男'?'tm':'tf'}">${G.sex}性</span>
+      &nbsp;智力：<span style="color:${G.iq<5?'#ff0066':'#00ff9f'}">${G.iq}</span>
+      &nbsp;资产：<span style="color:${G.home<5?'#ff0066':'#00ff9f'}">${G.home}万</span>
+    </div>
+    ${warn?'<div style="color:#ff0066;font-size:.8em;margin-bottom:8px">⚠️ 天崩开局，建议重开</div>':''}
+    <div class="input-row">
+      <input class="cyber-input" id="nameInput" placeholder="输入角色名..." maxlength="10">
+      <button class="btn" onclick="confirmName()">载入</button>
+    </div>
+    ${warn?`<div class="choices"><button class="btn br" onclick="reroll()">重开 (剩余${2-G.rerollCount}次)</button></div>`:''}`);
+}
+
+function reroll(){
+  if(G.rerollCount>=2){addLog('重开次数已用完','bad');return;}
+  G.rerollCount++;playClick();addLog('>> 触发新手保护，重新刷新...','sys');phaseCreate();
+}
+function confirmName(){
+  const n=document.getElementById('nameInput').value.trim();
+  if(!n){addLog('请输入角色名','bad');playBad();return;}
+  G.name=n;playGood();addLog(`\n✅ 角色【${G.name}】已载入地球Online`,'ok');
+  updateStats();phaseGrowth();
+}
+function phaseGrowth(){
+  addLog('\n>>> 进入【新手村·成长副本】','inf');
+  setAction(`<div class="phase-title">>> 新手村 · 成长副本</div>
+    <div style="color:#555;font-size:.8em;margin-bottom:12px">你在新手村度过了漫长的学生时代...</div>
+    <div class="choices">
+      <button class="btn" onclick="growthEvent('study')">📖 内卷学习</button>
+      <button class="btn bb" onclick="growthEvent('game')">🎮 王者峡谷</button>
+    </div>`);
+}
+function growthEvent(c){
+  playClick();
+  addLog(`>> 选择：${c==='study'?'内卷学习':'王者峡谷'}，开始答题验证...`,'inf');
+  showQuiz(c==='study'?'study':'game',(score)=>{
+    if(c==='study'){
+      const bonus=score>=1?2:0;
+      addLog(`📖 内卷学习 → 智力+${bonus}${bonus===0?' (答题太差，没学进去)':''}`,bonus>0?'ok':'bad');
+      G.iq=cl(G.iq+bonus,1,10);bonus>0?playGood():playBad();
+    }else{
+      const penalty=score>=1?-1:-2;
+      addLog(`🎮 王者峡谷 → 智力${penalty}${score>=1?' (还好没太沉迷)':''}`,penalty<-1?'bad':'ev');
+      G.iq=cl(G.iq+penalty,1,10);playBad();
+    }
+    addLog(`【属性更新】智力 ${G.iq}`,'sys');updateStats();phaseGaokao();
+  });
+}
+function phaseGaokao(){
+  addLog('\n>>> 进入【精英副本 · 高考】','inf');
+  setAction(`<div class="phase-title">>> 精英副本 · 高考</div>
+    <div style="color:#ffcc00;font-size:.8em;margin-bottom:8px">⚠️ 是否挑战「恋爱副本」(氪金警告)？</div>
+    <div style="color:#555;font-size:.75em;margin-bottom:12px">当前资产：${G.home}万 | 预计消耗：2~5万</div>
+    <div class="choices">
+      <button class="btn" onclick="gaokaoChoice(true)">💖 挑战恋爱副本</button>
+      <button class="btn bb" onclick="gaokaoChoice(false)">📖 专心学习</button>
+    </div>`);
+}
+function gaokaoChoice(love){
+  playClick();
+  if(love){
+    const cost=rv(2,5);
+    if(G.home>=cost){
+      G.home-=cost;addLog(`💸 消耗${cost}万，恋爱副本开启，先答题...`,'ev');
+      showQuiz('love',(score)=>{
+        if(score>=1){addLog('💖 副本通关！智力+3 快乐+2','ok');G.iq+=3;G.happy+=2;playGood();}
+        else{addLog('💔 副本失败... 智力-2 快乐-3','bad');G.iq-=2;G.happy-=3;playBad();}
+        G.iq=cl(G.iq,1,10);G.home=cl(G.home,1,15);G.happy=cl(G.happy,0,10);
+        addLog(`【属性更新】智力${G.iq}|资产${G.home}万|快乐${G.happy}`,'sys');
+        updateStats();phaseWork();
+      });
+    }else{addLog('💰 资产不足 → 安心学习 智力+1','ev');G.iq+=1;G.iq=cl(G.iq,1,10);updateStats();phaseWork();}
+  }else{
+    addLog('📖 独行学霸，先答题验证学习成果...','inf');
+    showQuiz('study',(score)=>{
+      const bonus=score>=1?2:1;
+      addLog(`📖 独行学霸 → 智力+${bonus} 资产+1万`,'ok');
+      G.iq+=bonus;G.home+=1;playGood();
+      G.iq=cl(G.iq,1,10);G.home=cl(G.home,1,15);G.happy=cl(G.happy,0,10);
+      addLog(`【属性更新】智力${G.iq}|资产${G.home}万|快乐${G.happy}`,'sys');
+      updateStats();phaseWork();
+    });
+  }
+}
+function phaseWork(){
+  addLog('\n>>> 进入【转职副本 · 职场】','inf');
+  setAction(`<div class="phase-title">>> 转职副本 · 职场</div>
+    <div style="color:#555;font-size:.8em;margin-bottom:12px">选择你的人生路线：</div>
+    <div class="choices">
+      <button class="btn" onclick="workChoice(true)">🚀 创业 (30%成功率)</button>
+      <button class="btn bb" onclick="workChoice(false)">🐂 996打工</button>
+    </div>`);
+}
+function workChoice(s){
+  playClick();
+  addLog(`>> 选择：${s?'创业':'996打工'}，先答题验证能力...`,'inf');
+  showQuiz(s?'startup':'work',(score)=>{
+    if(s){
+      const successRate=score>=1?.5:.15;
+      if(Math.random()<successRate){addLog('🚀 创业大成功！资产+5万','ok');G.home+=5;playGood();}
+      else{addLog('📉 创业失败... 资产-3万 体力-2','bad');G.home-=3;G.health-=2;playBad();}
+    }else{
+      const bonus=score>=1?3:2;
+      addLog(`🐂 996打工 → 资产+${bonus}万 体力-1 快乐-2`,'ev');
+      G.home+=bonus;G.health-=1;G.happy-=2;
+    }
+    G.home=cl(G.home,1,20);G.health=cl(G.health,1,10);G.happy=cl(G.happy,0,10);
+    addLog(`【属性更新】资产${G.home}万|体力${G.health}|快乐${G.happy}`,'sys');
+    updateStats();randomEvent();
+  });
+}
+function randomEvent(){
+  const evs=[
+    {d:"🐕 奇遇『二舅』→ 体力+1 快乐+2",m:[0,1,2],t:'ok'},
+    {d:"📉 遭遇『基金绿光』→ 资产-2万",m:[-2,0,0],t:'bad'},
+    {d:"🍺 『深夜网抑云』→ 快乐-2",m:[0,0,-2],t:'bad'},
+    {d:"💪 奇遇『刘畊宏』→ 体力+2",m:[0,2,0],t:'ok'},
+    {d:"💰 彩蛋『天降横财』→ 资产+3万",m:[3,0,0],t:'ok'}
+  ];
+  const e=evs[rv(0,evs.length-1)];
+  addLog('\n⚡ 【野怪出现】随机事件触发','ev');
+  addLog(e.d,e.t);e.t==='ok'?playGood():playBad();
+  G.home=cl(G.home+e.m[0],1,20);G.health=cl(G.health+e.m[1],1,10);G.happy=cl(G.happy+e.m[2],0,10);
+  addLog(`【当前面板】资产${G.home}万|体力${G.health}|快乐${G.happy}`,'sys');
+  updateStats();settle();
+}
+function settle(){
+  const ok=G.taskCheck(G.home,G.iq,G.health,G.happy);
+  addLog('\n📋 【主线任务·结算】'+G.task,'inf');
+  if(ok){addLog('✅ 任务完成！获得隐藏成就『天选之人』','ok');G.happy=cl(G.happy+2,0,10);G.home+=1;playGood();}
+  else{addLog('❌ 任务失败... 下次规划好加点','bad');playBad();}
+  updateStats();
+  const score=G.home+G.iq+G.health+G.happy;
+  let grade,color,msg;
+  if(score>=30){grade='S';color='#00ff9f';msg='人生赢家！'}
+  else if(score>=22){grade='A';color='#0088ff';msg='小康生活'}
+  else if(G.iq<=3){grade='D';color='#ff0066';msg='智力低下，流口水结局'}
+  else if(G.health<=2){grade='E';color='#ff0066';msg='健康崩坏，英年早逝'}
+  else if(G.happy<=2){grade='E';color='#ff0066';msg='重度抑郁，躺平退游'}
+  else{grade='B';color='#ffcc00';msg='平凡NPC，平淡一生'}
+  addLog(`\n🏆 通关评价：${grade}级 · ${msg}`,'ev');
+  setAction(`<div class="result-box">
+    <div style="color:#555;letter-spacing:4px;margin-bottom:15px;font-size:.8em">>> 地球Online · 通关评价 <<</div>
+    <div class="grade" style="color:${color}">${grade}</div>
+    <div style="color:${color};margin:12px 0;font-size:1em;letter-spacing:2px">${G.name} · ${msg}</div>
+    <div style="color:#555;font-size:.78em;margin:8px 0">资产${G.home}万 | 智力${G.iq} | 体力${G.health} | 快乐${G.happy} | 总分${score}</div>
+    <div style="color:${ok?'#00ff9f':'#ff0066'};font-size:.78em;margin:8px 0">主线任务：${ok?'✅ 完成':'❌ 失败'}</div>
+    <div class="choices" style="justify-content:center;margin-top:15px">
+      <button class="btn" onclick="restart()">>> 重新开始</button>
+    </div>
+  </div>`);
+}
+function restart(){
+  Object.assign(G,{name:'',sex:'',iq:0,home:0,health:0,happy:0,rerollCount:0,task:null,taskCheck:null});
+  document.getElementById('log').innerHTML='';
+  document.getElementById('charName').textContent='[ 未载入 ]';
+  document.getElementById('charId').textContent='ID: ----';
+  updateStats();init();playClick();
+}
+
+// Terminal background animation
+const tbg=document.getElementById('terminalBg');
+const tbgCtx=tbg.getContext('2d');
+function rszTbg(){const p=tbg.parentElement;tbg.width=p.offsetWidth;tbg.height=p.offsetHeight}
+rszTbg();window.addEventListener('resize',rszTbg);
+const dots=Array.from({length:30},()=>({x:Math.random()*tbg.width,y:Math.random()*tbg.height,vx:(Math.random()-.5)*.3,vy:(Math.random()-.5)*.3,r:Math.random()*2+1}));
+(function drawTbg(){
+  tbgCtx.fillStyle='rgba(0,0,0,.1)';tbgCtx.fillRect(0,0,tbg.width,tbg.height);
+  dots.forEach(d=>{
+    tbgCtx.fillStyle='rgba(0,255,159,.6)';tbgCtx.beginPath();tbgCtx.arc(d.x,d.y,d.r,0,Math.PI*2);tbgCtx.fill();
+    d.x+=d.vx;d.y+=d.vy;
+    if(d.x<0||d.x>tbg.width)d.vx*=-1;
+    if(d.y<0||d.y>tbg.height)d.vy*=-1;
+  });
+  requestAnimationFrame(drawTbg);
+})();
+
+init();
+</script>
+</body>
+</html>

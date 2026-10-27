@@ -2,6 +2,7 @@
 <html lang="zh-CN">
 
 <head>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg?v=2">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>通用数据可视化大屏 · 液体玻璃</title>
@@ -156,6 +157,7 @@
     }
 
     /* ============ UPLOAD OVERLAY ============ */
+    /* 默认不显示 —— 首屏直接给大屏，上传框收进 header 的「导入 CSV」 */
     #uploadOverlay {
       position: fixed;
       inset: 0;
@@ -163,13 +165,75 @@
       background: rgba(240, 244, 250, 0.7);
       backdrop-filter: blur(30px) saturate(180%);
       -webkit-backdrop-filter: blur(30px) saturate(180%);
-      display: flex;
+      display: none;
       align-items: center;
       justify-content: center;
     }
 
-    #uploadOverlay.done {
-      display: none;
+    #uploadOverlay.show { display: flex; }
+    #uploadOverlay.done { display: none; }
+
+    /* ── 载入遮罩：首屏要等 CSV 解析完，别让访客对着空白等 ── */
+    #bootMask {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #f0f4fa 0%, #e8eef8 50%, #f5f3ff 100%);
+      transition: opacity .45s;
+    }
+
+    #bootMask.gone { opacity: 0; pointer-events: none; }
+    .boot-spin {
+      width: 34px; height: 34px; margin: 0 auto 14px; border-radius: 50%;
+      border: 3px solid rgba(37, 99, 235, .16); border-top-color: #2563eb;
+      animation: bootspin .8s linear infinite;
+    }
+
+    @keyframes bootspin { to { transform: rotate(360deg); } }
+    .boot-text { font-size: .85rem; color: #5a6478; letter-spacing: .04em; }
+
+    /* ── header 里的返回与导入 ── */
+    /* 放在半透明白 header 上，用 var(--primary) 会淡到看不见，这里压深一档 */
+    .back-link {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 7px 13px; border-radius: 14px; white-space: nowrap;
+      font-size: 13px; font-weight: 600; color: #1a2540;
+      text-decoration: none;
+      background: rgba(255, 255, 255, .85);
+      border: 1px solid rgba(26, 37, 64, .12);
+      transition: all .25s;
+    }
+
+    .back-link:hover {
+      background: #fff;
+      transform: translateY(-1px);
+      color: var(--accent);
+    }
+
+    /* .import-btn 写在 .icon-btn 前面会被 width:36px 盖掉，这里用 id 提优先级；
+       width:auto 之后必须 nowrap，否则「导入 CSV」会被挤成一字一行 */
+    #header .icon-btn.import-btn {
+      width: auto;
+      padding: 0 14px;
+      font-size: .78rem;
+      font-weight: 700;
+      letter-spacing: .02em;
+      white-space: nowrap;
+    }
+
+    @media (max-width: 720px) {
+      #header { padding: 10px 12px; margin: 8px 10px; gap: 8px; }
+      #header .hl { gap: 8px; min-width: 0; }
+      #header .hl .logo { width: 30px; height: 30px; border-radius: 9px; font-size: 1rem; }
+      #header .title { display: none; }      /* 窄屏留出位置给导入按钮 */
+      #header .badge { display: none; }
+      #header .hr-right { gap: 6px; }
+      .back-link { padding: 5px 9px; font-size: .72rem; }
+      .icon-btn { width: 32px; height: 32px; font-size: .9rem; }
+      .import-btn { padding: 0 10px; font-size: .72rem; }
     }
 
     .upload-box {
@@ -484,8 +548,10 @@
     }
 
     @media (max-width: 700px) {
+      /* 四张 KPI 竖排会吃掉整整一屏，两列更紧凑，下面直接就是图表 */
       .kpi-row {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
       }
 
       #panelsContainer {
@@ -640,8 +706,10 @@
     }
 
     @media (max-width: 700px) {
+      /* 四张 KPI 竖排会吃掉整整一屏；两列更紧凑，下面直接接图表 */
       .kpi-row {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
       }
     }
 
@@ -1217,10 +1285,58 @@
       color: var(--text-faint);
       font-size: .82rem;
     }
-  </style>
+  
+    /* ============ 移动端收敛 ============
+       放在样式表最后，保证能覆盖前面的 .kpi-card / .kpi-icon / .kpi-val ——
+       这些类定义在下面，写在它们前面的媒体查询会被同特异性规则盖掉。 */
+    @media (max-width: 700px) {
+      .kpi-row {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+      }
+
+      /* 两列后每张卡只剩约 180px：icon 56px + 1.85rem 数字必然被截成「3...」 */
+      .kpi-card {
+        padding: 14px 12px;
+        gap: 10px;
+        border-radius: 18px;
+      }
+
+      .kpi-card .kpi-icon {
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+        font-size: 1rem;
+      }
+
+      .kpi-card .kpi-val {
+        font-size: 1.45rem;
+        letter-spacing: 0;
+      }
+
+      .kpi-card .kpi-label {
+        font-size: .67rem;
+        letter-spacing: 0;
+        margin-top: 2px;
+      }
+
+      /* 图表标题在窄屏容易被截，给一行余量 */
+      .panel-head .panel-title {
+        font-size: .82rem;
+      }
+    }
+</style>
 </head>
 
 <body>
+
+  <!-- ========== 载入遮罩 ========== -->
+  <div id="bootMask">
+    <div>
+      <div class="boot-spin"></div>
+      <div class="boot-text">正在载入真实数据…</div>
+    </div>
+  </div>
 
   <!-- ========== BG LAYERS ========== -->
   <div id="bgLayer1"></div>
@@ -1244,15 +1360,16 @@
   <!-- ========== HEADER ========== -->
   <header id="header" style="display:none;">
     <div class="hl">
+      <a class="back-link" href="../../index.html" title="返回作品集">← 返回作品集</a>
       <div class="logo">📊</div>
       <span class="dot"></span>
       <span class="title" id="dashTitle">数据<span>可视化大屏</span></span>
     </div>
     <div class="hr-right">
       <span class="badge" id="dataBadge"></span>
-      <div class="icon-btn" id="shuffleBtn" title="重新随机布局">🎲</div>
+      <div class="icon-btn" id="shuffleBtn" title="换一组图表看">🎲</div>
       <div class="icon-btn" id="configBtn" title="字段配置">⚙</div>
-      <div class="icon-btn" id="reloadBtn" title="重新上传">↻</div>
+      <div class="icon-btn import-btn" id="reloadBtn" title="导入新的 CSV">导入 CSV</div>
     </div>
   </header>
 
@@ -1369,13 +1486,19 @@
     $applyCfg.addEventListener('click', () => { collectConfig(); applyConfig(); closeDrawer(); });
     $autoCfg.addEventListener('click', () => { autoSuggestConfig(); renderDrawer(); });
     $shuffleBtn.addEventListener('click', () => {
-      if (rawRows.length) buildAll();
+      if (rawRows.length) buildAll('random');
     });
+    // 打开上传层时不再把大屏拆掉 —— 取消就能退回来看，不用重新加载
     $reloadBtn.addEventListener('click', () => {
+      $overlay.classList.add('show');
       $overlay.classList.remove('done');
-      $header.style.display = 'none';
-      $main.style.display = 'none';
       $fileInput.value = '';
+    });
+    $overlay.addEventListener('click', e => {
+      if (e.target === $overlay) $overlay.classList.remove('show');
+    });
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && $overlay.classList.contains('show')) $overlay.classList.remove('show');
     });
 
     function loadFile(file) {
@@ -1391,7 +1514,7 @@
       });
     }
 
-    function loadDemo() {
+    function loadDemo(isFallback) {
       const csvText = `学校名称,985,211,双一流,普通院校,院系名称,专业,招生人数,学习方式,分数线
 清华大学,是,是,是,不是,人文学院,哲学,4,全日制,370
 清华大学,是,是,是,不是,社会科学学院,理论经济学,1,全日制,350
@@ -1462,6 +1585,8 @@
         complete(r) {
           rawRows = r.data.filter(row => Object.values(row).some(v => v !== '' && v != null));
           onRowsLoaded('考研示例数据');
+          // 降级时标明来源。必须写在 onRowsLoaded 之后 —— 它刚把 badge 重写过一遍
+          if (isFallback) $dataBadge.textContent += ' · 内置示例';
         }
       });
     }
@@ -1471,6 +1596,7 @@
       autoSuggestConfig();
       $dashTitle.innerHTML = escapeHtml(name) + '<span> · 可视化大屏</span>';
       $overlay.classList.add('done');
+      $overlay.classList.remove('show');
       $header.style.display = 'flex';
       $main.style.display = 'grid';
       $dataBadge.textContent = rawRows.length.toLocaleString() + ' 条 · ' + columns.length + ' 字段';
@@ -1510,49 +1636,89 @@
     // ====== AUTO CONFIG SUGGESTION ======
     function autoSuggestConfig() {
       const numerics = columns.filter(c => c.type === 'numeric');
-      const categoricals = columns.filter(c => c.type === 'categorical' || c.type === 'boolean');
       const dates = columns.filter(c => c.type === 'date');
 
-      const kpiMetrics = [];
-      for (let i = 0; i < 4; i++) {
-        const col = numerics[i % Math.max(1, numerics.length)];
-        if (col) kpiMetrics.push({ col: col.name, agg: i === 0 ? 'sum' : (i === 1 ? 'count' : (i === 2 ? 'mean' : 'max')) });
-        else kpiMetrics.push({ col: '', agg: 'count' });
+      // 维度池 = 所有非数值、非日期字段。原来只收 categorical / boolean，
+      // 把「学校名称 976 项」「专业 781 项」「院系名称 1943 项」这类最有价值的
+      // 维度全部排除在外（它们被判成 text），只剩一堆 2 值字段可选 ——
+      // 于是六张图只能拿同一个「211」反复画。
+      const dims = columns.filter(c => c.type !== 'numeric' && c.type !== 'date');
+
+      // 每个维度的「失衡度」：一个饼图最有信息量的时候，是两块差距最大的时候。
+      // 学习方式 94% : 6% 比 211 的 50% : 50% 更值得画成占比图。
+      const skew = {};
+      for (const d of dims) {
+        const cnt = {};
+        for (const r of rawRows) {
+          const v = r[d.name];
+          if (v !== '' && v != null) cnt[v] = (cnt[v] || 0) + 1;
+        }
+        const vals = Object.values(cnt).sort((a, b) => b - a);
+        const tot = vals.reduce((a, b) => a + b, 0) || 1;
+        skew[d.name] = vals.length ? vals[0] / tot : 0;
       }
+      const bySkew = arr => [...arr].sort((a, b) => (skew[b.name] || 0) - (skew[a.name] || 0));
+      const asc = (a, b) => a.uniqueCount - b.uniqueCount;
 
-      const barDim = categoricals[0]?.name || columns[0]?.name || '';
-      const barMet = numerics[0]?.name || '';
-      const barFilterDim = categoricals[1]?.name || '';
+      const pool = {
+        tiny: dims.filter(d => d.uniqueCount <= 2).sort(asc),
+        low: dims.filter(d => d.uniqueCount >= 3 && d.uniqueCount <= 10).sort(asc),
+        mid: dims.filter(d => d.uniqueCount >= 11 && d.uniqueCount <= 120).sort(asc),
+        high: dims.filter(d => d.uniqueCount > 120).sort(asc)
+      };
 
-      let pieDim = categoricals[0]?.name || '';
-      for (const c of categoricals) {
-        if (c.uniqueCount >= 2 && c.uniqueCount <= 10) { pieDim = c.name; break; }
-      }
+      // 每个图表吃掉一个维度，吃完不再给别人 —— 保证 6 张图讲 6 件事
+      const used = new Set();
+      const take = (...orders) => {
+        for (const p of orders) {
+          for (const d of p) {
+            if (d && !used.has(d.name)) { used.add(d.name); return d.name; }
+          }
+        }
+        return '';
+      };
 
-      const lineX = dates[0]?.name || categoricals[0]?.name || '';
-      const lineMet = numerics[0]?.name || '';
-      const lineFilterDim = categoricals[2]?.name || '';
+      const met0 = numerics[0]?.name || '';
+      const met1 = numerics[1]?.name || met0;
 
-      const scatterX = numerics[0]?.name || '';
-      const scatterY = numerics[1]?.name || numerics[0]?.name || '';
-      const scatterColor = categoricals[0]?.name || '';
+      // ① 排行榜：高基数最有意义（谁最多 / 谁第一），名字长也放得下
+      const rankDim = take(pool.high, pool.mid, pool.low, pool.tiny);
+      // ② 柱状 TOP：中高基数，取前 10 根柱子
+      const barDim = take(pool.mid, pool.high, pool.low, pool.tiny);
+      // ③ 饼图：优先 3-10 项的维度，没有就在 2 值里挑最失衡的那个
+      const pieDim = take(pool.low, bySkew(pool.tiny), bySkew(pool.mid));
+      // ④ 分组对比：二值维度做主分类最清楚，另一个维度做系列
+      const groupCat = take(pool.tiny, pool.low);
+      // 系列维度必须基数小，否则画出来是上千条系列线（院系名称 1943 项那种）
+      const groupDim = take(pool.low, pool.tiny, pool.mid);
 
-      const groupCat = categoricals[0]?.name || '';
-      const groupDim = categoricals[1]?.name || '';
-      const groupMet = numerics[0]?.name || '';
+      // ⑤ 折线：只有真有日期字段才画。
+      //    原来没日期就拿第一个分类字段当 X 轴 —— 等于把「是 / 不是」
+      //    连成一条下降曲线，看上去像时间趋势，是会误导人的伪趋势。
+      const lineX = dates[0]?.name || '';
 
-      const rankDim = categoricals[0]?.name || '';
-      const rankMet = numerics[0]?.name || '';
-      const rankAgg = 'sum';
+      // KPI：把主指标讲透（总和 / 平均 / 最大），第 4 格给记录数。
+      // 原来第 2 格拿分数线做 count，结果就是行数，纯废话。
+      const kpiMetrics = met0 ? [
+        { col: met0, agg: 'sum' },
+        { col: met0, agg: 'mean' },
+        { col: met1, agg: 'max' },
+        { col: '', agg: 'count' }
+      ] : [
+        { col: '', agg: 'count' }, { col: '', agg: 'count' },
+        { col: '', agg: 'count' }, { col: '', agg: 'count' }
+      ];
 
       config = {
         kpi: kpiMetrics,
-        bar: { dim: barDim, met: barMet, agg: 'sum', top: 10, filterDim: barFilterDim },
-        pie: { dim: pieDim, met: barMet, agg: 'sum' },
-        line: { x: lineX, met: lineMet, agg: 'sum', filterDim: lineFilterDim },
-        scatter: { x: scatterX, y: scatterY, color: scatterColor },
-        group: { cat: groupCat, dim: groupDim, met: groupMet, agg: 'sum' },
-        rank: { dim: rankDim, met: rankMet, agg: rankAgg, top: 10, asc: false }
+        bar: { dim: barDim, met: met0, agg: 'sum', top: 10 },
+        radar: { dim: '', met: met0, agg: 'sum', top: 6 },
+        funnel: { dim: '', met: met0, agg: 'sum', top: 6 },
+        rank: { dim: rankDim, met: met0, agg: 'sum', top: 10, asc: false },
+        pie: { dim: pieDim, met: met0, agg: 'sum' },
+        line: { x: lineX, met: met0, agg: 'sum' },
+        scatter: { x: met0, y: met1, color: pool.tiny[0]?.name || pool.low[0]?.name || '' },
+        group: { cat: groupCat, dim: groupDim, met: met0, agg: 'sum' }
       };
     }
 
@@ -1765,12 +1931,12 @@
     }
 
     // ====== BUILD ALL — 随机布局 + 动态效果 ======
-    function buildAll() {
+    function buildAll(mode) {
       destroyCharts();
       clearHighlightTimers();
       startGlobalAnimLoop();
       buildKPIs();
-      buildRandomLayout();
+      buildRandomLayout(mode !== 'random');
       // 为新创建的元素初始化液体玻璃 CSS 变量（不覆盖 animation-delay）
       requestAnimationFrame(() => {
         document.querySelectorAll('.panel, .kpi-card').forEach(el => {
@@ -1789,15 +1955,18 @@
     }
 
     // 随机布局生成器：从所有可用图表中随机选择 6 个，随机分配 span
-    function buildRandomLayout() {
+    function buildRandomLayout(stable) {
       const $container = document.getElementById('panelsContainer');
       $container.innerHTML = '';
 
       // 所有可用的图表构建器（按是否满足前置条件筛选）
       const availableBuilders = CHART_BUILDERS.filter(b => b.available());
 
-      // 随机选择 6 个（如果不足 6 个，取全部）
-      const picked = shuffle(availableBuilders).slice(0, 6);
+      // 首屏固定按 priority 排队（作品集打开就该是最好的一组，不该每次刷新都不一样）
+      // 点骰子时才走随机
+      const picked = stable
+        ? [...availableBuilders].sort((a, b) => (a.priority || 99) - (b.priority || 99)).slice(0, 6)
+        : shuffle(availableBuilders).slice(0, 6);
       const n = picked.length;
 
       // 预定义布局模板：保证 3 列网格 + 3 行 + 整齐的行
@@ -1818,7 +1987,9 @@
       ];
 
       // 把模板按需打平成 span 数组
-      const template = TEMPLATES_6[Math.floor(Math.random() * TEMPLATES_6.length)];
+      const template = stable
+        ? TEMPLATES_6[0]                                   // 固定 2+1 / 2+1 / 2+1
+        : TEMPLATES_6[Math.floor(Math.random() * TEMPLATES_6.length)];
       let spanList = [];
       template.forEach(row => spanList.push(...row));
 
@@ -2025,6 +2196,10 @@
           val = formatNum(val);
           const aggLabel = ({ sum: '总和', mean: '平均', max: '最大', min: '最小', count: '计数' })[k.agg] || '';
           label = `${k.col} · ${aggLabel}`;
+        } else if (k.agg === 'count') {
+          // 不绑定字段时表示整表规模，比"某列做计数"有意义
+          val = rawRows.length.toLocaleString();
+          label = '记录总数';
         }
         return `<div class="kpi-card" style="animation-delay:${i * 0.1}s">
       <div class="kpi-icon" style="background:${t.kpiIconGrad}">${KPI_ICONS[i]}</div>
@@ -2451,8 +2626,13 @@
       const vals = rawRows.map(r => toNum(r[col])).filter(v => !isNaN(v));
       const avg = vals.reduce((a, b) => a + b, 0) / Math.max(1, vals.length);
       const max = Math.max(...vals);
-      const pct = max > 0 ? Math.min(100, (avg / max) * 100) : 0;
-      setPanelTitle($panel, `${col} · 平均值仪表`);
+      // 原来刻度写死 0-100、指针值传的是百分比，中心数字也显示百分比：
+      // 标题写「平均值仪表」，看到的却是 3.0，实际平均值 17.51 —— 会读错。
+      // 改成真实数值刻度，用 P95 兜住极端值，指针才不至于永远贴在左边。
+      const sortedVals = [...vals].sort((a, b) => a - b);
+      const p95 = sortedVals[Math.floor(sortedVals.length * 0.95)] || max;
+      const scaleMax = Math.max(p95, avg * 1.5, 1);
+      setPanelTitle($panel, `${col} · 平均值 ${formatNum(avg)}`);
 
       const t = THEMES[activeTheme];
       inst.setOption({
@@ -2461,7 +2641,7 @@
           type: 'gauge',
           center: ['50%', '60%'],
           radius: '90%',
-          min: 0, max: 100,
+          min: 0, max: scaleMax,
           progress: { show: true, width: 14, itemStyle: { color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [{ offset: 0, color: t.primary }, { offset: 1, color: t.accent }]) } },
           axisLine: { lineStyle: { width: 14, color: [[1, 'rgba(26, 37, 64, 0.08)']] } },
           pointer: { length: '60%', width: 5, itemStyle: { color: t.primary } },
@@ -2478,7 +2658,7 @@
             fontWeight: 700,
             offsetCenter: [0, '30%']
           },
-          data: [{ value: pct.toFixed(1), name: col }]
+          data: [{ value: +avg.toFixed(2), name: col }]
         }]
       });
       regAnim(inst, 'gauge', 1);
@@ -2533,19 +2713,27 @@
 
     // ====== 所有图表构建器列表 ======
     const CHART_BUILDERS = [
-      { name: '柱状图', available: () => config.bar && config.bar.dim, build: buildBarChart },
-      { name: '横向柱图', available: () => config.rank && config.rank.dim, build: buildBarHorizChart },
-      { name: '饼图', available: () => config.pie && config.pie.dim, build: buildPieChart },
-      { name: '玫瑰图', available: () => config.pie && config.pie.dim, build: buildRoseChart },
-      { name: '折线图', available: () => config.line && config.line.x, build: buildLineChart },
-      { name: '面积图', available: () => config.line && config.line.x, build: buildAreaStackChart },
-      { name: '散点图', available: () => config.scatter && config.scatter.x && config.scatter.y, build: buildScatterChart },
-      { name: '分组对比', available: () => config.group && config.group.cat && config.group.dim, build: buildGroupChart },
-      { name: '雷达图', available: () => config.bar && config.bar.dim, build: buildRadarChart },
-      { name: '漏斗图', available: () => config.bar && config.bar.dim, build: buildFunnelChart },
-      { name: '仪表盘', available: () => columns.some(c => c.type === 'numeric'), build: buildGaugeChart },
-      { name: '排行榜', available: () => config.rank && config.rank.dim, build: buildRankListChart, bodyClass: 'rank-list' }
+      // priority 决定首屏固定组合的顺序：数字小的优先。
+      // 思路是「先放信息密度最高的，再放补充视角」，而不是随机抽。
+      { name: '柱状图', priority: 2, available: () => config.bar && config.bar.dim, build: buildBarChart },
+      { name: '横向柱图', priority: 1, available: () => config.rank && config.rank.dim, build: buildBarHorizChart },
+      { name: '饼图', priority: 3, available: () => config.pie && config.pie.dim, build: buildPieChart },
+      { name: '玫瑰图', priority: 9, available: () => config.pie && config.pie.dim, build: buildRoseChart },
+      { name: '折线图', priority: 6, available: () => config.line && config.line.x, build: buildLineChart },
+      { name: '面积图', priority: 10, available: () => config.line && config.line.x, build: buildAreaStackChart },
+      { name: '散点图', priority: 4, available: () => config.scatter && config.scatter.x && config.scatter.y, build: buildScatterChart },
+      { name: '分组对比', priority: 5, available: () => config.group && config.group.cat && config.group.dim, build: buildGroupChart },
+      { name: '雷达图', priority: 8, available: () => config.bar && config.bar.dim && dimCount(config.bar.dim) >= 3, build: buildRadarChart },
+      { name: '漏斗图', priority: 11, available: () => config.bar && config.bar.dim && dimCount(config.bar.dim) >= 3, build: buildFunnelChart },
+      { name: '仪表盘', priority: 7, available: () => columns.some(c => c.type === 'numeric'), build: buildGaugeChart },
+      { name: '排行榜', priority: 12, available: () => config.rank && config.rank.dim, build: buildRankListChart, bodyClass: 'rank-list' }
     ];
+
+    // 某个维度的实际基数 —— 雷达 / 漏斗靠两根轴画不出形状，至少 3 项才放行
+    function dimCount(name) {
+      const col = columns.find(c => c.name === name);
+      return col ? col.uniqueCount : 0;
+    }
 
     // ====== HELPERS ======
     function aggLabel(agg) {
@@ -2641,8 +2829,46 @@
       }, 800);
     })();
 
+    // ====== 首屏自动载入 ======
+    // 作品集访客点进来应该直接看到结果，而不是先对着一个「拖入 CSV」的空框。
+    // 这份 17,574 行的考研招生目录就在同目录下，是真数据，不是手写示例。
+    function bootRealData() {
+      const mask = document.getElementById('bootMask');
+      const hideMask = () => {
+        if (!mask) return;
+        mask.classList.add('gone');
+        setTimeout(() => mask.remove(), 500);
+      };
+
+      fetch('全国考研数据.csv')
+        .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
+        .then(text => new Promise((resolve, reject) => {
+          Papa.parse(text, {
+            header: true, skipEmptyLines: true,
+            complete(res) {
+              rawRows = res.data.filter(row => Object.values(row).some(v => v !== '' && v != null));
+              if (rawRows.length < 10) return reject(new Error('数据太少'));
+              resolve();
+            },
+            error: reject
+          });
+        }))
+        .then(() => {
+          onRowsLoaded('全国考研数据');
+          hideMask();
+        })
+        .catch(() => {
+          // 拿不到 CSV（直接双击 html、或文件被挪走）就退回内置示例，
+          // 但把「这是示例」写在角标上，不假装是真实数据
+          loadDemo(true);
+          hideMask();
+        });
+    }
+
     // ====== INIT ======
     registerEchartsTheme(THEMES.emerald);
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bootRealData);
+    else bootRealData();
   </script>
 
 </body>

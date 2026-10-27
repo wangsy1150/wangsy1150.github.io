@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>本地语义记忆库 · 项目详情</title>
+<link rel="icon" href="../../favicon.svg?v=2" type="image/svg+xml">
+<style>
+  :root{
+    --bg:#FBFCFE; --ink:#1A1D24; --ink2:#525B6B; --ink3:#8B95A6;
+    --blue:#4FA8E8; --blue-d:#2E8BD0; --blue-s:#EAF5FD;
+    --pink:#FF8FB1; --pink-d:#E0568A; --pink-s:#FFF0F5;
+    --red:#E8455F; --red-d:#C9304A; --red-s:#FFEBEE;
+    --orange:#FF8A1E; --orange-d:#D96A00; --orange-s:#FFF1DC;
+    --teal:#10B6A6; --teal-d:#0B8578; --teal-s:#E2F8F5;
+    --line:#E4EBF5;
+  }
+  @font-face{font-family:"Noto Sans SC";font-style:normal;font-weight:400;
+    font-display:swap;src:url("../../fonts/NotoSansSC-400-subset.woff2") format("woff2")}
+  @font-face{font-family:"Noto Sans SC";font-style:normal;font-weight:500;
+    font-display:swap;src:url("../../fonts/NotoSansSC-500-subset.woff2") format("woff2")}
+  @font-face{font-family:"Noto Sans SC";font-style:normal;font-weight:600;
+    font-display:swap;src:url("../../fonts/NotoSansSC-600-subset.woff2") format("woff2")}
+  @font-face{font-family:"Noto Sans SC";font-style:normal;font-weight:700;
+    font-display:swap;src:url("../../fonts/NotoSansSC-700-subset.woff2") format("woff2")}
+
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"Noto Sans SC","Microsoft YaHei","PingFang SC",Arial,sans-serif;
+    color:var(--ink);background:var(--bg);line-height:1.75;overflow-x:hidden}
+  .glow{position:fixed;inset:0;pointer-events:none;z-index:0;
+    background:
+      radial-gradient(circle at 8% 0%, rgba(79,168,232,.20), transparent 42%),
+      radial-gradient(circle at 94% 4%, rgba(232,69,95,.16), transparent 40%),
+      radial-gradient(circle at 50% 102%, rgba(16,182,166,.08), transparent 46%)}
+
+  .wrap{position:relative;z-index:1;max-width:min(1600px,100%);margin:0 auto;padding:56px clamp(16px,3vw,40px) 96px}
+  .back{display:flex;width:fit-content;align-items:center;gap:8px;color:var(--ink3);
+    text-decoration:none;font-size:14px;margin-bottom:34px;transition:color .2s}
+  .back:hover{color:var(--blue-d)}
+
+  .num{display:inline-block;font-size:12.5px;font-weight:600;letter-spacing:.14em;color:#fff;
+    background:linear-gradient(100deg,#3E9FE0 0%,#E8455F 72%,#D62F4A 100%);
+    border-radius:999px;padding:6px 16px;margin-bottom:16px;
+    box-shadow:0 8px 22px rgba(214,47,74,.34)}
+  h1{font-size:clamp(28px,4.6vw,44px);line-height:1.25;font-weight:800;
+    margin-bottom:14px;letter-spacing:-.01em}
+  h1::after{content:"";display:inline-block;width:11px;height:11px;border-radius:3px;
+    background:var(--red);margin-left:12px;vertical-align:.22em;
+    box-shadow:0 3px 10px rgba(232,69,95,.45)}
+  .lede{font-size:17px;color:var(--ink2);max-width:700px;margin-bottom:28px}
+  .lede strong{color:var(--ink);font-weight:600;
+    background:linear-gradient(transparent 60%, rgba(232,69,95,.22) 60%);
+    padding:0 2px;border-radius:2px}
+
+  .tags{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:34px}
+  .tag{font-size:12.5px;padding:6px 14px;border-radius:999px;background:#fff;
+    border:1px solid var(--line);color:var(--ink2);box-shadow:0 1px 2px rgba(26,29,36,.04)}
+  .tag:nth-child(3n+1){border-color:#D6EAF8;color:var(--blue-d);background:var(--blue-s)}
+  .tag:nth-child(3n+2){border-color:#FBD0D7;color:var(--red-d);background:var(--red-s)}
+  .tag:nth-child(3n){border-color:#BEEBE4;color:var(--teal-d);background:var(--teal-s)}
+
+  h2{font-size:20px;margin:0 0 18px;padding-left:15px;position:relative;font-weight:700}
+  h2::before{content:"";position:absolute;left:0;top:6px;bottom:6px;width:4px;
+    border-radius:3px;background:linear-gradient(180deg,var(--blue),var(--red))}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:19px 21px;
+    box-shadow:0 2px 10px rgba(26,29,36,.045);transition:transform .22s,box-shadow .22s,border-color .22s}
+  .card:hover{transform:translateY(-3px);box-shadow:0 12px 28px rgba(79,168,232,.14);
+    border-color:#D6EAF8}
+  .card h3{font-size:14px;color:var(--blue-d);margin-bottom:9px;font-weight:700}
+  .card p{font-size:14px;color:var(--ink2);margin:0}
+
+  /* ---------- demo ---------- */
+  .stage{margin-bottom:30px;border-radius:20px;overflow:hidden;border:1px solid var(--line);
+    background:#fff;box-shadow:0 22px 60px rgba(79,168,232,.16),0 4px 14px rgba(26,29,36,.05)}
+  .stage-bar{display:flex;align-items:center;gap:8px;padding:11px 16px;
+    background:linear-gradient(90deg,#F7FBFE,#FEF7FA);border-bottom:1px solid var(--line)}
+  .stage-dot{width:9px;height:9px;border-radius:50%}
+  .stage-dot:nth-child(1){background:#FFC9D9}
+  .stage-dot:nth-child(2){background:#CFE8F9}
+  .stage-dot:nth-child(3){background:#D9E6F2}
+  .stage-title{font-size:12.5px;color:var(--ink3);margin-left:6px}
+  .stage-live{display:inline-flex;align-items:center;gap:6px;margin-left:8px;
+    font-size:11.5px;font-weight:600;color:var(--red-d)}
+  .stage-live::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--red);
+    box-shadow:0 0 0 3px rgba(232,69,95,.24);animation:livePulse 1.6s ease-in-out infinite}
+  @keyframes livePulse{0%,100%{opacity:1}50%{opacity:.35}}
+  .stage-note{margin-left:auto;font-size:12px;color:var(--ink3)}
+  .fs-btn{font:inherit;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;
+    padding:5px 13px;border-radius:999px;border:1px solid #D6EAF8;background:#fff;
+    color:var(--blue-d);margin-left:10px;transition:background .18s,border-color .18s}
+  .fs-btn:hover{background:var(--blue-s);border-color:#B9DDF4}
+  .stage.fs .fs-btn{background:var(--red-s);border-color:#F8C9D0;color:var(--red-d)}
+
+  .demo{padding:20px 22px}
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+  .stat{border-radius:12px;padding:11px 13px;border:1px solid var(--line);background:#FDFEFF;
+    transition:transform .2s,box-shadow .2s}
+  .stat:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(26,29,36,.08)}
+  .stat .v{font-size:22px;font-weight:800;line-height:1.15;letter-spacing:-.01em;
+    font-variant-numeric:tabular-nums}
+  .stat .v small{font-size:11.5px;font-weight:700;margin-left:2px;opacity:.75}
+  .stat .k{font-size:11.5px;color:var(--ink3);margin-top:2px}
+  .stat.c1{background:linear-gradient(160deg,#F2F9FE,#E4F2FC);border-color:#CDE7F8}
+  .stat.c1 .v{color:var(--blue-d)}
+  .stat.c2{background:linear-gradient(160deg,#F0FBF9,#DFF6F2);border-color:#BEEBE4}
+  .stat.c2 .v{color:var(--teal-d)}
+  .stat.c3{background:linear-gradient(160deg,#FFEFF2,#FFE3E8);border-color:#F8C9D0}
+  .stat.c3 .v{color:var(--red-d)}
+  .stat.c4{background:linear-gradient(160deg,#FFF7EC,#FFEBD1);border-color:#FFDCB3}
+  .stat.c4 .v{color:var(--orange-d)}
+
+  .cols{display:grid;grid-template-columns:300px 1fr;gap:16px}
+  .pane{border:1px solid var(--line);border-radius:14px;background:#FDFEFF;padding:14px;
+    display:flex;flex-direction:column;min-width:0}
+  .pane-h{font-size:12.5px;font-weight:700;color:var(--ink2);margin-bottom:9px;
+    display:flex;align-items:center;gap:6px}
+  .pane-h .n{font-size:11px;font-weight:600;color:var(--ink3);background:#fff;
+    border:1px solid var(--line);border-radius:999px;padding:0 7px}
+
+  .tabs{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:9px}
+  .tab{font:inherit;font-size:12px;font-weight:500;cursor:pointer;padding:4px 11px;
+    border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--ink2);
+    transition:all .16s}
+  .tab:hover{border-color:#B9DDF4;color:var(--blue-d)}
+  .tab.on{background:var(--ink);border-color:var(--ink);color:#fff;font-weight:600}
+
+  .addrow{display:flex;gap:7px;margin-bottom:10px}
+  input[type=text]{flex:1;min-width:0;font:inherit;font-size:13px;color:var(--ink);
+    border:1px solid var(--line);border-radius:9px;padding:7px 11px;background:#fff;
+    transition:border-color .2s,box-shadow .2s}
+  input[type=text]:focus{outline:none;border-color:#B9DDF4;
+    box-shadow:0 0 0 3px rgba(79,168,232,.13)}
+  .btn{font:inherit;font-size:12.5px;font-weight:600;cursor:pointer;white-space:nowrap;
+    padding:7px 15px;border-radius:9px;border:1px solid transparent;transition:all .16s}
+  .btn:active{transform:translateY(1px)}
+  .btn-main{color:#fff;background:linear-gradient(100deg,#3E9FE0,#E8455F);
+    box-shadow:0 5px 14px rgba(232,69,95,.26)}
+  .btn-main:hover{box-shadow:0 8px 18px rgba(232,69,95,.34)}
+
+  .memlist{flex:1;min-height:0;overflow-y:auto;max-height:250px;scrollbar-width:thin}
+  .memlist::-webkit-scrollbar{width:7px}
+  .memlist::-webkit-scrollbar-thumb{background:#DCE5F0;border-radius:4px}
+  .mem{position:relative;font-size:12.5px;color:var(--ink2);background:#fff;
+    border:1px solid var(--line);border-radius:10px;padding:8px 10px 8px 11px;
+    margin-bottom:7px;line-height:1.6;transition:border-color .16s}
+  .mem:hover{border-color:#CDE7F8}
+  .mem .ns{display:inline-block;font-size:10px;font-weight:700;padding:0 6px;
+    border-radius:999px;background:var(--blue-s);color:var(--blue-d);margin-right:5px}
+  .mem .x{position:absolute;right:5px;top:5px;width:18px;height:18px;line-height:16px;
+    text-align:center;font-size:13px;color:var(--ink3);background:none;border:0;
+    cursor:pointer;border-radius:6px;transition:all .15s}
+  .mem .x:hover{background:var(--red-s);color:var(--red-d)}
+
+  .switch{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--ink2);
+    cursor:pointer;margin-bottom:10px;user-select:none}
+  .switch input{accent-color:var(--blue);width:14px;height:14px;cursor:pointer}
+
+  .cmp{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .cmp-col{border:1px solid var(--line);border-radius:12px;padding:10px;background:#fff;
+    min-width:0}
+  .cmp-col h4{font-size:11.5px;font-weight:700;margin-bottom:8px;display:flex;
+    align-items:center;gap:5px}
+  .cmp-col.kw h4{color:var(--orange-d)}
+  .cmp-col.sem h4{color:var(--blue-d)}
+  .cmp-col h4::before{content:"";width:7px;height:7px;border-radius:2px;display:inline-block}
+  .cmp-col.kw h4::before{background:var(--orange)}
+  .cmp-col.sem h4::before{background:var(--blue)}
+  .hit{margin-bottom:8px}
+  .hit .tx{font-size:12px;color:var(--ink2);line-height:1.5;margin-bottom:3px}
+  .hit .sc{display:flex;align-items:center;gap:6px}
+  .hit .bar{flex:1;height:5px;border-radius:3px;background:#EDF2F8;overflow:hidden}
+  .hit .bar i{display:block;height:100%;border-radius:3px;transition:width .45s ease}
+  .cmp-col.kw .bar i{background:linear-gradient(90deg,#FFC18A,#FF8A1E)}
+  .cmp-col.sem .bar i{background:linear-gradient(90deg,#82CBF2,#2E8BD0)}
+  .hit .sc-num{font-size:10.5px;color:var(--ink3);font-variant-numeric:tabular-nums;
+    width:34px;text-align:right;flex:none}
+  .none{font-size:11.5px;color:var(--ink3);padding:6px 0}
+  .badge{display:inline-block;font-size:10px;font-weight:700;padding:0 6px;border-radius:999px;
+    margin-left:5px;vertical-align:1px}
+  .badge.win{background:#E9F9F2;color:#1F9D55;border:1px solid #C6EDDA}
+  .hit .wh{font-size:10px;color:var(--ink3);margin-top:4px}
+  .hit .wh .w{display:inline-block;font-family:Consolas,"Cascadia Code",monospace;
+    font-size:10px;padding:0 5px;margin-right:3px;border-radius:4px;
+    background:#F1F6FB;border:1px solid #E2ECF6;color:#4B6A85}
+  .cmp-foot{font-size:11px;color:var(--ink3);margin-top:6px;line-height:1.6}
+
+  .demo-foot{font-size:11.5px;color:var(--ink3);margin-top:13px;line-height:1.7}
+  .demo-foot b{color:var(--ink2)}
+
+  /* 全屏 */
+  .stage.fs{position:fixed;inset:0;z-index:9999;margin:0;border:0;border-radius:0;
+    display:flex;flex-direction:column;overflow:hidden;background:#fff;box-shadow:none}
+  .stage.fs .stage-bar{border-radius:0;flex:none}
+  .stage.fs .demo{flex:1;display:flex;flex-direction:column;min-height:0;
+    max-width:1440px;margin:0 auto;width:100%;padding:20px 30px 18px}
+  .stage.fs .cols{flex:1;min-height:0;grid-template-columns:360px 1fr}
+  .stage.fs .pane{min-height:0}
+  .stage.fs .memlist{max-height:none;flex:1}
+  .stage.fs .cmp{flex:1;min-height:0}
+  .stage.fs .cmp-col{overflow-y:auto}
+  .stage.fs .stat .v{font-size:26px}
+  .stage.fs .demo-foot{display:none}
+  body.fs-lock{overflow:hidden}
+
+  ul.flow{list-style:none;counter-reset:step}
+  ul.flow li{position:relative;padding-left:34px;margin-bottom:14px;font-size:14.5px;color:var(--ink2)}
+  ul.flow li::before{content:counter(step);counter-increment:step;position:absolute;left:0;top:2px;
+    width:22px;height:22px;border-radius:50%;font-size:12px;font-weight:700;color:#fff;
+    text-align:center;line-height:22px;background:linear-gradient(135deg,var(--blue),var(--red))}
+  ul.flow li strong{color:var(--ink);font-weight:600}
+  ul.flow li code{font-family:Consolas,"Cascadia Code",Monaco,monospace;font-size:12.5px;
+    color:var(--blue-d);background:var(--blue-s);border-radius:5px;padding:1px 6px}
+
+  .code{white-space:pre-wrap;word-break:break-word;background:#1E1F22;border:1px solid #2A2C30;
+    border-radius:14px;padding:19px 21px;font-family:Consolas,"Cascadia Code",Monaco,monospace;
+    font-size:13px;color:#BCBEC4;overflow-x:auto;margin-bottom:12px;line-height:1.8;
+    box-shadow:0 10px 28px rgba(26,29,36,.22),inset 0 1px 0 rgba(255,255,255,.05)}
+  .code .c{color:#7A7E85}.code .k{color:#CF8E6D}.code .s{color:#6AAB73}.code .n{color:#2AACB8}
+  .cap{font-size:12.5px;color:var(--ink3);margin:0 0 40px}
+  .cap code{font-family:Consolas,"Cascadia Code",Monaco,monospace;font-size:12px;
+    color:var(--blue-d);background:var(--blue-s);border-radius:4px;padding:1px 5px}
+
+  .note{border-radius:14px;padding:16px 19px;font-size:13.5px;color:var(--ink2);
+    background:var(--blue-s);border:1px solid #D6EAF8;margin-bottom:40px}
+  .note.warn{background:var(--red-s);border-color:#F8C9D0}
+  .note b{color:var(--ink);font-weight:700}
+  .note code{font-family:Consolas,"Cascadia Code",Monaco,monospace;font-size:12.5px;
+    color:var(--blue-d);background:#fff;border-radius:5px;padding:1px 6px}
+
+  footer{text-align:center;font-size:13px;color:var(--ink3);padding-top:38px;
+    border-top:1px solid var(--line);margin-top:56px}
+  footer a{color:var(--blue-d);text-decoration:none;font-weight:600}
+  footer a:hover{color:var(--red-d)}
+
+  @media (max-width:820px){
+    .wrap{padding:40px 18px 72px}
+    .demo{padding:16px}
+    .cols{grid-template-columns:1fr}
+    .stats{grid-template-columns:repeat(2,1fr)}
+    .stage-note{display:none}
+    .cmp{grid-template-columns:1fr}
+    .memlist{max-height:200px}
+  }
+</style>
+</head>
+<body>
+<div class="glow"></div>
+
+<div class="wrap">
+  <a class="back" href="../../index.html">← 返回作品集</a>
+
+  <div class="num">PROJECT 08</div>
+  <h1>本地语义记忆库</h1>
+  <p class="lede">同一个坑我踩过两次以上：上次怎么解决的忘了，只记得「好像搞过」。
+  所以我想把这些偏好和教训存下来，下次开工能自己想起来。<strong>难点从来不在存，
+  在于我问的时候用词和当初记的对不上</strong>——这也是我最后放弃关键词搜索的原因。</p>
+
+  <div class="tags">
+    <span class="tag">TF-IDF</span>
+    <span class="tag">余弦相似度</span>
+    <span class="tag">查询扩展</span>
+    <span class="tag">localStorage</span>
+    <span class="tag">纯前端</span>
+  </div>
+
+  <div class="stage" id="stage">
+    <div class="stage-bar">
+      <span class="stage-dot"></span><span class="stage-dot"></span><span class="stage-dot"></span>
+      <span class="stage-title">真存真检索 · 数据在你浏览器里</span>
+      <span class="stage-live">LIVE</span>
+      <span class="stage-note">左边加记忆，右边问一句看两边差在哪</span>
+      <button class="fs-btn" id="fsBtn" type="button">全屏 ↗</button>
+    </div>
+
+    <div class="demo">
+      <div class="stats">
+        <div class="stat c1"><div class="v" id="s-mem">0<small>条</small></div><div class="k">记忆总数</div></div>
+        <div class="stat c2"><div class="v" id="s-ns">0<small>个</small></div><div class="k">项目分组</div></div>
+        <div class="stat c3"><div class="v" id="s-top">—</div><div class="k">语义 Top1</div></div>
+        <div class="stat c4"><div class="v" id="s-diff">—</div><div class="k">高出关键词</div></div>
+      </div>
+
+      <div class="cols">
+        <div class="pane">
+          <div class="pane-h">记忆库 <span class="n" id="cnt">0</span></div>
+          <div class="tabs" id="nsTabs"></div>
+          <div class="addrow">
+            <input type="text" id="text" placeholder="写一条记忆…" maxlength="60" autocomplete="off">
+            <button class="btn btn-main" id="add" type="button">添加</button>
+          </div>
+          <div class="memlist" id="memlist"></div>
+        </div>
+
+        <div class="pane">
+          <div class="pane-h">提问检索</div>
+          <div class="addrow">
+            <input type="text" id="q" placeholder="试一句：讨厌啰嗦 / 可读性太差 / 做饭顺序" autocomplete="off">
+            <button class="btn btn-main" id="go" type="button">检索</button>
+          </div>
+          <label class="switch"><input type="checkbox" id="cross"> 跨项目检索</label>
+
+          <div class="cmp">
+            <div class="cmp-col kw">
+              <h4>关键词匹配</h4>
+              <div id="kwRes"><div class="none">等一个问题…</div></div>
+            </div>
+            <div class="cmp-col sem">
+              <h4>语义检索</h4>
+              <div id="semRes"><div class="none">等一个问题…</div></div>
+            </div>
+          </div>
+          <div class="cmp-foot" id="cmpFoot">
+            左边只看字面重叠，右边会先做同义词归一化再加权。同一个问题，两边结果通常不一样。
+          </div>
+        </div>
+      </div>
+
+      <p class="demo-foot">
+        <b>我做的部分：</b>中文按两字一组切词 → 用 TF-IDF 给每个词算权重（越少见的词越重）→
+        句子变成向量 → 用余弦夹角比相似度。你在上面看到的排序，是这段代码当场算的，
+        不是写死的几组答案。
+        数据存在浏览器 <code style="font-family:Consolas,monospace;font-size:11px">localStorage</code>
+        里，关掉再开还在。</p>
+    </div>
+  </div>
+
+  <section>
+    <h2>我为什么放弃了关键词搜索</h2>
+    <div class="grid">
+      <div class="card">
+        <h3>我第一版就是关键词搜索</h3>
+        <p>记忆存成纯文本，提问时找共同的字。第一条记忆我写的是「文字堆得再多也没人读」，
+          转头问「讨厌啰嗦」——一个字都不重合，直接零分。</p>
+      </div>
+      <div class="card">
+        <h3>虚词把我的排序搞乱了</h3>
+        <p>「我今天把那个东西改了」比「变量命名」长得多。按字面重合算，长句更容易赢，
+          可它其实什么都没说——排在第一位的往往是废话说得最多的那条。</p>
+      </div>
+      <div class="card">
+        <h3>加权之后才分得出主次</h3>
+        <p>换成 TF-IDF，让「变量命名」这种稀有词权重高，「我、的、把、了」趋近零。
+          同一批记忆，排名立刻变了——真正的主题这才浮上来。</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>我是怎么算这条的</h2>
+    <ul class="flow">
+      <li><strong>先切词。</strong>中文没有空格没法按词分，所以我按两字一组滑窗切：
+        <code>变量命名</code> → <code>变量</code> <code>量命</code> <code>命名</code>。</li>
+      <li><strong>再算权重。</strong><code>tf × idf</code>：这个词在这句里出现几次 ×
+        它在多少条记忆里出现过（越少越重）。这一步是整套东西的关键。</li>
+      <li><strong>然后归一化。</strong>每条记忆变成一串数字，再除以自身长度——
+        不除的话长句天然占便宜，短句永远排不上来。</li>
+      <li><strong>比余弦。</strong>我的提问变成向量，跟每条记忆算夹角余弦，0 到 1，越大越像。</li>
+      <li><strong>最后排序。</strong>取前 3 条，低于 0.05 的直接不显示——
+        宁可不给，也别塞几条不相关的。</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>关键代码</h2>
+    <div class="code"><span class="c">// 核心就三件事：切词、加权、比余弦</span>
+<span class="k">function</span> tokenize(text) {
+  <span class="k">const</span> s = text.toLowerCase().replace(<span class="s">/[^\u4e00-\u9fa5a-z0-9]+/g</span>, <span class="s">' '</span>);
+  <span class="k">const</span> out = [];
+  (s.match(<span class="s">/[\u4e00-\u9fa5]+/g</span>) || []).forEach(seg =&gt; {
+    <span class="k">for</span> (<span class="k">let</span> i = <span class="n">0</span>; i &lt; seg.length - <span class="n">1</span>; i++) out.push(seg.slice(i, i + <span class="n">2</span>));
+  });
+  (s.match(<span class="s">/[a-z0-9]+/g</span>) || []).forEach(w =&gt; out.push(w));
+  <span class="k">return</span> out;
+}
+
+<span class="c">// 余弦：只看向量夹角，所以长记忆不会天然占便宜</span>
+<span class="k">function</span> cosine(a, b) {
+  <span class="k">let</span> dot = <span class="n">0</span>;
+  Object.keys(a.vec).forEach(t =&gt; { <span class="k">if</span> (b.vec[t]) dot += a.vec[t] * b.vec[t]; });
+  <span class="k">return</span> dot / (a.norm * b.norm);
+}</div>
+    <p class="cap">这一页里的检索就是上面这段跑出来的，改一个字结果就变。</p>
+
+    <div class="note warn">
+      <b>我知道这个实现的上限在哪。</b>这一页跑的是 TF-IDF 向量 + 余弦 +
+      一张我自己写的同义词表，纯前端，没有神经网络。它能处理「说法不同但用词相关」，
+      <b>处理不了真正的同义改写</b>——比如「饭做得难吃」和「厨艺不行」，
+      我的词表救不了它，那得靠 embedding 模型。这是能力边界，我不想含糊过去。
+    </div>
+  </section>
+
+  <section>
+    <h2>为什么按项目分组</h2>
+    <ul class="flow">
+      <li><strong>这是我自己踩出来的。</strong>我在做作品集时存了一条「代码块要用深色」，
+        后来写爬虫时也被翻出来当依据——那时候根本不该听这条。</li>
+      <li><strong>分组就是命名空间。</strong>每条记忆带一个 <code>ns</code> 标记，
+        默认只在本组里找。</li>
+      <li><strong>需要时能跨组。</strong>勾上「跨项目检索」才全库扫——
+        这也是向量库里 <code>where={"ns": "..."}</code> 在做的事。</li>
+    </ul>
+  </section>
+
+  <footer>
+    王思洋 · 本地语义记忆库 ·
+    <a href="https://github.com/wangsy1150" target="_blank" rel="noopener">GitHub</a>
+  </footer>
+</div>
+
+<script>
+/* ========== 预置记忆（示例数据，可以随手删） ========== */
+var SEED = [
+  { id: 'a1', ns: '作品集', text: '面试官只看首屏，文字堆得再多也没人读' },
+  { id: 'a2', ns: '作品集', text: '项目链接一定要自己点一遍，别交上去才发现 404' },
+  { id: 'a3', ns: '作品集', text: '代码块用深色，语法高亮照编辑器的来，别自创配色' },
+  { id: 'b1', ns: '写代码', text: '变量命名别用 a b c，三个月后自己都看不懂' },
+  { id: 'b2', ns: '写代码', text: '改别人的代码前先 commit，出事了还能退回去' },
+  { id: 'b3', ns: '写代码', text: 'Python 报错先看最后一行，栈顶在下面不在上面' },
+  { id: 'c1', ns: '生活', text: '辣椒炒肉先炒肉后放辣椒，顺序反了肉会老' },
+  { id: 'c2', ns: '生活', text: '画笔画太多 PS 会卡，超过 500MB 就得清一遍' }
+];
+
+/* 同义词 / 近义词归一化：只在「语义」那一列生效，关键词列保持原样，
+   这样两边的差异才是真的来自查询扩展。 */
+var SYN = [
+  ['讨厌', '不喜欢'], ['反感', '不喜欢'], ['不爱', '不喜欢'], ['受不了', '不喜欢'],
+  ['啰嗦', '文字'], ['篇幅', '文字'], ['冗长', '文字'], ['长篇', '文字'], ['字数', '文字'],
+  ['可读性', '看不懂'], ['易读', '看不懂'], ['难读', '看不懂'], ['读不懂', '看不懂'],
+  ['命名', '变量名'], ['取名', '变量名'], ['起名', '变量名'],
+  ['炒菜', '做饭'], ['烹饪', '做饭'], ['下厨', '做饭'],
+  ['先后', '顺序'], ['次序', '顺序'],
+  ['搞坏', '出事'], ['翻车', '出事'], ['弄坏', '出事'], ['改坏', '出事'], ['动坏了', '出事']
+];
+
+var STORE_KEY = 'wsy_memory_v1';
+var mems = [];
+var curNs = '全部';
+
+var $ = function (id) { return document.getElementById(id); };
+
+/* ---------- 存储 ---------- */
+function load() {
+  try {
+    var raw = localStorage.getItem(STORE_KEY);
+    if (raw) {
+      var arr = JSON.parse(raw);
+      if (Array.isArray(arr) && arr.length) { mems = arr; return; }
+    }
+  } catch (e) { /* 隐私模式下 localStorage 可能不可用，退回内存态 */ }
+  mems = SEED.slice();
+  save();
+}
+function save() {
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(mems)); } catch (e) {}
+}
+
+/* ---------- 文本处理 ---------- */
+function tokenize(text) {
+  var s = String(text).toLowerCase().replace(/[^\u4e00-\u9fa5a-z0-9]+/g, ' ');
+  var out = [];
+  var cn = s.match(/[\u4e00-\u9fa5]+/g) || [];
+  cn.forEach(function (seg) {
+    if (seg.length === 1) { out.push(seg); return; }
+    for (var i = 0; i < seg.length - 1; i++) out.push(seg.slice(i, i + 2));
+  });
+  (s.match(/[a-z0-9]+/g) || []).forEach(function (w) { out.push(w); });
+  return out;
+}
+
+function expand(text) {
+  var s = String(text);
+  SYN.forEach(function (p) { s = s.split(p[0]).join(p[1]); });
+  return s;
+}
+
+function tfMap(toks) {
+  var tf = {};
+  toks.forEach(function (t) { tf[t] = (tf[t] || 0) + 1; });
+  return tf;
+}
+
+/* TF-IDF 建索引：df 统计「有多少条记忆出现过这个词」 */
+function buildIndex(docs) {
+  var N = Math.max(1, docs.length);
+  var df = {};
+  docs.forEach(function (d) {
+    var seen = {};
+    d.toks.forEach(function (t) { seen[t] = 1; });
+    Object.keys(seen).forEach(function (t) { df[t] = (df[t] || 0) + 1; });
+  });
+  docs.forEach(function (d) {
+    var tf = tfMap(d.toks);
+    var vec = {}, sq = 0;
+    Object.keys(tf).forEach(function (t) {
+      var idf = Math.log(1 + N / (1 + (df[t] || 0)));
+      var w = (1 + Math.log(tf[t])) * idf;
+      vec[t] = w; sq += w * w;
+    });
+    d.vec = vec; d.norm = Math.sqrt(sq) || 1;
+  });
+  return { df: df, N: N };
+}
+
+function queryVec(weights, index) {
+  var vec = {}, sq = 0;
+  Object.keys(weights).forEach(function (t) {
+    /* 词表里没有的词直接丢掉。
+       不丢的话它的 idf 会是 ln(1+N)（最大），权重反而最高，
+       把分母撑大、相似度压到 0.1 以下 —— 而它本来就不可能匹配到任何东西。 */
+    if (!(t in index.df)) return;
+    var idf = Math.log(1 + index.N / (1 + index.df[t]));
+    var v = weights[t] * idf;
+    vec[t] = v; sq += v * v;
+  });
+  return { vec: vec, norm: Math.sqrt(sq) || 1 };
+}
+
+/* 查询侧：原句的词权重更高，扩展词只当补充。
+   注意是「并集」不是「替换」—— 替换会把本来能匹配的词搞没：
+   「变量命名」被替换成「变量变量名」之后，真正管用的「命名」反而丢了，
+   于是语义列分数掉到关键词列以下，看着像"语义更差"，其实是扩展做坏了。 */
+function buildQuery(raw, withExpand) {
+  var w = {};
+  var baseSet = {};
+  tokenize(raw).forEach(function (t) { baseSet[t] = (baseSet[t] || 0) + 1; });
+
+  if (!withExpand) {
+    Object.keys(baseSet).forEach(function (t) { w[t] = baseSet[t]; });
+    return w;
+  }
+
+  var extSet = {};
+  tokenize(expand(raw)).forEach(function (t) { extSet[t] = (extSet[t] || 0) + 1; });
+  Object.keys(extSet).forEach(function (t) { w[t] = extSet[t]; });
+  Object.keys(baseSet).forEach(function (t) {
+    w[t] = Math.max(w[t] || 0, baseSet[t] * 1.8);
+  });
+  return w;
+}
+
+function cosine(a, b) {
+  var dot = 0;
+  Object.keys(a.vec).forEach(function (t) {
+    if (b.vec[t]) dot += a.vec[t] * b.vec[t];
+  });
+  return dot / (a.norm * b.norm || 1);
+}
+
+/* 关键词列也走余弦，唯一差别是「查询不做同义词扩展」。
+   两列用同一个刻度才比得出高低 —— 如果左边用重合比例、右边用余弦，
+   会出现「0.33 比 0.24 高」的假象，那是刻度不同，不是检索更准。 */
+
+/* ---------- 渲染 ---------- */
+function nsList() {
+  var s = {};
+  mems.forEach(function (m) { s[m.ns] = 1; });
+  return Object.keys(s);
+}
+
+function renderTabs() {
+  var box = $('nsTabs');
+  var list = ['全部'].concat(nsList());
+  box.innerHTML = list.map(function (n) {
+    return '<button class="tab' + (n === curNs ? ' on' : '') +
+      '" data-ns="' + esc(n) + '" type="button">' + esc(n) + '</button>';
+  }).join('');
+  if (list.indexOf(curNs) < 0) { curNs = '全部'; }
+}
+
+function renderList() {
+  var list = curNs === '全部' ? mems : mems.filter(function (m) { return m.ns === curNs; });
+  $('cnt').textContent = list.length;
+  $('s-mem').innerHTML = mems.length + '<small>条</small>';
+  $('s-ns').innerHTML = nsList().length + '<small>个</small>';
+
+  var box = $('memlist');
+  if (!list.length) {
+    box.innerHTML = '<div class="none">这个分组还没有记忆，上面写一条试试。</div>';
+    return;
+  }
+  box.innerHTML = list.map(function (m) {
+    return '<div class="mem"><span class="ns">' + esc(m.ns) + '</span>' + esc(m.text) +
+      '<button class="x" data-id="' + esc(m.id) + '" title="删除" type="button">×</button></div>';
+  }).join('');
+}
+
+function esc(s) {
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function paintHits(box, rows, kind, best) {
+  rows = rows.filter(function (r) { return r.s > 0.004; });
+  if (!rows.length) {
+    box.innerHTML = '<div class="none">没有匹配的</div>';
+    return;
+  }
+  box.innerHTML = rows.map(function (r, i) {
+    var pct = Math.round(r.s * 100);
+    var win = (kind === 'sem' && r.m.id === best) ? '<span class="badge win">最像</span>' : '';
+    var hitTags = (r.hits || []).slice(0, 3).map(function (h) {
+      return '<span class="w">' + esc(h) + '</span>';
+    }).join('');
+    return '<div class="hit">' +
+      '<div class="tx">' + esc(r.m.text.slice(0, 30)) + (r.m.text.length > 30 ? '…' : '') + win + '</div>' +
+      '<div class="sc"><span class="bar"><i style="width:' + Math.min(100, Math.max(4, pct)) + '%"></i></span>' +
+      '<span class="sc-num">' + r.s.toFixed(2) + '</span></div>' +
+      (hitTags ? '<div class="wh">命中 ' + hitTags + '</div>' : '') +
+    '</div>';
+  }).join('');
+}
+
+/* ---------- 检索 ---------- */
+function search() {
+  var raw = ($('q').value || '').trim();
+  if (!raw) { $('q').focus(); return; }
+
+  var pool = $('cross').checked ? mems.slice()
+           : (curNs === '全部' ? mems.slice() : mems.filter(function (m) { return m.ns === curNs; }));
+
+  if (!pool.length) {
+    $('kwRes').innerHTML = '<div class="none">这个分组里没有记忆</div>';
+    $('semRes').innerHTML = '<div class="none">这个分组里没有记忆</div>';
+    return;
+  }
+
+  // 预计算每条记忆的 toks / vec
+  pool.forEach(function (m) { m.toks = tokenize(m.text); });
+  var index = buildIndex(pool);
+
+  // 关键词列：原句切词，不做扩展
+  var qvKw = queryVec(buildQuery(raw, false), index);
+  var kw = pool.map(function (m) {
+    var hits = Object.keys(qvKw.vec)
+      .filter(function (t) { return m.vec[t]; })
+      .sort(function (a, b) { return qvKw.vec[b] - qvKw.vec[a]; });
+    return { m: m, s: cosine(qvKw, m), hits: hits };
+  }).sort(function (a, b) { return b.s - a.s; }).slice(0, 3);
+
+  // 语义列：同义词归一化后的词并进查询向量，再算余弦
+  var qv = queryVec(buildQuery(raw, true), index);
+  var sem = pool.map(function (m) {
+    /* 命中词按权重从高到低排：讲清楚「为什么这条被选中」 */
+    var hits = Object.keys(qv.vec)
+      .filter(function (t) { return m.vec[t]; })
+      .sort(function (a, b) { return qv.vec[b] - qv.vec[a]; });
+    return { m: m, s: cosine(qv, m), hits: hits };
+  }).sort(function (a, b) { return b.s - a.s; }).slice(0, 3);
+
+  var best = sem.length ? sem[0].m.id : null;
+  paintHits($('kwRes'), kw, 'kw', best);
+  paintHits($('semRes'), sem, 'sem', best);
+
+  var topS = sem.length ? sem[0].s : 0;
+  var kwS = kw.length ? kw[0].s : 0;
+  $('s-top').textContent = topS ? topS.toFixed(2) : '—';
+  $('s-diff').innerHTML = topS
+    ? (topS - kwS >= 0 ? '+' : '') + (topS - kwS).toFixed(2) : '—';
+
+  var foot;
+  if (topS > kwS + 0.01) {
+    foot = '这次<b>语义检索更高</b>：句子被归一化成「' + esc(expand(raw)) +
+           '」，找到了用词不同但意思相关的那条。';
+  } else if (kwS > topS + 0.01) {
+    foot = '这次<b>关键词反而更高</b>——你问的词和记忆里写得几乎一样，' +
+           '扩展加进来的词只是稀释了权重。<b>用词对得上时，语义检索并没有优势</b>，这是实情。';
+  } else if (topS > 0) {
+    foot = '这次两边<b>差不多</b>：原句里本来就有能对上的词，扩展没带来额外信息。';
+  } else {
+    foot = '两边都<b>没找到</b>。库里暂时没有相关内容，换一句或者先在左边加一条记忆。';
+  }
+  $('cmpFoot').innerHTML = foot;
+}
+
+/* ---------- 交互 ---------- */
+$('add').addEventListener('click', function () {
+  var t = ($('text').value || '').trim();
+  if (!t) { $('text').focus(); return; }
+  var ns = (curNs === '全部') ? (nsList()[0] || '未分组') : curNs;
+  mems.push({ id: 'm' + Date.now(), ns: ns, text: t });
+  $('text').value = '';
+  save(); renderTabs(); renderList();
+});
+
+$('text').addEventListener('keydown', function (e) {
+  if (e.key === 'Enter') $('add').click();
+});
+$('q').addEventListener('keydown', function (e) {
+  if (e.key === 'Enter') search();
+});
+$('go').addEventListener('click', search);
+$('cross').addEventListener('change', function () { if ($('q').value.trim()) search(); });
+
+$('nsTabs').addEventListener('click', function (e) {
+  var b = e.target.closest('.tab');
+  if (!b) return;
+  curNs = b.dataset.ns;
+  renderTabs(); renderList();
+  if ($('q').value.trim()) search();
+});
+
+$('memlist').addEventListener('click', function (e) {
+  var b = e.target.closest('.x');
+  if (!b) return;
+  mems = mems.filter(function (m) { return m.id !== b.dataset.id; });
+  save(); renderTabs(); renderList();
+});
+
+/* ---------- 全屏 ---------- */
+var stageEl = $('stage'), fsBtn = $('fsBtn');
+function setFS(on) {
+  stageEl.classList.toggle('fs', on);
+  document.body.classList.toggle('fs-lock', on);
+  fsBtn.textContent = on ? '退出全屏 ✕' : '全屏 ↗';
+}
+fsBtn.addEventListener('click', function () { setFS(!stageEl.classList.contains('fs')); });
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'Escape' && stageEl.classList.contains('fs')) setFS(false);
+});
+
+/* ---------- 启动 ---------- */
+load();
+renderTabs();
+renderList();
+
+/* 打开自动问一句：不用点任何东西就能看到两边差异 */
+setTimeout(function () {
+  $('q').value = '讨厌啰嗦';
+  search();
+}, 320);
+</script>
+</body>
+</html>

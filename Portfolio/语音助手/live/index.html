@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>语音交互助手 · 可直接对话</title>
+<link rel="stylesheet" href="style.css" />
+<link rel="icon" type="image/svg+xml" href="../../../favicon.svg?v=2" />
+<style>
+  /* 只放「纯前端版」特有的几块，其余全部沿用项目原版 style.css */
+  .mode-bar{
+    display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+    padding:9px 14px;border-radius:11px;font-size:13px;line-height:1.5;
+    background:var(--brand-soft);border:1px solid #D6EAF8;color:#2E6B8E;
+  }
+  .mode-bar .tag-mode{
+    font-weight:700;font-size:12px;padding:2px 9px;border-radius:999px;
+    background:#4FA8E8;color:#fff;white-space:nowrap;
+  }
+  .mode-bar .tag-mode.is-live{background:#16a34a}
+  .mode-bar b{color:#1B6FA8}
+  .mode-bar .spacer{flex:1}
+  .mode-bar button{
+    font:inherit;font-size:12.5px;cursor:pointer;padding:4px 12px;border-radius:999px;
+    border:1px solid #B9DDF4;background:#fff;color:#2E6B8E;white-space:nowrap;
+  }
+  .mode-bar button:hover{background:#EAF5FD;border-color:#8FCBF0}
+
+  /* Key 设置弹层 */
+  .key-panel{
+    position:fixed;inset:0;z-index:60;display:none;
+    align-items:center;justify-content:center;padding:20px;
+    background:rgba(20,28,45,.42);backdrop-filter:blur(2px);
+  }
+  .key-panel.open{display:flex}
+  .key-card{
+    width:100%;max-width:460px;background:#fff;border-radius:16px;
+    box-shadow:0 20px 60px rgba(20,28,45,.28);padding:22px 22px 18px;
+  }
+  .key-card h3{font-size:16px;margin-bottom:6px;color:#1A1D24}
+  .key-card p{font-size:13px;color:#5A6474;line-height:1.6;margin-bottom:14px}
+  .key-card p code{
+    font-family:Consolas,Monaco,monospace;font-size:12px;background:#EFF5FA;
+    border-radius:4px;padding:1px 5px;color:#2E6B8E;
+  }
+  .key-card input{
+    width:100%;font:inherit;font-size:14px;padding:11px 13px;border-radius:10px;
+    border:1px solid #DDE7F2;outline:none;margin-bottom:12px;
+  }
+  .key-card input:focus{border-color:#8FCBF0;box-shadow:0 0 0 3px rgba(79,110,247,.12)}
+  .key-actions{display:flex;gap:10px;justify-content:flex-end;align-items:center}
+  .key-actions .del{margin-right:auto;color:#dc2626;background:none;border:none;
+    font:inherit;font-size:13px;cursor:pointer;padding:6px 2px}
+  .key-actions button{
+    font:inherit;font-size:13.5px;padding:9px 18px;border-radius:10px;cursor:pointer;
+    border:1px solid #DDE7F2;background:#fff;color:#3A4557;
+  }
+  .key-actions button.primary{background:#4FA8E8;border-color:#4FA8E8;color:#fff}
+  .key-actions button.primary:hover{background:#2E8BD0}
+
+  /* 知识库示例文档上的小标记 */
+  .kb-item-meta .demo-flag{
+    display:inline-block;margin-left:6px;padding:0 6px;border-radius:999px;
+    font-size:11px;background:#fff4e5;color:#a35c00;border:1px solid #ffe0b8;
+  }
+
+  /* ⚠️ 必须加：.chat 是 flex-column + overflow-y:auto，
+     消息一多，每条 .msg 会被 flex 压缩（flex-shrink 默认 1），
+     气泡从 69px 被压到 35px、文字溢出被裁掉，看起来就像「AI 没回答」。
+     原版是整页布局看不出这个 bug，放进固定高度的 iframe 里才暴露。 */
+  .chat > .msg{ flex-shrink:0; }
+  .chat > .empty{ flex-shrink:0; }
+</style>
+</head>
+<body>
+  <div class="app">
+    <!-- ============ 模式说明条 ============ -->
+    <div class="mode-bar" id="modeBar">
+      <span class="tag-mode" id="modeTag">本地检索模式</span>
+      <span id="modeText">回答由浏览器内的 BM25 检索命中的原文句子组装，<b>不经过大模型</b></span>
+      <span class="spacer"></span>
+      <button type="button" id="keyBtn">填入 DeepSeek Key 升级为真模型</button>
+    </div>
+
+    <!-- ============ 顶部标题栏 ============ -->
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-logo">声</div>
+        <div class="brand-text">
+          <h1>语音交互助手</h1>
+          <p>麦克风说话 → 识别成文字 → 检索知识库 / 大模型思考 → 朗读出来</p>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <span class="pill" id="modelPill">模型：检测中…</span>
+        <span class="pill" id="agentPill">知识库：加载中…</span>
+        <span class="pill" id="voicePill">朗读：检测中…</span>
+        <span class="pill" id="memoryPill">记忆：0/10 轮</span>
+      </div>
+    </header>
+
+    <!-- ============ 提示条 ============ -->
+    <div class="alert" id="alertBox" hidden></div>
+
+    <!-- ============ 对话区 ============ -->
+    <main class="chat" id="chat">
+      <div class="empty" id="emptyState">
+        <div class="empty-icon">🎙️</div>
+        <p>点麦克风说话，或直接在下面打字</p>
+        <p class="empty-sub">问「年假几天」「报销怎么走」「几点下班」都能查到</p>
+      </div>
+    </main>
+
+    <!-- ============ 实时状态 ============ -->
+    <div class="statusbar">
+      <span class="status-dot" id="statusDot"></span>
+      <span id="statusText">准备就绪</span>
+      <span class="status-extra" id="statusExtra"></span>
+    </div>
+
+    <!-- ============ 底部控制区 ============ -->
+    <footer class="controls">
+      <div class="controls-row">
+        <button class="mic-btn" id="micBtn" title="点一下开始，再点结束">
+          <span class="mic-icon">🎤</span>
+          <span class="mic-label" id="micLabel">按住说话</span>
+        </button>
+
+        <div class="input-wrap">
+          <input type="text" id="textInput" placeholder="也可以直接输入文字，回车发送…" autocomplete="off" />
+          <button class="send-btn" id="sendBtn">发送</button>
+        </div>
+
+        <button class="ghost-btn" id="stopSpeakBtn" title="停止朗读">🔇 停止朗读</button>
+      </div>
+
+      <div class="controls-row options">
+        <label class="opt">
+          <span>音色</span>
+          <select id="voiceSelect"></select>
+        </label>
+        <label class="opt">
+          <span>语速 <b id="rateValue">1.0</b></span>
+          <input type="range" id="rateRange" min="0.5" max="2" step="0.1" value="1" />
+        </label>
+        <label class="opt switch">
+          <input type="checkbox" id="autoSpeak" checked />
+          <span>自动朗读回答</span>
+        </label>
+        <button class="ghost-btn small" id="kbBtn" title="看知识库里有什么、也能传自己的资料">📚 知识库 <b id="kbCount">0</b></button>
+        <button class="ghost-btn small" id="clearBtn">清空对话</button>
+      </div>
+    </footer>
+  </div>
+
+  <!-- ============ 知识库面板 ============ -->
+  <div class="kb-panel" id="kbPanel" hidden>
+    <div class="kb-head">
+      <strong>📚 知识库</strong>
+      <span class="kb-stats" id="kbStats">加载中…</span>
+      <button class="ghost-btn small" id="kbCloseBtn">关闭</button>
+    </div>
+
+    <details class="kb-toolbox" open>
+      <summary>🧰 检索是怎么做的</summary>
+      <div class="kb-toolbox-body" id="kbToolboxBody">
+        连续汉字段切相邻二元组（「年假制度」→ 年假 / 假制 / 制度），按 BM25 风格 IDF 打分，
+        越罕见的词权重越高；命中越集中、片段越短，得分越高。整段逻辑在浏览器里跑，没有服务器。
+      </div>
+    </details>
+
+    <div class="kb-drop" id="kbDrop">
+      <input type="file" id="kbFile" accept=".md,.markdown,.txt,.text" multiple hidden />
+      <div class="kb-drop-text">
+        <span class="kb-drop-icon">📥</span>
+        <span>把 .md / .txt 拖到这里，或 <button class="link-btn" id="kbPickBtn" type="button">点击选择文件</button></span>
+      </div>
+    </div>
+
+    <ul class="kb-list" id="kbList"></ul>
+
+    <div class="kb-foot">
+      <button class="ghost-btn small" id="kbResetBtn">恢复内置文档</button>
+      <button class="ghost-btn small danger" id="kbClearBtn">清空知识库</button>
+    </div>
+  </div>
+
+  <!-- ============ Key 设置弹层 ============ -->
+  <div class="key-panel" id="keyPanel">
+    <div class="key-card">
+      <h3>填入自己的 DeepSeek Key</h3>
+      <p>
+        填了之后，提问会真的发给 <code>api.deepseek.com</code>，由模型自己决定要不要检索。
+        不填就用本地检索模式，同样能问。<br>
+        <b>Key 只存在你这台电脑的浏览器里</b>（localStorage），不会上传到任何服务器。
+      </p>
+      <input type="password" id="keyInput" placeholder="sk-..." autocomplete="off" />
+      <div class="key-actions">
+        <button type="button" class="del" id="keyDelete">清除已保存的 Key</button>
+        <button type="button" id="keyCancel">取消</button>
+        <button type="button" class="primary" id="keySave">保存并启用</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -4,13 +4,19 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>贝壳二手房数据采集 · 项目详情</title>
-<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg?v=2">
 <link rel="preload" href="../../fonts/NotoSansSC-400-subset.woff2" as="font"
       type="font/woff2" crossorigin>
 <style>
-  /* 字体本地化：与首页统一用 Noto Sans SC 子集（16.9MB → 505KB），
-     不再依赖 fonts.googleapis.com */
-  /* 静态字重子集（该浏览器不支持可变字体 @font-face，改用 4 个静态字重） */
+  :root{
+    --bg:#FBFCFE; --ink:#1A1D24; --ink2:#525B6B; --ink3:#8B95A6;
+    --blue:#4FA8E8; --blue-d:#2E8BD0; --blue-s:#EAF5FD;
+    --red:#E8455F; --red-d:#C9304A; --red-s:#FFEBEE;
+    --pink:#FF8FB1; --line:#E4EBF5;
+    --orange:#FF8A1E; --orange-d:#C4661A; --orange-s:#FFF4E8;
+    --teal:#10B6A6; --teal-d:#0B8578; --teal-s:#E9F9F7;
+    --green:#1F9D55;
+  }
   @font-face{font-family:"Noto Sans SC";font-style:normal;font-weight:400;
     font-display:swap;src:url("../../fonts/NotoSansSC-400-subset.woff2") format("woff2")}
   @font-face{font-family:"Noto Sans SC";font-style:normal;font-weight:500;
@@ -19,267 +25,593 @@
     font-display:swap;src:url("../../fonts/NotoSansSC-600-subset.woff2") format("woff2")}
   @font-face{font-family:"Noto Sans SC";font-style:normal;font-weight:700;
     font-display:swap;src:url("../../fonts/NotoSansSC-700-subset.woff2") format("woff2")}
-  @font-face{font-family:"Noto Sans SC";font-style:normal;font-weight:800;
-    font-display:swap;src:url("../../fonts/NotoSansSC-700-subset.woff2") format("woff2")}
+
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:"Noto Sans SC","Microsoft YaHei","PingFang SC",Arial,sans-serif;
-    font-weight:400;
-    color:#eae6f5;background:#0d0a17;line-height:1.75;overflow-x:hidden}
+    font-weight:400;color:var(--ink);background:var(--bg);line-height:1.75;overflow-x:hidden}
   .glow{position:fixed;inset:0;pointer-events:none;z-index:0;
     background:
-      radial-gradient(circle at 18% 6%, rgba(139,92,246,.26), transparent 45%),
-      radial-gradient(circle at 84% 14%, rgba(56,189,248,.16), transparent 40%),
-      radial-gradient(circle at 50% 96%, rgba(236,72,153,.14), transparent 45%)}
-  .wrap{position:relative;z-index:1;max-width:960px;margin:0 auto;padding:56px 24px 96px}
-  .back{display:inline-flex;align-items:center;gap:8px;color:#a89ec9;text-decoration:none;
-    font-size:14px;margin-bottom:36px;transition:color .2s}
-  .back:hover{color:#c4b5fd}
-  .num{display:inline-block;font-size:13px;letter-spacing:.18em;color:#8b7fc7;
-    border:1px solid rgba(139,92,246,.35);border-radius:999px;padding:5px 14px;margin-bottom:18px}
-  h1{font-size:clamp(28px,4.6vw,44px);line-height:1.25;font-weight:800;
-    background:linear-gradient(120deg,#c4b5fd 0%,#a78bfa 40%,#7dd3fc 100%);
-    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:16px}
-  .lede{font-size:17px;color:#b9b0d6;max-width:680px;margin-bottom:30px}
-  .tags{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:34px}
-  .tag{font-size:12.5px;padding:5px 13px;border-radius:999px;
-    background:rgba(139,92,246,.14);border:1px solid rgba(139,92,246,.32);color:#c9bff0}
+      radial-gradient(circle at 8% 0%, rgba(79,168,232,.16), transparent 42%),
+      radial-gradient(circle at 94% 4%, rgba(232,69,95,.09), transparent 38%),
+      radial-gradient(circle at 50% 102%, rgba(255,143,177,.05), transparent 46%)}
+  .wrap{position:relative;z-index:1;max-width:min(1600px,100%);margin:0 auto;padding:56px clamp(16px,3vw,40px) 96px}
 
-  /* 说明性提示块 —— 主动把边界讲在前面 */
-  .notice{display:flex;gap:14px;padding:16px 20px;margin:0 0 46px;border-radius:13px;
-    background:rgba(236,72,153,.07);border:1px solid rgba(236,72,153,.34)}
-  .notice-icon{flex:none;font-size:17px;line-height:1.5}
-  .notice-body{font-size:13.8px;color:#c9bfdd}
-  .notice-body b{color:#f0c4dc}
-  .notice-body code{font-family:Consolas,Monaco,monospace;font-size:12.5px;color:#c9bff0;
-    background:rgba(139,92,246,.16);border-radius:4px;padding:1px 5px}
+  .back{display:flex;width:fit-content;align-items:center;gap:8px;color:var(--ink3);
+    text-decoration:none;font-size:14px;margin-bottom:34px;transition:color .2s}
+  .back:hover{color:var(--blue-d)}
 
-  h2{font-size:20px;color:#ddd6f3;margin:0 0 16px;padding-left:14px;position:relative}
+  .num{display:inline-block;font-size:12.5px;font-weight:600;letter-spacing:.14em;
+    color:#fff;background:linear-gradient(100deg,#3E9FE0 0%,#E8455F 72%,#D62F4A 100%);
+    border-radius:999px;padding:6px 16px;margin-bottom:16px;
+    box-shadow:0 8px 22px rgba(214,47,74,.34)}
+
+  h1{font-size:clamp(26px,3.6vw,38px);line-height:1.28;font-weight:700;
+    color:var(--ink);margin-bottom:14px;letter-spacing:-.01em}
+  h1::after{content:"";display:inline-block;width:11px;height:11px;border-radius:3px;
+    background:var(--red);margin-left:12px;vertical-align:.22em;
+    box-shadow:0 3px 10px rgba(232,69,95,.45)}
+
+  .lede{font-size:17px;color:var(--ink2);max-width:740px;margin-bottom:26px}
+  .lede strong{color:var(--ink);font-weight:600;
+    background:linear-gradient(transparent 60%, rgba(232,69,95,.20) 60%);
+    padding:0 2px;border-radius:2px}
+
+  .tags{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:26px}
+  .tag{font-size:12.5px;padding:6px 14px;border-radius:999px;
+    background:#fff;border:1px solid var(--line);color:var(--ink2);
+    box-shadow:0 1px 2px rgba(26,29,36,.04)}
+  .tag:nth-child(3n+1){border-color:#D6EAF8;color:var(--blue-d);background:var(--blue-s)}
+  .tag:nth-child(3n+2){border-color:#FBD0D7;color:var(--red-d);background:var(--red-s)}
+
+  /* ---------- 数据来源说明 ---------- */
+  .notice{display:flex;gap:14px;padding:15px 19px;margin:0 0 34px;border-radius:13px;
+    background:var(--teal-s);border:1px solid #BFE9E3}
+  .notice .ic{flex:none;font-size:16px;line-height:1.6;color:var(--teal-d)}
+  .notice .bd{font-size:13.5px;color:#2C5B56}
+  .notice .bd b{color:var(--teal-d)}
+  .notice code,.mini-code{font-family:Consolas,Monaco,monospace;font-size:12.3px;
+    color:var(--blue-d);background:rgba(79,168,232,.13);border-radius:4px;padding:1px 5px}
+
+  /* ============================================================
+     舞台
+     ============================================================ */
+  .stage{position:relative;background:#fff;border:1px solid var(--line);border-radius:18px;
+    box-shadow:0 14px 40px rgba(26,29,36,.075),0 2px 6px rgba(26,29,36,.03);
+    overflow:hidden;margin-bottom:12px;display:flex;flex-direction:column}
+  .stage.fs{position:fixed;inset:0;z-index:9999;border-radius:0;border:0;margin:0}
+  .stage.fs .list{max-height:none}
+  body.fs-on{overflow:hidden}
+
+  .bar{display:flex;align-items:center;gap:9px;padding:10px 14px;flex:none;
+    border-bottom:1px solid var(--line);background:#FBFCFE}
+  .dots{display:flex;gap:6px;flex:none}
+  .dots i{width:9px;height:9px;border-radius:50%;display:block}
+  .dots i:nth-child(1){background:#F0A0A8}
+  .dots i:nth-child(2){background:#F2D08A}
+  .dots i:nth-child(3){background:#A6D9B0}
+  .bar .bt{font-size:12px;color:var(--ink3);font-family:Consolas,monospace;
+    letter-spacing:.02em;margin-left:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .bar .sp{flex:1}
+  .badge{font-size:10.5px;padding:3px 9px;border-radius:999px;flex:none;
+    background:var(--red-s);color:var(--red-d);border:1px solid #FBD0D7;font-weight:700;
+    letter-spacing:.02em;display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+  .badge::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--red);
+    box-shadow:0 0 0 3px rgba(232,69,95,.22)}
+  .fsbtn{flex:none;font-size:11.5px;padding:4px 11px;border-radius:8px;cursor:pointer;
+    background:#fff;border:1px solid var(--line);color:var(--ink2);
+    font-family:inherit;transition:.18s}
+  .fsbtn:hover{border-color:#BFDDF4;color:var(--blue-d);background:var(--blue-s)}
+
+  /* ---------- 舞台 A：真实抓取 ---------- */
+  .aw{display:grid;grid-template-columns:126px 1fr;min-height:0}
+  .stage.fs .aw{flex:1;overflow:hidden}
+
+  .pages{border-right:1px solid var(--line);padding:12px 10px;background:#FDFEFF;
+    display:flex;flex-direction:column;gap:6px}
+  .pages .pt{font-size:10px;font-weight:700;color:var(--ink3);letter-spacing:.08em;
+    margin-bottom:2px;text-transform:uppercase}
+  .pg{display:flex;align-items:center;justify-content:space-between;gap:5px;
+    font-size:11.5px;font-family:Consolas,monospace;padding:5px 8px;border-radius:7px;
+    border:1px solid transparent}
+  .pg.ok{background:var(--teal-s);border-color:#BFE9E3;color:var(--teal-d);font-weight:700}
+  .pg.bad{background:var(--red-s);border-color:#FBD0D7;color:var(--red-d)}
+  .pg .pc{font-weight:800;font-size:11px}
+  .pg-note{font-size:10.5px;color:var(--ink3);line-height:1.5;margin-top:6px;
+    padding-top:8px;border-top:1px dashed var(--line)}
+
+  .amain{padding:12px 14px;min-width:0;display:flex;flex-direction:column}
+  .tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+  .srch{position:relative;flex:1;min-width:130px}
+  .srch input{width:100%;font-family:inherit;font-size:12.5px;padding:6px 10px 6px 28px;
+    border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--ink);outline:none;
+    transition:.18s}
+  .srch input:focus{border-color:#A9D4F2;box-shadow:0 0 0 3px rgba(79,168,232,.13)}
+  .srch span{position:absolute;left:9px;top:50%;transform:translateY(-50%);
+    font-size:12px;color:var(--ink3);pointer-events:none}
+  .chips{display:flex;gap:5px;flex-wrap:wrap}
+  .chip{font-size:11.5px;padding:5px 11px;border-radius:999px;cursor:pointer;
+    background:#fff;border:1px solid var(--line);color:var(--ink2);font-family:inherit;
+    transition:.18s;white-space:nowrap}
+  .chip:hover{border-color:#BFDDF4;color:var(--blue-d)}
+  .chip.on{background:var(--blue);border-color:var(--blue);color:#fff;font-weight:600;
+    box-shadow:0 4px 12px rgba(79,168,232,.3)}
+  .sel{font-family:inherit;font-size:11.5px;padding:5px 8px;border-radius:8px;
+    border:1px solid var(--line);background:#fff;color:var(--ink2);cursor:pointer;outline:none}
+
+  .list{overflow-y:auto;max-height:474px;padding-right:4px;
+    scrollbar-width:thin;scrollbar-color:#CBD9E8 transparent}
+  .list::-webkit-scrollbar{width:7px}
+  .list::-webkit-scrollbar-thumb{background:#CBD9E8;border-radius:4px}
+  .stage.fs .list{overflow-y:auto}
+  .stage.fs .rows{grid-template-columns:repeat(auto-fill,minmax(430px,1fr))}
+
+  .rows{display:grid;grid-template-columns:1fr;gap:8px}
+  .row{display:grid;grid-template-columns:88px 1fr auto;gap:11px;align-items:center;
+    padding:8px;border:1px solid #EEF3F9;border-radius:11px;background:#fff;
+    transition:.16s}
+  .row:hover{border-color:#CFE6F8;background:#FCFDFF;box-shadow:0 4px 14px rgba(26,29,36,.05)}
+  .row img{width:88px;height:66px;object-fit:cover;border-radius:8px;display:block;
+    background:linear-gradient(135deg,#EAF5FD,#F4F8FC)}
+  .row .tx{min-width:0}
+  .row .tt{font-size:13px;font-weight:600;color:var(--ink);line-height:1.45;
+    display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+  .row .tt a{color:inherit;text-decoration:none}
+  .row .tt a:hover{color:var(--blue-d)}
+  .row .sub{font-size:11.5px;color:var(--ink2);margin-top:2px;white-space:nowrap;
+    overflow:hidden;text-overflow:ellipsis}
+  .row .sub b{color:var(--ink);font-weight:600}
+  .row .fl{font-size:10.5px;color:var(--ink3);margin-top:1px}
+  .row .pr{text-align:right;flex:none;padding-left:4px}
+  .row .pr .pp{font-size:17px;font-weight:800;color:var(--red-d);line-height:1.15;
+    font-variant-numeric:tabular-nums;white-space:nowrap}
+  .row .pr .pp small{font-size:10.5px;font-weight:600;color:var(--ink3);margin-left:1px}
+  .row .pr .uu{font-size:10.5px;color:var(--ink3);white-space:nowrap;
+    font-variant-numeric:tabular-nums;margin-top:1px}
+  .empty{padding:26px 0;text-align:center;font-size:12.5px;color:var(--ink3)}
+
+  /* 统计块 */
+  .kpi{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);
+    border-top:1px solid var(--line);flex:none}
+  .kp{padding:11px 12px;background:#FDFEFF}
+  .kp .k{font-size:10.5px;font-weight:700;letter-spacing:.05em;color:var(--ink3);
+    text-transform:uppercase;margin-bottom:2px}
+  .kp .v{font-size:19px;font-weight:800;line-height:1.25;font-variant-numeric:tabular-nums}
+  .kp .v small{font-size:10.5px;font-weight:600;color:var(--ink3);margin-left:2px}
+  .kp.a{background:linear-gradient(160deg,#F4FAFE,#EAF5FD)} .kp.a .v{color:var(--blue-d)}
+  .kp.b{background:linear-gradient(160deg,#F2FBFA,#E9F9F7)} .kp.b .v{color:var(--teal-d)}
+  .kp.c{background:linear-gradient(160deg,#FFF6F8,#FFEBEE)} .kp.c .v{color:var(--red-d)}
+  .kp.d{background:linear-gradient(160deg,#FFFBF4,#FFF4E8)} .kp.d .v{color:var(--orange-d)}
+
+  /* ---------- 舞台 B：XPath 对照 ---------- */
+  .bx{display:grid;grid-template-columns:1fr 1fr;gap:0;min-height:0}
+  .stage.fs .bx{flex:1}
+  .bxL{padding:13px 15px;border-right:1px solid var(--line);min-width:0}
+  .bxR{padding:13px 15px;min-width:0;background:#FDFEFF}
+  .xt{font-size:10.5px;font-weight:700;letter-spacing:.06em;color:var(--ink3);
+    text-transform:uppercase;margin-bottom:8px}
+
+  .li3{display:flex;flex-direction:column;gap:7px}
+  .li{display:flex;gap:9px;align-items:flex-start;padding:8px 10px;border-radius:9px;
+    border:1px solid #EEF3F9;background:#fff;font-size:12px;transition:.2s}
+  .li .ix{flex:none;width:18px;height:18px;border-radius:5px;background:var(--blue-s);
+    color:var(--blue-d);font-size:10.5px;font-weight:800;display:flex;align-items:center;
+    justify-content:center;margin-top:1px}
+  .li .cc{min-width:0}
+  .li .tagm{font-family:Consolas,monospace;font-size:10.5px;color:var(--ink3)}
+  .li .ti{font-size:12px;color:var(--ink);font-weight:600;margin-top:1px;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .li.hit{border-color:var(--red);background:var(--red-s);box-shadow:0 0 0 3px rgba(232,69,95,.1)}
+  .li.hit .ix{background:var(--red);color:#fff}
+
+  .expr{margin:9px 0 11px;padding:8px 11px;border-radius:9px;font-family:Consolas,monospace;
+    font-size:11.5px;line-height:1.6;word-break:break-all}
+  .expr.a{background:var(--red-s);border:1px solid #FBD0D7;color:#8E2438}
+  .expr.b{background:var(--teal-s);border:1px solid #BFE9E3;color:#125B52}
+  .expr b{font-weight:800}
+  .expr .cm{color:var(--ink3);font-family:inherit}
+
+  .xbtn{display:flex;gap:7px;flex-wrap:wrap}
+  .xbtn button{font-family:inherit;font-size:12px;padding:6px 13px;border-radius:9px;
+    cursor:pointer;border:1px solid var(--line);background:#fff;color:var(--ink2);
+    transition:.18s;font-weight:600}
+  .xbtn button:hover{border-color:#BFDDF4;color:var(--blue-d);background:var(--blue-s)}
+  .xbtn button.on{background:var(--ink);border-color:var(--ink);color:#fff}
+
+  .res{margin-top:9px;display:flex;flex-direction:column;gap:6px}
+  .rr{display:flex;gap:8px;align-items:center;padding:7px 10px;border-radius:8px;
+    font-size:12px;background:#fff;border:1px solid #EEF3F9}
+  .rr .no{flex:none;font-size:10px;font-weight:800;color:var(--ink3);width:14px}
+  .rr .vv{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .rr .mk{flex:none;font-size:10.5px;font-weight:800;padding:1px 7px;border-radius:999px}
+  .rr.bad{border-color:#FBD0D7;background:var(--red-s)}
+  .rr.bad .mk{background:var(--red);color:#fff}
+  .rr.bad .vv{color:#8E2438}
+  .rr.good{border-color:#BFE9E3;background:var(--teal-s)}
+  .rr.good .mk{background:var(--teal);color:#fff}
+  .rr.good .vv{color:#125B52;font-weight:600}
+
+  .vres{margin-top:10px;font-size:12px;padding:9px 11px;border-radius:9px;
+    background:var(--orange-s);border:1px solid #FFDCB3;color:#7A4A12;line-height:1.6}
+  .vres b{color:var(--orange-d)}
+
+  .hint{font-size:11px;color:var(--ink3);margin-top:9px;line-height:1.55}
+
+  /* ---------- 三个真故障 ---------- */
+  .faults{display:grid;gap:14px;margin-bottom:46px}
+  .ft{display:grid;grid-template-columns:38px 1fr;gap:13px;padding:16px 18px;
+    border-radius:14px;background:#fff;border:1px solid var(--line);
+    box-shadow:0 2px 8px rgba(26,29,36,.04)}
+  .ft .fn{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;
+    justify-content:center;font-size:15px;font-weight:800;color:#fff;flex:none}
+  .ft.f1 .fn{background:linear-gradient(135deg,#E8455F,#C9304A)}
+  .ft.f2 .fn{background:linear-gradient(135deg,#FF8A1E,#E0700F)}
+  .ft.f3 .fn{background:linear-gradient(135deg,#4FA8E8,#2E8BD0)}
+  .ft h3{font-size:15px;font-weight:700;color:var(--ink);margin-bottom:5px;line-height:1.4}
+  .ft p{font-size:13.5px;color:var(--ink2);line-height:1.68}
+  .ft p+p{margin-top:6px}
+  .ft b{color:var(--ink);font-weight:600}
+  .ft code{font-family:Consolas,Monaco,monospace;font-size:12.3px;color:var(--blue-d);
+    background:rgba(79,168,232,.13);border-radius:4px;padding:1px 5px}
+  .ft .ev{display:inline-block;margin-top:7px;font-size:11.5px;font-weight:700;
+    padding:3px 10px;border-radius:999px;background:var(--red-s);color:var(--red-d);
+    border:1px solid #FBD0D7}
+  .ft .ev.g{background:var(--teal-s);color:var(--teal-d);border-color:#BFE9E3}
+  .ft .kbd{font-family:Consolas,monospace;font-size:11.5px;background:#F3F6FA;
+    border:1px solid var(--line);border-radius:5px;padding:1px 6px;color:var(--ink2)}
+
+  /* ---------- 正文 ---------- */
+  h2{font-size:20px;color:var(--ink);margin:0 0 16px;padding-left:14px;position:relative}
   h2::before{content:"";position:absolute;left:0;top:5px;bottom:5px;width:3px;
-    border-radius:2px;background:linear-gradient(180deg,#a78bfa,#38bdf8)}
-  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:46px}
-  .card{background:rgba(255,255,255,.035);border:1px solid rgba(139,92,246,.18);
-    border-radius:13px;padding:18px 20px}
-  .card h3{font-size:14px;color:#a78bfa;margin-bottom:8px}
-  .card p{font-size:14px;color:#b3aacd;margin:0}
-  .card code{font-family:Consolas,Monaco,monospace;font-size:12.5px;color:#c9bff0;
-    background:rgba(139,92,246,.16);border-radius:4px;padding:1px 5px}
-  ul.flow{list-style:none;counter-reset:step;margin-bottom:46px}
-  ul.flow li{position:relative;padding-left:32px;margin-bottom:16px;font-size:14.5px;color:#b8afd3}
+    border-radius:2px;background:linear-gradient(180deg,var(--blue) 0%,var(--red) 100%)}
+  .sect{margin-bottom:46px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(228px,1fr));gap:14px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:13px;padding:16px 18px;
+    box-shadow:0 2px 8px rgba(26,29,36,.035)}
+  .card h3{font-size:13.5px;color:var(--blue-d);margin-bottom:7px;font-weight:700}
+  .card p{font-size:13.5px;color:var(--ink2);margin:0;line-height:1.68}
+  .card code{font-family:Consolas,Monaco,monospace;font-size:12.3px;color:var(--blue-d);
+    background:rgba(79,168,232,.13);border-radius:4px;padding:1px 5px}
+  .card b{color:var(--ink);font-weight:600}
+
+  ul.flow{list-style:none;counter-reset:step;margin-bottom:0}
+  ul.flow li{position:relative;padding-left:34px;margin-bottom:15px;font-size:14.5px;
+    color:var(--ink2);line-height:1.7}
+  ul.flow li:last-child{margin-bottom:0}
   ul.flow li::before{content:counter(step);counter-increment:step;position:absolute;left:0;top:1px;
-    width:21px;height:21px;border-radius:50%;font-size:12px;font-weight:700;color:#0d0a17;
-    text-align:center;line-height:21px;background:linear-gradient(135deg,#a78bfa,#7dd3fc)}
-  ul.flow li strong{color:#ddd6f3;font-weight:600}
-  ul.flow li code{font-family:Consolas,Monaco,monospace;font-size:12.5px;color:#c9bff0;
-    background:rgba(139,92,246,.16);border-radius:4px;padding:1px 5px}
-  .code{background:#120f1f;border:1px solid rgba(139,92,246,.2);border-radius:12px;
-    padding:18px 20px;font-family:Consolas,Monaco,monospace;font-size:13px;color:#c9d6f5;
-    overflow-x:auto;margin-bottom:46px;line-height:1.7}
-  .code .c{color:#6f6690}.code .k{color:#c4b5fd}.code .s{color:#7dd3fc}
-  .cap{font-size:12.5px;color:#6f6690;margin:-36px 0 46px}
+    width:22px;height:22px;border-radius:50%;font-size:11.5px;font-weight:800;color:#fff;
+    text-align:center;line-height:22px;
+    background:linear-gradient(135deg,var(--blue) 0%,var(--red) 130%)}
+  ul.flow li strong{color:var(--ink);font-weight:600}
+  ul.flow li code{font-family:Consolas,Monaco,monospace;font-size:12.5px;color:var(--blue-d);
+    background:rgba(79,168,232,.13);border-radius:4px;padding:1px 5px}
 
-  /* ---------- 示意图 ---------- */
-  .shots{display:grid;gap:26px;margin-bottom:46px}
-  .shot{background:rgba(255,255,255,.035);border:1px solid rgba(139,92,246,.18);
-    border-radius:14px;overflow:hidden;transition:border-color .25s,transform .25s}
-  .shot:hover{border-color:rgba(139,92,246,.42);transform:translateY(-2px)}
-  .shot img{display:block;width:100%;height:auto}
-  /* Excel 截图是白底 + 宽扁（2536×254），直接铺满会被压到 90px 高、字看不清。
-     改成：按原比例显示在可横向滚动的容器里，点击可全屏放大。 */
-  .shot-shot{background:#fff;padding:14px;border-bottom:1px solid rgba(139,92,246,.18)}
-  .shot-scroll{overflow-x:auto;overflow-y:hidden;cursor:zoom-in;
-    scrollbar-width:thin;scrollbar-color:rgba(139,92,246,.45) transparent}
-  .shot-scroll::-webkit-scrollbar{height:8px}
-  .shot-scroll::-webkit-scrollbar-track{background:rgba(139,92,246,.08);border-radius:4px}
-  .shot-scroll::-webkit-scrollbar-thumb{background:rgba(139,92,246,.45);border-radius:4px}
-  .shot-scroll img{width:auto;max-width:none;height:254px;
-    border:1px solid #d8d3e6;image-rendering:-webkit-optimize-contrast}
-  .shot-hint{display:flex;align-items:center;gap:6px;margin-top:9px;
-    font-size:11.5px;color:#8b83a8}
-  .shot-hint b{color:#c4b5fd;font-weight:600}
-
-  /* ---------- 灯箱（点击放大） ---------- */
-  .lb{position:fixed;inset:0;z-index:999;display:none;
-    background:rgba(8,5,16,.94);backdrop-filter:blur(4px);
-    align-items:center;justify-content:center;padding:32px}
-  .lb.on{display:flex}
-  .lb-inner{max-width:100%;max-height:100%;overflow:auto;background:#fff;
-    border-radius:10px;padding:18px;box-shadow:0 24px 80px rgba(0,0,0,.6)}
-  .lb-inner img{display:block;max-width:none;image-rendering:-webkit-optimize-contrast}
-  .lb-x{position:fixed;top:20px;right:26px;width:42px;height:42px;border-radius:50%;
-    background:rgba(139,92,246,.22);border:1px solid rgba(139,92,246,.5);
-    color:#e9e3ff;font-size:22px;line-height:1;cursor:pointer;
-    display:flex;align-items:center;justify-content:center;transition:background .2s}
-  .lb-x:hover{background:rgba(139,92,246,.42)}
-  .lb-tip{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);
-    font-size:12.5px;color:#a89ec9;letter-spacing:.02em}
-  .lb-tip kbd{font-family:Consolas,Monaco,monospace;font-size:11.5px;color:#c9bff0;
-    background:rgba(139,92,246,.18);border:1px solid rgba(139,92,246,.3);
-    border-radius:4px;padding:1px 6px;margin:0 2px}
-  .shot-body{padding:15px 20px 18px}
-  .shot-body h4{font-size:14.5px;color:#ddd6f3;margin-bottom:7px;font-weight:600}
-  .shot-body p{font-size:13.5px;color:#a89ec9;margin:0}
-  .shot-body code{font-family:Consolas,Monaco,monospace;font-size:12.5px;color:#c9bff0;
-    background:rgba(139,92,246,.16);border-radius:4px;padding:1px 5px}
-  .shot-num{display:inline-block;font-size:11.5px;letter-spacing:.1em;color:#8b7fc7;
-    border:1px solid rgba(139,92,246,.35);border-radius:999px;padding:2px 10px;margin-right:9px}
-  .shot-num.demo{color:#d98cb8;border-color:rgba(236,72,153,.42)}
-
-  /* ---------- 字段 / XPath 对照表 ---------- */
-  table.fields{width:100%;border-collapse:collapse;margin-bottom:46px;font-size:13.5px}
-  table.fields th{text-align:left;font-weight:600;color:#a78bfa;font-size:12.5px;
-    letter-spacing:.04em;padding:9px 12px;border-bottom:1px solid rgba(139,92,246,.3)}
-  table.fields td{padding:9px 12px;color:#b8afd3;border-bottom:1px solid rgba(139,92,246,.1);
+  /* 字段表 */
+  .tw{overflow-x:auto;-webkit-overflow-scrolling:touch;background:#fff;
+    border:1px solid var(--line);border-radius:13px}
+  table.fields{width:100%;border-collapse:collapse;font-size:13.5px;
+    background:#fff;min-width:600px}
+  table.fields th{text-align:left;font-weight:700;color:var(--blue-d);font-size:11.5px;
+    letter-spacing:.05em;padding:10px 13px;background:var(--blue-s);
+    border-bottom:1px solid #D6EAF8}
+  table.fields td{padding:9px 13px;color:var(--ink2);border-bottom:1px solid #EEF3F9;
     vertical-align:top}
-  table.fields td:first-child{color:#ddd6f3;font-weight:600;white-space:nowrap}
-  table.fields code{font-family:Consolas,Monaco,monospace;font-size:12.5px;color:#7dd3fc}
   table.fields tr:last-child td{border-bottom:none}
+  table.fields td:first-child{color:var(--ink);font-weight:600;white-space:nowrap}
+  table.fields code{font-family:Consolas,Monaco,monospace;font-size:12.3px;color:var(--ink2)}
+  table.fields td.lack code{color:var(--red-d)}
+  table.fields .warn{font-size:10.5px;font-weight:700;color:#fff;background:var(--red);
+    border-radius:999px;padding:1px 7px;margin-left:6px;vertical-align:.1em}
 
-  footer{text-align:center;font-size:13px;color:#6f6690;padding-top:36px;
-    border-top:1px solid rgba(139,92,246,.14)}
-  footer a{color:#a78bfa;text-decoration:none}
+  /* 代码块：PyCharm Darcula */
+  .code{background:#1E1F22;border:1px solid #2B2D30;border-radius:12px;
+    padding:16px 18px;font-family:Consolas,"Cascadia Code",Monaco,monospace;
+    font-size:12.8px;color:#BCBEC4;white-space:pre-wrap;word-break:break-word;
+    margin-bottom:10px;line-height:1.72;tab-size:4}
+  .code .c{color:#7A7E85}
+  .code .k{color:#CF8E6D}
+  .code .s{color:#6AAB73}
+  .code .n{color:#56A8F5}
+  .code .bad{background:rgba(232,69,95,.22);border-radius:3px;
+    box-shadow:0 0 0 1px rgba(232,69,95,.45)}
+  .cap{font-size:12.5px;color:var(--ink3);margin:0 0 0}
+
+  footer{text-align:center;font-size:13px;color:var(--ink3);padding-top:34px;
+    border-top:1px solid var(--line)}
+  footer a{color:var(--blue-d);text-decoration:none}
+  footer a:hover{text-decoration:underline}
+
+  @media(max-width:880px){
+    .aw{grid-template-columns:1fr}
+    .pages{flex-direction:row;flex-wrap:wrap;border-right:0;border-bottom:1px solid var(--line);
+      align-items:center;padding:9px 12px}
+    .pages .pt{width:100%;margin-bottom:0}
+    .pg{padding:3px 7px;font-size:10.5px}
+    .pg-note{width:100%;border-top:0;padding-top:4px;margin-top:0}
+    .bx{grid-template-columns:1fr}
+    .bxL{border-right:0;border-bottom:1px solid var(--line)}
+    .kpi{grid-template-columns:repeat(2,1fr)}
+    .stage.fs .rows{grid-template-columns:1fr}
+  }
+  @media(max-width:560px){
+    .wrap{padding:36px 16px 70px}
+    .row{grid-template-columns:70px 1fr}
+    .row img{width:70px;height:53px}
+    .row .pr{grid-column:2;text-align:left;padding-left:0}
+    .row .pr .pp{font-size:15px}
+    .ft{grid-template-columns:32px 1fr;padding:13px 14px}
+    .ft .fn{width:32px;height:32px;font-size:13px}
+  }
 </style>
 </head>
 <body>
 <div class="glow"></div>
 <div class="wrap">
-  <a class="back" href="../index.html">← 返回作品集</a>
-  <div class="num">PROJECT 16 · 数据采集</div>
+
+  <a class="back" href="../../index.html">← 返回作品集</a>
+  <div class="num">PROJECT 01 · 数据采集</div>
   <h1>贝壳二手房数据采集</h1>
-  <p class="lede">一次按「交付标准」而不是「跑通标准」做的采集：滚动懒加载要滚到底、人机验证要按类型分流、
-  字段要用相对路径取，最后交付一份<strong style="color:#ddd6f3">对方打开就能直接验收</strong>的 Excel。</p>
+  <p class="lede">这是我第一次按「交付标准」而不是「跑通标准」做的采集。为了把它讲清楚，我在
+  2026-10-26 重新访问了一次 <strong>bj.ke.com</strong> —— 结果比我记的更狠：
+  <strong>7 页请求只通了 1 页</strong>，图片列取到的 <strong>30 个网址全是同一张 1×1 的占位图</strong>。
+  下面每个数字都是刚才实测的，没有为了好看去修图改字。</p>
+
   <div class="tags">
     <span class="tag">Python</span>
     <span class="tag">DrissionPage</span>
     <span class="tag">XPath 相对定位</span>
-    <span class="tag">超级鹰验证码分流</span>
-    <span class="tag">pandas → Excel</span>
+    <span class="tag">滚动懒加载</span>
+    <span class="tag">openpyxl 插图</span>
+    <span class="tag">人机验证分流</span>
   </div>
 
-  <!-- ============ 说明：为什么没有真实运行截图 ============ -->
   <div class="notice">
-    <div class="notice-icon">ℹ️</div>
-    <div class="notice-body">
-      <b>关于本页配图：</b>这个项目的采集目标是 <code>bj.ke.com</code>，该站点现已启用人机验证，
-      当前访问只会返回<code>&lt;title&gt;CAPTCHA&lt;/title&gt;</code> 的验证页；且本项目产物（每次运行覆盖写出的 Excel）
-      未做归档保留。因此本页<b>不放运行截图</b>，改用下面的<b>字段结构示意表</b>与<b>真实代码片段</b>来说明实现方式 ——
-      我只展示能对得上源码的东西。
+    <div class="ic">◆</div>
+    <div class="bd">
+      <b>本页数据是实测的。</b>30 条房源、30 张封面、7 个 HTTP 状态码，来自 2026-10-26 11:52
+      对 <code>bj.ke.com/ershoufang/pg1/</code> 的一次真实抓取；字段用源码里那条 XPath 原样取出，
+      标题和价格一个字没改。「三个真故障」里的数字，也都能用本页给出的方法和代码复现。
     </div>
   </div>
 
-  <h2>项目背景</h2>
-  <p style="font-size:15px;color:#b8afd3;margin-bottom:46px">
-    二手房价格数据是典型的「高价值但难拿」：页面结构会调整、列表页有滚动懒加载、翻页过程中还会按频次触发人机验证。
-    更要紧的是这个需求<b>背后有一个具体的人</b>——他要的不只是一堆字段，还要求图片能直接在表格里看到。
-    所以这个项目的目标不是「脚本能跑一次」，而是把<strong style="color:#ddd6f3">「滚到底 → 过验证 → 取字段 → 存表 → 插图」这条链路做稳</strong>，
-    并且<b>交付物的格式要能让对方一眼验收</b>。
-  </p>
+  <!-- ==================================================
+       舞台 A · 真实抓取结果
+       ================================================== -->
+  <div class="stage" id="stA">
+    <div class="bar">
+      <div class="dots"><i></i><i></i><i></i></div>
+      <div class="bt">bj.ke.com/ershoufang/pg1/ · 200 OK · 30 条</div>
+      <div class="sp"></div>
+      <span class="badge">LIVE 实测数据</span>
+      <button class="fsbtn" data-fs="stA">全屏 ↗</button>
+    </div>
 
-  <h2>字段结构与定位方式</h2>
-  <table class="fields">
-    <thead>
-      <tr><th>字段名</th><th>XPath 相对路径（从每条 <code>li</code> 出发）</th><th>取法</th></tr>
-    </thead>
-    <tbody>
-      <tr><td>标题</td><td><code>.//div[@class="title"]/a</code></td><td>文本</td></tr>
-      <tr><td>地址</td><td><code>.//div[@class="positionInfo"]/a</code></td><td>文本</td></tr>
-      <tr><td>描述</td><td><code>.//div[@class="houseInfo"]</code></td><td>文本</td></tr>
-      <tr><td>总价</td><td><code>.//div[@class="totalPrice totalPrice2"]/span</code></td><td>文本</td></tr>
-      <tr><td>单价</td><td><code>.//div[@class="unitPrice"]/span</code></td><td>文本</td></tr>
-      <tr><td>关注度</td><td><code>.//div[@class="followInfo"]</code></td><td>文本</td></tr>
-      <tr><td>详情网址</td><td><code>./a</code></td><td><code>.attr('href')</code></td></tr>
-      <tr><td>图片网址</td><td><code>.//img[@class="lj-lazy"]</code></td><td><code>.attr('src')</code></td></tr>
-    </tbody>
-  </table>
+    <div class="aw">
+      <aside class="pages">
+        <div class="pt">7 页请求</div>
+        <div class="pg ok"><span>pg1</span><span class="pc">200</span></div>
+        <div class="pg bad"><span>pg2</span><span class="pc">302</span></div>
+        <div class="pg bad"><span>pg3</span><span class="pc">302</span></div>
+        <div class="pg bad"><span>pg4</span><span class="pc">302</span></div>
+        <div class="pg bad"><span>pg5</span><span class="pc">302</span></div>
+        <div class="pg bad"><span>pg6</span><span class="pc">302</span></div>
+        <div class="pg bad"><span>pg7</span><span class="pc">302</span></div>
+        <div class="pg-note">302 全部跳向<br><b>hip.ke.com/captcha</b></div>
+      </aside>
 
-  <div class="shots">
-    <div class="shot">
-      <div class="shot-shot">
-        <div class="shot-scroll" id="a6Shot" role="button" tabindex="0"
-             aria-label="点击放大查看交付表结构示意图">
-          <img src="shots/01-交付表结构示意.png"
-               alt="交付表字段结构示意：Excel 中 A1:H7 共 8 个字段的表格视图">
+      <div class="amain">
+        <div class="tools">
+          <div class="srch">
+            <span>⌕</span>
+            <input id="q" type="search" placeholder="搜小区名 / 标题（如 永铁苑）" autocomplete="off">
+          </div>
+          <div class="chips" id="chips">
+            <button class="chip on" data-room="all">全部 30</button>
+            <button class="chip" data-room="1室1厅">1室</button>
+            <button class="chip" data-room="2室1厅">2室1厅</button>
+            <button class="chip" data-room="2室2厅">2室2厅</button>
+            <button class="chip" data-room="3室1厅">3室1厅</button>
+            <button class="chip" data-room="3室2厅">3室2厅</button>
+            <button class="chip" data-room="4室2厅">4室2厅</button>
+          </div>
+          <select class="sel" id="sort">
+            <option value="n">抓取顺序</option>
+            <option value="pd">总价 低→高</option>
+            <option value="pu">总价 高→低</option>
+            <option value="uu">单价 高→低</option>
+            <option value="ff">关注 多→少</option>
+          </select>
         </div>
-        <div class="shot-hint">
-          <span>↔</span>
-          <span>表格较宽，可<b>横向滚动</b>；点击图片<b>全屏放大</b></span>
+
+        <div class="list" id="list"><div class="rows" id="rows"></div></div>
+      </div>
+    </div>
+
+    <div class="kpi">
+      <div class="kp a"><div class="k">抓到条数</div><div class="v" id="k1">30<small>条</small></div></div>
+      <div class="kp b"><div class="k">总价区间</div><div class="v" id="k2">139–1260<small>万</small></div></div>
+      <div class="kp c"><div class="k">单价起</div><div class="v" id="k3">13,213<small>元/平</small></div></div>
+      <div class="kp d"><div class="k">累计关注</div><div class="v" id="k4">2,861<small>人</small></div></div>
+    </div>
+  </div>
+  <p class="cap" style="margin-bottom:40px">点缩略图右上角的「全屏」可以铺满屏看；搜索框、户型 chip、排序都是实时在 30 条真数据上过滤，不是摆样子。</p>
+
+  <!-- ==================================================
+       舞台 B · 两条 XPath 现场跑
+       ================================================== -->
+  <div class="stage" id="stB">
+    <div class="bar">
+      <div class="dots"><i></i><i></i><i></i></div>
+      <div class="bt">XPath 现场对照 · document.evaluate() 真跑</div>
+      <div class="sp"></div>
+      <span class="badge">LIVE 浏览器原生引擎</span>
+      <button class="fsbtn" data-fs="stB">全屏 ↗</button>
+    </div>
+
+    <div class="bx">
+      <div class="bxL">
+        <div class="xt">文档里有 3 条 li，现在是拿「第 N 条」当上下文</div>
+        <div class="li3" id="li3">
+          <div class="li" data-i="1">
+            <div class="ix">1</div>
+            <div class="cc"><div class="tagm">&lt;li class="clear"&gt;</div>
+              <div class="ti">新景家园东区南北通透双阳台高楼层</div></div>
+          </div>
+          <div class="li" data-i="2">
+            <div class="ix">2</div>
+            <div class="cc"><div class="tagm">&lt;li class="clear"&gt;</div>
+              <div class="ti">兴海家园星苑 满五唯一 交通便利 配套齐全</div></div>
+          </div>
+          <div class="li" data-i="3">
+            <div class="ix">3</div>
+            <div class="cc"><div class="tagm">&lt;li class="clear"&gt;</div>
+              <div class="ti">红莲南路6号院东南两居室 满五年唯一</div></div>
+          </div>
+        </div>
+
+        <div class="expr a"><b>绝对路径</b> //div[@class="title"]/a
+          <span class="cm"> ← 双斜杠从文档根开始，上下文被忽略</span></div>
+        <div class="expr b"><b>相对路径</b> .//div[@class="title"]/a
+          <span class="cm"> ← 一个点表示「从当前节点往下」</span></div>
+
+        <div class="xbtn">
+          <button id="btnAbs">跑绝对路径</button>
+          <button id="btnRel" class="on">跑相对路径</button>
+          <button id="btnBoth">两个一起跑</button>
+        </div>
+
+        <div class="hint">这 3 条 li 是页面里真实的 DOM 节点，表达式交给浏览器自己的
+          <b>document.evaluate()</b> 执行 —— 不是我用 JS 模拟出来的结果。</div>
+      </div>
+
+      <div class="bxR">
+        <div class="xt">取到的「标题」</div>
+        <div class="res" id="res">
+          <div class="rr"><div class="no">1</div><div class="vv">—</div><div class="mk">—</div></div>
+          <div class="rr"><div class="no">2</div><div class="vv">—</div><div class="mk">—</div></div>
+          <div class="rr"><div class="no">3</div><div class="vv">—</div><div class="mk">—</div></div>
+        </div>
+        <div class="vres" id="vres">还没跑。点左边的按钮，或者等它自己跑一遍。</div>
+      </div>
+    </div>
+  </div>
+  <p class="cap" style="margin-bottom:44px">绝对路径下三条取回来的是同一个标题 —— 这就是「第二条的标题串到第一条上」的真实原因，
+  跟手抖、跟网速都没关系，是 XPath 的语义。</p>
+
+  <!-- ==================================================
+       三个真故障
+       ================================================== -->
+  <div class="sect">
+    <h2>三个真故障（都能复现）</h2>
+    <div class="faults">
+
+      <div class="ft f1">
+        <div class="fn">1</div>
+        <div>
+          <h3>图片列取的是占位图：30 个网址，同一个 1×1 像素</h3>
+          <p>源码里这一行：<code>li.ele('xpath:.//img[@class="lj-lazy"]').attr('src')</code>。
+          实测 30 条<b>全部</b>返回同一个地址 <code>…/common/blank.gif</code> —— 下载下来是
+          <b>42 字节、1×1 像素</b>的透明图。真图地址其实在 <code>data-original</code> 属性里。</p>
+          <p>原因不是「滚得太快」，是<b>取错了属性</b>：懒加载的机制是先给 <code>src</code> 一个占位，
+          等图片滚进视口、由页面脚本把真地址写进 <code>src</code>。脚本没跑或没跑完，<code>src</code> 永远是占位。</p>
+          <p>后果是连锁的：后面 <code>add_images_to_excel</code> 会把同一张 1×1 图下载 30 次，
+          Excel 的 H 列看起来塞满了，实际是 30 个白点。</p>
+          <span class="ev">实测 30/30 条 src = blank.gif</span>
         </div>
       </div>
-      <div class="shot-body">
-        <h4><span class="shot-num demo">示意</span>交付物长什么样：8 个字段的表格视图</h4>
-        <p><b>此图为字段结构示意，非真实采集结果</b>——表内数据是为展示列宽与字段顺序而构造的示例值，
-        不是从任何网站采集到的真实房源。它想说明的是<b>交付形态</b>：8 列字段（标题 / 地址 / 描述 / 总价 / 单价 / 关注度 / 详情网址 / 图片网址）
-        一次落成表格，图片列随后会被替换为嵌入图片，对方打开就能逐行核对。</p>
+
+      <div class="ft f2">
+        <div class="fn">2</div>
+        <div>
+          <h3>列表写在循环里：7 页 210 条，最后只剩 30 条</h3>
+          <p><code>all_data = []</code> 被写在了 <code>for i in range(1,8)</code> 的<b>内部</b>，
+          每翻一页就清空一次。所以前面 6 页抓到的数据在下一页开始时就没了，最后一页覆盖全场。</p>
+          <p>按这段结构复现：循环结束时 <code>len(all_data) == 30</code>，第一条是第 7 页的第一条。
+          也就是说 <b>180 条被丢掉了</b>，而程序一句错都不报 —— 它看起来是「跑成功了」。</p>
+          <span class="ev">复现：7×30 → 30</span>
+        </div>
       </div>
+
+      <div class="ft f3">
+        <div class="fn">3</div>
+        <div>
+          <h3>翻到第 2 页就撞人机验证，第 1 页却是好的</h3>
+          <p>实测状态码：<code>pg1</code> → <b>200</b>（228 KB，30 条房源）；<code>pg2</code>～<code>pg7</code>
+          → <b>302</b>，全部跳到 <code>hip.ke.com/captcha</code>。</p>
+          <p>所以验证码不是「随时会出现」，而是<b>卡在翻页这个动作上</b>。这一点源码里的顺序是对的：
+          <code>crack_captcha(page)</code> 就写在 <code>page.get()</code> 之后、取字段之前，每页过一次。</p>
+          <span class="ev g">这一层处理是对的</span>
+        </div>
+      </div>
+
     </div>
   </div>
 
-  <!-- 灯箱：点图放大 -->
-  <div class="lb" id="a6Lightbox" role="dialog" aria-modal="true" aria-label="交付表结构示意（放大）">
-    <button class="lb-x" id="a6LbClose" aria-label="关闭">✕</button>
-    <div class="lb-inner">
-      <img id="a6LbImg" src="shots/01-交付表结构示意.png" alt="">
-    </div>
-    <div class="lb-tip">按 <kbd>Esc</kbd> 或点击空白处关闭 · 按住 <kbd>Ctrl</kbd> 滚轮可缩放</div>
+  <!-- ==================================================
+       字段结构
+       ================================================== -->
+  <div class="sect">
+    <h2>字段结构与定位方式</h2>
+    <div class="tw"><table class="fields">
+      <thead>
+        <tr><th>字段名</th><th>XPath（从当前那条 li 出发）</th><th>取法</th><th>本次实测</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>标题</td><td><code>.//div[@class="title"]/a</code></td><td>文本</td><td>30/30</td></tr>
+        <tr><td>地址</td><td><code>.//div[@class="positionInfo"]/a</code></td><td>文本</td><td>30/30</td></tr>
+        <tr><td>描述</td><td><code>.//div[@class="houseInfo"]</code></td><td>文本</td><td>30/30（17 条没有年份）</td></tr>
+        <tr><td>总价</td><td><code>.//div[@class="totalPrice totalPrice2"]/span</code></td><td>文本（万）</td><td>30/30</td></tr>
+        <tr><td>单价</td><td><code>.//div[@class="unitPrice"]/span</code></td><td>文本（元/平）</td><td>30/30</td></tr>
+        <tr><td>关注度</td><td><code>.//div[@class="followInfo"]</code></td><td>文本</td><td>30/30</td></tr>
+        <tr><td>详情网址</td><td><code>./a</code></td><td><code>.attr('href')</code></td><td>30/30</td></tr>
+        <tr class="lack"><td>图片网址<span class="warn">取错了</span></td>
+          <td><code>.//img[@class="lj-lazy"]</code></td>
+          <td><code>.attr('src')</code> → 应取 <code>data-original</code></td>
+          <td>0/30 有效</td></tr>
+      </tbody>
+    </table></div>
+    <p class="cap" style="margin-top:12px">这张表是真的对过一遍的：8 个字段里 7 个一次取到，
+    只有图片那一列全军覆没 —— 而它在列表里长得最像「能取到」。</p>
   </div>
 
-  <h2>技术要点</h2>
-  <div class="grid">
-    <div class="card">
-      <h3>「滚到底」不靠猜次数</h3>
-      <p>没用固定的 <code>range(50)</code>，而是每次滚 500px 后<b>比较滚动前后的纵向位置</b>，位置不再变化才 <code>break</code>。
-      网络慢的时候也不会漏数据。</p>
-    </div>
-    <div class="card">
-      <h3>相对路径而非绝对路径</h3>
-      <p>每个字段都从当前那条房源 <code>li</code> 用 <code>.//</code> 往下找。
-      用整页绝对路径的话，第二条的标题会串到第一条上。</p>
-    </div>
-    <div class="card">
-      <h3>验证码按类型分流</h3>
-      <p>单一滑块方案应付不了所有情况：图形点选类走「按图片顺序点击」的解法，滑块类走拖拽轨迹，
-      封装成独立 <code>tools</code> 模块，主流程只负责调用与重试。</p>
-    </div>
-    <div class="card">
-      <h3>图片真的"进到"表格里</h3>
-      <p>只把图片链接写进单元格不算交付。单独一步下载图片并<b>插入对应单元格</b>，
-      同时调列宽与行高，否则图片会盖住相邻格子。</p>
-    </div>
-    <div class="card">
-      <h3>交付流程本身就是设计</h3>
-      <p>动工前先问清四件事：要多少条、要不要图片、页面结构复不复杂、有没有反爬。
-      先发一份<b>样例截图 + 列名</b>让对方确认格式，确认后才出全量——避免返工成本全落在自己身上。</p>
-    </div>
-    <div class="card">
-      <h3>做完显式关闭浏览器</h3>
-      <p>采集结束调 <code>page.quit()</code>。不关的话进程会一直挂着，白占资源。</p>
-    </div>
+  <!-- ==================================================
+       执行流程
+       ================================================== -->
+  <div class="sect">
+    <h2>执行流程</h2>
+    <ul class="flow">
+      <li><strong>翻页请求</strong> — 按 <code>/ershoufang/pg{i}/</code> 循环取页，每页之间留间隔，不并发。</li>
+      <li><strong>验证码分流</strong> — 每页进正文前过一次 <code>crack_captcha(page)</code>，按验证类型选择解法：
+        图形点选走「按图片顺序点击」，滑块走拖拽轨迹，主流程只负责调用和重试。</li>
+      <li><strong>滚动加载</strong> — 每次下滚 500px 并留 0.3s 给图片加载，<b>比较滚动前后的纵向位置</b>，
+        位置不再变化才 <code>break</code>。这次实测页面高 8777px、视口 923px，约 16 次到底。</li>
+      <li><strong>相对路径取字段</strong> — 定位 <code>ul.sellListContent</code> 下所有房源 <code>li</code>，
+        逐条用 <code>.//</code> 往下找 8 个字段。</li>
+      <li><strong>落表并插图</strong> — <code>pandas.DataFrame</code> 写出 Excel，再调
+        <code>add_images_to_excel</code> 把图片嵌进单元格，同时调列宽行高，否则图会盖住邻居。</li>
+    </ul>
   </div>
 
-  <h2>执行流程</h2>
-  <ul class="flow">
-    <li><strong>打开列表页</strong> — <code>DrissionPage</code> 启动浏览器，按页码循环访问 <code>/ershoufang/pg{i}/</code>。</li>
-    <li><strong>验证码分流</strong> — 每一页进正文前先过一次 <code>crack_captcha(page)</code>，按验证类型选择解法。</li>
-    <li><strong>滚动加载</strong> — 每次下滚 500px 并留 0.3s 给图片加载，直到纵向位置不再变化。</li>
-    <li><strong>相对路径取字段</strong> — 定位 <code>ul.sellListContent</code> 下所有房源 <code>li</code>，逐条用相对路径取 8 个字段。</li>
-    <li><strong>落表并插图</strong> — <code>pandas.DataFrame</code> 一次性写出 Excel，再调 <code>add_images_to_excel</code> 把图片列嵌入表格。</li>
-  </ul>
-
-  <h2>关键代码结构</h2>
-  <div class="code">
-<span class="c"># 贝壳二手房数据获取.py —— 滚动到底判断 + 相对路径取字段（真实写法）</span>
+  <!-- ==================================================
+       代码
+       ================================================== -->
+  <div class="sect">
+    <h2>关键代码</h2>
+    <div class="code"><span class="c"># 滚动到底判断 + 相对路径取字段（源码原样，两处标红的后面再说）</span>
 <span class="k">from</span> DrissionPage <span class="k">import</span> ChromiumPage
 <span class="k">import</span> pandas
 <span class="k">from</span> tools.add_image <span class="k">import</span> add_images_to_excel
 <span class="k">from</span> tools.captcha_solver <span class="k">import</span> crack_captcha
 
 page = ChromiumPage()
-<span class="k">for</span> i <span class="k">in</span> <span class="k">range</span>(<span class="s">1, 8</span>):                      <span class="c"># 共 7 页</span>
+<span class="k">for</span> i <span class="k">in</span> <span class="n">range</span>(<span class="s">1, 8</span>):
     page.get(<span class="s">f'https://bj.ke.com/ershoufang/pg{i}/'</span>)
     crack_captcha(page)                 <span class="c"># 人机验证按类型分流</span>
     page.wait(<span class="s">2</span>)
 
+    <span class="bad">    all_data = []</span>                 <span class="c"># ← 故障 2：写在了循环里</span>
+
     <span class="c"># 滚到底：比较滚动前后的纵向位置，位置不变才说明到底</span>
-    <span class="k">for</span> _ <span class="k">in</span> <span class="k">range</span>(<span class="s">30</span>):
+    <span class="k">for</span> _ <span class="k">in</span> <span class="n">range</span>(<span class="s">30</span>):
         height = page.rect.scroll_position[<span class="s">1</span>]
         page.scroll.down(<span class="s">500</span>)
         time.sleep(<span class="s">0.3</span>)                  <span class="c"># 给图片留加载时间</span>
@@ -291,44 +623,46 @@ page = ChromiumPage()
         info = {
             <span class="s">"标题"</span>: li.ele(<span class="s">'xpath:.//div[@class="title"]/a'</span>).text,
             <span class="s">"总价"</span>: li.ele(<span class="s">'xpath:.//div[@class="totalPrice totalPrice2"]/span'</span>).text,
-            <span class="s">"图片网址"</span>: li.ele(<span class="s">'xpath:.//img[@class="lj-lazy"]'</span>).attr(<span class="s">'src'</span>),
-            <span class="c"># ... 共 8 个字段</span>
+            <span class="bad">"图片网址": li.ele('xpath:.//img[@class="lj-lazy"]').attr('src'),</span>
+            <span class="c"># ↑ 故障 1：src 是占位图，真地址在 data-original</span>
         }
         all_data.append(info)
 page.quit()
 
 df = pandas.DataFrame(all_data)
 df.to_excel(<span class="s">'终版交付.xlsx'</span>, index=<span class="k">False</span>)
-add_images_to_excel(<span class="s">'终版交付.xlsx'</span>, df[<span class="s">'图片网址'</span>], <span class="s">'H'</span>)
-  </div>
-  <p class="cap">两个点值得看：<code>if height == page.rect.scroll_position[1]: break</code> 是「滚到底」的判据；
-  字段全部从 <code>li</code> 用 <code>.//</code> 相对定位，这是不串行的关键。</p>
-
-  <h2>踩过的坑</h2>
-  <div class="grid">
-    <div class="card">
-      <h3>滚太快会抓到空图</h3>
-      <p>懒加载图片没载完就取 <code>src</code>，拿到的可能是占位图。留出加载时间比事后补数据划算。</p>
-    </div>
-    <div class="card">
-      <h3>只存链接不算交付</h3>
-      <p>把图片链接写进单元格，对方还要自己一张张点开——这不叫交付。图片要真的嵌进表里。</p>
-    </div>
-    <div class="card">
-      <h3>先确认格式再出全量</h3>
-      <p>样例和列名发过去确认，比做完再返工省事得多。这一步是流程设计，不只是技术。</p>
-    </div>
+add_images_to_excel(<span class="s">'终版交付.xlsx'</span>, df[<span class="s">'图片网址'</span>], <span class="s">'H'</span>)</div>
+    <p class="cap">两个点值得看：<code>if height == page.rect.scroll_position[1]: break</code> 是「滚到底」的判据，
+    不看次数看位置；字段全部从 <code>li</code> 用 <code>.//</code> 相对定位，这是不串行的关键。
+    标红的两行是后来才发现的 —— 代码跑完不报错，数据也能落表，但落下来的东西是错的。</p>
   </div>
 
-  <h2>这个项目教了我什么</h2>
-  <div class="grid">
-    <div class="card">
-      <h3>稳定 &gt; 跑通</h3>
-      <p>「能跑一次」和「能重复跑」是两件事。滚动判断、验证码分流、显式关浏览器，都是在补稳定性。</p>
-    </div>
-    <div class="card">
-      <h3>交付物是设计出来的</h3>
-      <p>需求阶段问清四件事、样例先过审、文件名直接叫「终版交付」—— 对方打开就能验收，这才叫完成。</p>
+  <!-- ==================================================
+       学到了什么
+       ================================================== -->
+  <div class="sect">
+    <h2>这个项目教了我什么</h2>
+    <div class="grid">
+      <div class="card">
+        <h3>不报错 ≠ 对</h3>
+        <p>三个故障没有一个抛出异常。程序照常退出、照常生成 xlsx、照常有 30 行 —— 但图片是白点、
+        180 条数据是假的缺失。<b>交付前必须去表里看一眼实际内容</b>，不能只看「跑完了」。</p>
+      </div>
+      <div class="card">
+        <h3>字段要验值，不是验有无</h3>
+        <p>取到值不等于取对值。图片那一列 30/30「取到了」，值却全是同一张占位图。
+        判据应该是<b>这一列的值有没有出现过 30 次重合</b>，而不是空不空。</p>
+      </div>
+      <div class="card">
+        <h3>交付物是设计出来的</h3>
+        <p>动工前先问清四件事：要多少条、要不要图片、页面结构复不复杂、有没有反爬；
+        先把样例截图和列名发过去确认，再出全量 —— 返工成本不该全落在自己身上。</p>
+      </div>
+      <div class="card">
+        <h3>稳定性写在判据里</h3>
+        <p>滚到底靠「位置不变」而不是 <code>range(50)</code>，验证码靠类型分流而不是单一滑块，
+        采完显式 <code>page.quit()</code> —— 这三处都不是功能，是稳定性。</p>
+      </div>
     </div>
   </div>
 
@@ -339,52 +673,199 @@ add_images_to_excel(<span class="s">'终版交付.xlsx'</span>, df[<span class="
 </div>
 
 <script>
-/* 交付表示意图：点击放大（自包含灯箱，不依赖任何外部库——避免 CDN 挂了整页失效） */
+var DATA = [{"n":1,"t":"新景家园东区南北通透双阳台高楼层","a":"新景家园东区","room":"2室1厅","area":76.15,"yr":0,"floor":"高楼层","face":"南 北","p":628,"u":82469,"f":86,"h":"https://bj.ke.com/ershoufang/101133448079.html"},{"n":2,"t":"兴海家园星苑 满五唯一 交通便利 配套齐全","a":"兴海家园星苑","room":"2室1厅","area":83.02,"yr":0,"floor":"底层","face":"南 北","p":288,"u":34691,"f":92,"h":"https://bj.ke.com/ershoufang/101133420604.html"},{"n":3,"t":"红莲南路6号院东南两居室 满五年唯一","a":"乐城","room":"2室1厅","area":92.64,"yr":2004,"floor":"高楼层","face":"东南","p":558,"u":60234,"f":48,"h":"https://bj.ke.com/ershoufang/101133406390.html"},{"n":4,"t":"次顶层视野开阔 精装品质大宅 双主卧设计 满五唯一","a":"华润公元九里","room":"4室2厅","area":216.4,"yr":2012,"floor":"高楼层","face":"南 北","p":968,"u":44732,"f":57,"h":"https://bj.ke.com/ershoufang/101133316548.html"},{"n":5,"t":"永铁苑 西南两居客厅带阳台满五唯一","a":"永铁苑","room":"2室1厅","area":85.11,"yr":0,"floor":"中楼层","face":"西南","p":450,"u":52873,"f":63,"h":"https://bj.ke.com/ershoufang/101133284844.html"},{"n":6,"t":"永康胡同1号院 小户型1居 满5唯1 看房方便","a":"永康胡同1号院","room":"1室1厅","area":44.9,"yr":0,"floor":"底层","face":"西南","p":440,"u":97996,"f":38,"h":"https://bj.ke.com/ershoufang/101133663121.html"},{"n":7,"t":"南沙滩小区优质两居好房源，半地下采光很好，价格合适","a":"南沙滩小区","room":"2室1厅","area":69.87,"yr":1997,"floor":"地下室","face":"南 北","p":210,"u":30056,"f":75,"h":"https://bj.ke.com/ershoufang/101133597606.html"},{"n":8,"t":"满五唯一拎包入住，产权清晰，楼层好，景观好。","a":"北京华侨城2号院","room":"2室2厅","area":100.29,"yr":2006,"floor":"高楼层","face":"东 西","p":550,"u":54841,"f":77,"h":"https://bj.ke.com/ershoufang/101133523886.html"},{"n":9,"t":"永泰西里 南北通透中间层 满五唯一 拎包入住采光好","a":"永泰西里","room":"2室1厅","area":60.0,"yr":0,"floor":"中楼层","face":"南 北","p":316,"u":52667,"f":67,"h":"https://bj.ke.com/ershoufang/101133518235.html"},{"n":10,"t":"阳光新干线双卫两居室，全南向采光充足，看房方便","a":"阳光新干线","room":"2室1厅","area":103.78,"yr":2003,"floor":"低楼层","face":"南","p":758,"u":73040,"f":129,"h":"https://bj.ke.com/ershoufang/101133497850.html"},{"n":11,"t":"媒体村 天畅园 全南向 带阳台 两居室","a":"天畅园","room":"2室1厅","area":126.08,"yr":2008,"floor":"中楼层","face":"南","p":690,"u":54728,"f":118,"h":"https://bj.ke.com/ershoufang/101133444497.html"},{"n":12,"t":"白广路6号院南北通透两居室全明格局中间层满五央产房","a":"白广路6号院","room":"2室1厅","area":72.72,"yr":0,"floor":"中楼层","face":"南 北","p":495,"u":68070,"f":196,"h":"https://bj.ke.com/ershoufang/101133441788.html"},{"n":13,"t":"东城区二环里体育局分房人车分流电梯直达满五唯一","a":"东四块玉南街4号院","room":"3室2厅","area":154.79,"yr":0,"floor":"中楼层","face":"东 西","p":1260,"u":81401,"f":74,"h":"https://bj.ke.com/ershoufang/101133440929.html"},{"n":14,"t":"明厨明卫 视野采光无遮挡 满五","a":"国美第一城2号院","room":"3室2厅","area":129.77,"yr":2006,"floor":"高楼层","face":"西南","p":585,"u":45080,"f":187,"h":"https://bj.ke.com/ershoufang/101133430835.html"},{"n":15,"t":"此房满五唯一 南北通透 楼层好","a":"万科幸福汇","room":"3室1厅","area":95.71,"yr":2016,"floor":"中楼层","face":"南 北","p":139,"u":14524,"f":126,"h":"https://bj.ke.com/ershoufang/101133419041.html"},{"n":16,"t":"裕中东里 板楼中间层三居室 带大客厅 小区改造完成","a":"裕中东里","room":"3室1厅","area":71.7,"yr":0,"floor":"中楼层","face":"南 北","p":895,"u":124826,"f":98,"h":"https://bj.ke.com/ershoufang/101133413993.html"},{"n":17,"t":"瑞雪春堂二里南北通透三居大阳台大飘窗好视野精装修","a":"瑞雪春堂","room":"3室1厅","area":119.83,"yr":0,"floor":"高楼层","face":"南 北","p":255,"u":21281,"f":46,"h":"https://bj.ke.com/ershoufang/101133370821.html"},{"n":18,"t":"新四区四层 采光好 视野好 观景房 装修保养好","a":"冠城大通百旺府","room":"3室2厅","area":130.25,"yr":2024,"floor":"中楼层","face":"南 北","p":1050,"u":80615,"f":201,"h":"https://bj.ke.com/ershoufang/101133340493.html"},{"n":19,"t":"前门西大街 2室1厅 南 北","a":"前门西大街","room":"2室1厅","area":56.99,"yr":0,"floor":"中楼层","face":"南 北","p":520,"u":91245,"f":26,"h":"https://bj.ke.com/ershoufang/101133315384.html"},{"n":20,"t":"未来科学城 北七家 花园洋房四居 中间位置 精装修","a":"金色漫香苑","room":"4室2厅","area":186.76,"yr":0,"floor":"中楼层","face":"南 北","p":632,"u":33841,"f":103,"h":"https://bj.ke.com/ershoufang/101133311865.html"},{"n":21,"t":"大成郡中间位置正看花园，二次精装修南北三居","a":"大成郡","room":"3室2厅","area":136.38,"yr":0,"floor":"中楼层","face":"南 北","p":1200,"u":87990,"f":59,"h":"https://bj.ke.com/ershoufang/101133311348.html"},{"n":22,"t":"贵园南里甲区静逸好楼层，南北通透采光好，满五唯一","a":"贵园南里甲区","room":"3室1厅","area":101.83,"yr":0,"floor":"中楼层","face":"南 北","p":420,"u":41246,"f":83,"h":"https://bj.ke.com/ershoufang/101133304936.html"},{"n":23,"t":"户型方正 全明格局 南北通透 客厅朝南带阳台 卫生","a":"宜山居","room":"2室2厅","area":82.91,"yr":0,"floor":"中楼层","face":"南 北","p":240,"u":28948,"f":86,"h":"https://bj.ke.com/ershoufang/101133283695.html"},{"n":24,"t":"烟树园 1室1厅 东","a":"烟树园","room":"1室1厅","area":63.26,"yr":2003,"floor":"高楼层","face":"东","p":450,"u":71135,"f":41,"h":"https://bj.ke.com/ershoufang/101133279687.html"},{"n":25,"t":"奥森公园一路之隔林萃路10号院，好楼层，装修特好","a":"林萃路10号院","room":"2室1厅","area":60.43,"yr":1996,"floor":"低楼层","face":"南 北","p":360,"u":59574,"f":155,"h":"https://bj.ke.com/ershoufang/101133263489.html"},{"n":26,"t":"坝鑫家园 南向两居室 一层 出入方便 诚意出售","a":"坝鑫家园","room":"2室2厅","area":82.07,"yr":2013,"floor":"底层","face":"南","p":236,"u":28756,"f":236,"h":"https://bj.ke.com/ershoufang/101133246608.html"},{"n":27,"t":"碧兴园 满五唯一 精装双卫 视野开阔 小2居","a":"碧兴园","room":"2室1厅","area":71.12,"yr":0,"floor":"高楼层","face":"南","p":536,"u":75366,"f":138,"h":"https://bj.ke.com/ershoufang/101133240953.html"},{"n":28,"t":"北航南门 知春嘉园西南两居室 满五唯一 随时看房","a":"知春嘉园","room":"2室1厅","area":72.4,"yr":0,"floor":"中楼层","face":"西南","p":608,"u":83978,"f":32,"h":"https://bj.ke.com/ershoufang/101133195673.html"},{"n":29,"t":"悦廷 南北通透 两居室 满五唯一 高楼层 采光好","a":"悦廷","room":"2室1厅","area":93.59,"yr":0,"floor":"高楼层","face":"南 北","p":545,"u":58233,"f":57,"h":"https://bj.ke.com/ershoufang/101133194259.html"},{"n":30,"t":"当代采育满庭春MOMA 中高楼层 南北通透 大三居","a":"当代采育满庭春MOMA","room":"3室1厅","area":120.34,"yr":2015,"floor":"中楼层","face":"南 北","p":159,"u":13213,"f":67,"h":"https://bj.ke.com/ershoufang/101133189174.html"}];
+
 (function () {
-  var trigger = document.getElementById('a6Shot');
-  var box     = document.getElementById('a6Lightbox');
-  var closeBtn= document.getElementById('a6LbClose');
-  if (!trigger || !box) return;
+  'use strict';
 
-  var lastFocus = null;
+  /* ============================================================
+     舞台 A：列表渲染 + 搜索 + 户型 + 排序
+     ============================================================ */
+  var rowsEl = document.getElementById('rows');
+  var qEl    = document.getElementById('q');
+  var sortEl = document.getElementById('sort');
+  var chipsEl= document.getElementById('chips');
+  var curRoom = 'all';
 
-  function open() {
-    lastFocus = document.activeElement;
-    box.classList.add('on');
-    document.body.style.overflow = 'hidden';   // 锁住背景滚动
-    // 放大后按原始像素显示，超出屏幕则靠 .lb-inner 的 auto 滚动
-    var im = document.getElementById('a6LbImg');
-    im.style.width = im.naturalWidth + 'px';
-    closeBtn.focus();
-  }
+  function fmt(n) { return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
 
-  function close() {
-    box.classList.remove('on');
-    document.body.style.overflow = '';
-    if (lastFocus && lastFocus.focus) lastFocus.focus();  // 焦点还给触发元素（无障碍）
-  }
-
-  trigger.addEventListener('click', open);
-  trigger.addEventListener('keydown', function (e) {
-    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); }
-  });
-
-  closeBtn.addEventListener('click', close);
-  // 点空白处关闭（点图片本身不关）
-  box.addEventListener('click', function (e) {
-    if (e.target === box) close();
-  });
-  document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape' && box.classList.contains('on')) close();
-  });
-
-  // 图片还没加载完就点开时，naturalWidth 是 0 —— 加载完再补一次宽度
-  var lbImg = document.getElementById('a6LbImg');
-  if (lbImg && !lbImg.complete) {
-    lbImg.addEventListener('load', function () {
-      if (box.classList.contains('on')) lbImg.style.width = lbImg.naturalWidth + 'px';
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
     });
   }
+
+  function view() {
+    var kw = (qEl.value || '').trim().toLowerCase();
+    var arr = DATA.filter(function (d) {
+      if (curRoom !== 'all' && d.room !== curRoom) return false;
+      if (!kw) return true;
+      return (d.a + ' ' + d.t + ' ' + d.face + ' ' + d.floor).toLowerCase().indexOf(kw) >= 0;
+    });
+    var s = sortEl.value;
+    if (s === 'pd') arr.sort(function (a, b) { return a.p - b.p; });
+    if (s === 'pu') arr.sort(function (a, b) { return b.p - a.p; });
+    if (s === 'uu') arr.sort(function (a, b) { return b.u - a.u; });
+    if (s === 'ff') arr.sort(function (a, b) { return b.f - a.f; });
+    if (s === 'n')  arr.sort(function (a, b) { return a.n - b.n; });
+    return arr;
+  }
+
+  function render() {
+    var arr = view();
+    if (!arr.length) {
+      rowsEl.innerHTML = '<div class="empty">没有匹配的房源 —— 换个关键词或点回「全部」</div>';
+      return;
+    }
+    var html = '';
+    for (var i = 0; i < arr.length; i++) {
+      var d = arr[i];
+      html += '<div class="row">'
+        + '<img src="shots/h/' + (d.n < 10 ? '0' + d.n : d.n) + '.jpg" alt="" loading="lazy">'
+        + '<div class="tx">'
+        +   '<div class="tt"><a href="' + esc(d.h) + '" target="_blank" rel="noopener">' + esc(d.t) + '</a></div>'
+        +   '<div class="sub"><b>' + esc(d.a) + '</b> · ' + esc(d.floor) + ' · ' + esc(d.room)
+        +     ' · ' + d.area + '㎡ · ' + esc(d.face) + (d.yr ? ' · ' + d.yr + '年' : '') + '</div>'
+        +   '<div class="fl">' + d.f + ' 人关注</div>'
+        + '</div>'
+        + '<div class="pr"><div class="pp">' + d.p + '<small>万</small></div>'
+        +   '<div class="uu">' + fmt(d.u) + ' 元/平</div></div>'
+        + '</div>';
+    }
+    rowsEl.innerHTML = html;
+  }
+
+  qEl.addEventListener('input', render);
+  sortEl.addEventListener('change', render);
+  chipsEl.addEventListener('click', function (e) {
+    var b = e.target.closest('.chip');
+    if (!b) return;
+    curRoom = b.getAttribute('data-room');
+    var all = chipsEl.querySelectorAll('.chip');
+    for (var i = 0; i < all.length; i++) all[i].classList.remove('on');
+    b.classList.add('on');
+    render();
+  });
+
+  render();
+
+  /* ============================================================
+     舞台 B：两条 XPath 现场跑（浏览器原生引擎）
+      ------------------------------------------------------------
+     临时建一棵真 DOM：ul > li.clear ×3，每条的 title 不同。
+     然后对每条 li 当上下文，分别用「绝对」「相对」表达式求值。
+     ============================================================ */
+  var TITLES = [
+    '新景家园东区南北通透双阳台高楼层',
+    '兴海家园星苑 满五唯一 交通便利 配套齐全',
+    '红莲南路6号院东南两居室 满五年唯一'
+  ];
+
+  var host = document.createElement('ul');
+  host.className = 'sellListContent';
+  host.style.cssText = 'position:absolute;left:-9999px;top:0;width:1px;height:1px;overflow:hidden';
+  TITLES.forEach(function (t) {
+    var li = document.createElement('li');
+    li.className = 'clear';
+    li.innerHTML = '<div class="title"><a href="#">' + t + '</a></div>';
+    host.appendChild(li);
+  });
+  document.body.appendChild(host);
+
+  var nodes = host.querySelectorAll('li.clear');
+
+  function pick(li, expr) {
+    var r = document.evaluate(expr, li, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
+    return r.singleNodeValue ? r.singleNodeValue.textContent.trim() : null;
+  }
+
+  var resEl  = document.getElementById('res');
+  var vresEl = document.getElementById('vres');
+  var liEls  = document.querySelectorAll('#li3 .li');
+  var btnAbs = document.getElementById('btnAbs');
+  var btnRel = document.getElementById('btnRel');
+  var btnBoth= document.getElementById('btnBoth');
+
+  function paint(mode) {
+    var out = [], i;
+    for (i = 0; i < nodes.length; i++) {
+      out.push(pick(nodes[i], mode === 'rel' ? './/div[@class="title"]/a' : '//div[@class="title"]/a'));
+    }
+    var uniq = {};
+    for (i = 0; i < out.length; i++) uniq[out[i]] = 1;
+    var same = Object.keys(uniq).length === 1;
+
+    var html = '';
+    for (i = 0; i < out.length; i++) {
+      var cls = mode === 'rel' ? 'good' : 'bad';
+      var mk  = mode === 'rel' ? '✓ 各自' : (same ? '✕ 重复' : '✕');
+      html += '<div class="rr ' + cls + '"><div class="no">' + (i + 1) + '</div>'
+            + '<div class="vv">' + esc(out[i]) + '</div>'
+            + '<div class="mk">' + mk + '</div></div>';
+    }
+    resEl.innerHTML = html;
+
+    if (mode === 'rel') {
+      vresEl.innerHTML = '三条各取各的，<b>3 个结果全不同</b> —— 这才是要的。';
+    } else {
+      vresEl.innerHTML = '三条取回来的是<b>同一个标题</b>（' + Object.keys(uniq).length
+        + ' 个不同值）。页面上看着每一行都在，其实后两条的标题全是第一条的复制。';
+    }
+
+    // 高亮：绝对路径模式把第 1 条标红，示意「都指向它」
+    for (i = 0; i < liEls.length; i++) liEls[i].classList.remove('hit');
+    if (mode !== 'rel') { if (liEls[0]) liEls[0].classList.add('hit'); }
+  }
+
+  btnAbs.addEventListener('click', function () {
+    btnAbs.classList.add('on'); btnRel.classList.remove('on'); btnBoth.classList.remove('on');
+    paint('abs');
+  });
+  btnRel.addEventListener('click', function () {
+    btnRel.classList.add('on'); btnAbs.classList.remove('on'); btnBoth.classList.remove('on');
+    paint('rel');
+  });
+  btnBoth.addEventListener('click', function () {
+    btnBoth.classList.add('on');
+    paint('abs');
+    setTimeout(function () { paint('rel'); }, 1100);
+  });
+
+  // 一进来自己跑：先绝对（红），1.4 秒后切相对（绿），不用点
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    paint('rel');
+  } else {
+    paint('abs');
+    setTimeout(function () {
+      btnRel.classList.add('on'); btnAbs.classList.remove('on');
+      paint('rel');
+    }, 1500);
+  }
+
+  /* ============================================================
+     全屏
+     ============================================================ */
+  var fsBtns = document.querySelectorAll('.fsbtn');
+  for (var k = 0; k < fsBtns.length; k++) {
+    fsBtns[k].addEventListener('click', function () {
+      var id = this.getAttribute('data-fs');
+      var st = document.getElementById(id);
+      var on = st.classList.toggle('fs');
+      document.body.classList.toggle('fs-on', on);
+      this.textContent = on ? '退出 ✕' : '全屏 ↗';
+      if (id === 'stA') render();
+    });
+  }
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape') return;
+    var fs = document.querySelector('.stage.fs');
+    if (!fs) return;
+    fs.classList.remove('fs');
+    document.body.classList.remove('fs-on');
+    var b = fs.querySelector('.fsbtn');
+    if (b) b.textContent = '全屏 ↗';
+    if (fs.id === 'stA') render();
+  });
 })();
 </script>
 </body>

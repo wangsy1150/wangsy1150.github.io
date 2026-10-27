@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>语音交互助手 · 在线演示</title>
-<link rel="icon" type="image/svg+xml" href="../../../favicon.svg" />
+<link rel="icon" type="image/svg+xml" href="../../../favicon.svg?v=2" />
 <link rel="stylesheet" href="style.css" />
 <style>
   /* ---------- 演示版专属：顶部说明条 + 追问区 ---------- */
@@ -87,6 +87,23 @@
     font-family:Consolas,Monaco,monospace;font-size:12.5px;color:#5b21b6;
     background:rgba(139,92,246,.14);border-radius:4px;padding:1px 5px
   }
+
+  /* ---------- 内嵌模式：被作品集详情页用 iframe 套住时 ----------
+     1) 详情页外面已经有「返回作品集」，这里的返回链接重复且点了会污染 iframe
+     2) 去掉 .chat 的内部滚动：改成由父页面统一滚动，
+        否则会变成「页面里套一个滚动条」，手机端尤其难操作 */
+  body.is-embed .demo-banner a{ display:none; }
+  body.is-embed .demo-banner{ padding:9px 16px; font-size:12.5px; }
+  body.is-embed .app{ min-height:0; }
+  body.is-embed .chat{
+    max-height:none; min-height:0; overflow:visible;
+  }
+  /* 内嵌时彻底不要自身的滚动条（含滚动条槽位）——
+     只要它露出一点，就会出现「页面里套一根条」，而且它会吃掉 15px 宽度，
+     让高度测量永远差一截。滚动权全部交给父页面。 */
+  html.is-embed-html{ overflow:hidden !important; scrollbar-width:none; }
+  html.is-embed-html::-webkit-scrollbar,
+  body.is-embed::-webkit-scrollbar{ width:0 !important; height:0 !important; display:none !important; }
 </style>
 </head>
 <body>
@@ -187,6 +204,16 @@ function keepTraceOpen(node) {
 
 let playing = false;
 
+/* 是否被作品集详情页用 iframe 内嵌。
+   内嵌时高度由父页面撑开、自身不能滚，此时任何滚动调用都会把父页面的滚动位置带跑
+   （实测：父页面 scrollY 从 0 被顶到 800，焦点落到 iframe 上），所以内嵌模式下一律不滚。 */
+var EMBED_MODE = false;
+
+function scrollChatToBottom() {
+  if (EMBED_MODE) return;
+  chat.scrollTo({ top: chat.scrollHeight, behavior: 'smooth' });
+}
+
 /** 回放一个场景：逐条消息插入，带打字机效果 */
 async function playTurn(turn) {
   if (playing) return;
@@ -195,7 +222,7 @@ async function playTurn(turn) {
 
   emptyState.hidden = true;
   chat.innerHTML = '';
-  chat.scrollTop = 0;
+  if (!EMBED_MODE) chat.scrollTop = 0;
   document.body.classList.add('has-messages');
 
   const messages = sliceMessages(turn.html);
@@ -244,7 +271,7 @@ async function playTurn(turn) {
       }
       await sleep(420);
     }
-    chat.scrollTo({ top: chat.scrollHeight, behavior: 'smooth' });
+    scrollChatToBottom();
   }
 
   statusText.textContent = R.pills.status || '已收到回答';
@@ -279,7 +306,7 @@ function appendNote(turn) {
   box.id = 'demoNote';
   box.innerHTML = txt;
   chat.appendChild(box);
-  chat.scrollTo({ top: chat.scrollHeight, behavior: 'smooth' });
+  scrollChatToBottom();
 }
 
 /** 逐字打出 */
@@ -298,7 +325,7 @@ function typewrite(el, text) {
         clearInterval(timer);
         resolve();
       }
-      chat.scrollTop = chat.scrollHeight;
+      if (!EMBED_MODE) chat.scrollTop = chat.scrollHeight;
     }, delay);
   });
 }
@@ -321,8 +348,45 @@ function markChipDone(id) {
   if (b) b.classList.add('is-done');
 }
 
+/* ---------- 内嵌模式：把自身高度报给父页面 ----------
+   作品集详情页用 iframe 套这个页面时，如果 iframe 高度固定，
+   就会出现「页面里套一根滚动条」。这里把真实内容高度报上去，
+   让父页面把 iframe 撑到刚好，滚动权交回父页面，手机端也不会卡住。 */
+function reportHeight() {
+  if (window.parent === window) return;
+  const h = Math.ceil(Math.max(
+    document.body.scrollHeight,
+    document.documentElement.scrollHeight
+  ));
+  window.parent.postMessage({ type: 'va-demo-height', height: h }, '*');
+}
+
 /* ---------- 初始化 ---------- */
 (function init() {
+  const params = new URLSearchParams(location.search);
+
+  // 内嵌模式：藏掉返回链接 + 让高度自适应
+  if (params.get('embed') === '1') {
+    EMBED_MODE = true;
+    document.body.classList.add('is-embed');
+    /* 关键：彻底去掉自身的滚动条（连槽位也不要）。
+       否则会死循环 —— 滚动条占 15px → clientHeight 变小 → 更要滚动条 → 高度永远差一截。
+       滚动权完全交给父页面。 */
+    document.documentElement.classList.add('is-embed-html');
+    /* 用 MutationObserver 而不是 ResizeObserver：
+       实测 ResizeObserver 观察 body 在这个 iframe 场景下不触发回调，
+       而对话内容是一条条插进来的，DOM 变化最可靠。 */
+    var pending = false;
+    var mo = new MutationObserver(function () {
+      if (pending) return;
+      pending = true;
+      requestAnimationFrame(function () { pending = false; reportHeight(); });
+    });
+    mo.observe(document.body, { childList: true, subtree: true, characterData: true });
+    setTimeout(reportHeight, 260);
+    window.addEventListener('load', reportHeight);
+  }
+
   // 侧栏标签用真实导出值覆盖
   if (R.pills) {
     const map = { modelPill: 'model', agentPill: 'agent',
@@ -346,6 +410,14 @@ function markChipDone(id) {
 
   statusText.textContent = '准备就绪';
   statusDot.style.background = '#10b981';
+
+  /* ---------- 自动播放（首屏零点击就能看到效果） ----------
+     访客打开页面时不需要点任何东西，第一个场景自己开始播。
+     播完就停，把第二个场景留给访客点 —— 不循环，避免页面一直在动分散注意力。
+     想关掉自动播放：在地址后加 ?autoplay=0 */
+  if (params.get('autoplay') !== '0' && R.turns && R.turns.length) {
+    setTimeout(() => { playTurn(R.turns[0]); }, 1000);
+  }
 })();
 </script>
 </body>

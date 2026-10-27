@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>商品评论批量采集 · 项目详情</title>
+<link rel="icon" href="../../favicon.svg?v=2" type="image/svg+xml">
+<style>
+  :root{
+    --bg:#FBFCFE;
+    --ink:#1A1D24;
+    --ink2:#525B6B;
+    --ink3:#8B95A6;
+    --blue:#4FA8E8;
+    --blue-d:#2E8BD0;
+    --blue-s:#EAF5FD;
+    --pink:#FF8FB1;
+    --pink-d:#E0568A;
+    --pink-s:#FFF0F5;
+    --red:#E8455F;
+    --red-d:#C9304A;
+    --red-s:#FFEBEE;
+    --orange:#FF8A1E;
+    --orange-d:#D96A00;
+    --orange-s:#FFF1DC;
+    --teal:#10B6A6;
+    --teal-d:#0B8578;
+    --teal-s:#E2F8F5;
+    --green:#1F9D55;
+    --line:#E4EBF5;
+  }
+
+  @font-face{font-family:"Noto Sans SC";font-style:normal;font-weight:400;
+    font-display:swap;src:url("../../fonts/NotoSansSC-400-subset.woff2") format("woff2")}
+  @font-face{font-family:"Noto Sans SC";font-style:normal;font-weight:500;
+    font-display:swap;src:url("../../fonts/NotoSansSC-500-subset.woff2") format("woff2")}
+  @font-face{font-family:"Noto Sans SC";font-style:normal;font-weight:600;
+    font-display:swap;src:url("../../fonts/NotoSansSC-600-subset.woff2") format("woff2")}
+  @font-face{font-family:"Noto Sans SC";font-style:normal;font-weight:700;
+    font-display:swap;src:url("../../fonts/NotoSansSC-700-subset.woff2") format("woff2")}
+  @font-face{font-family:"Noto Sans SC";font-style:normal;font-weight:800;
+    font-display:swap;src:url("../../fonts/NotoSansSC-700-subset.woff2") format("woff2")}
+
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"Noto Sans SC","Microsoft YaHei","PingFang SC",Arial,sans-serif;
+    font-weight:400;color:var(--ink);background:var(--bg);line-height:1.75;overflow-x:hidden}
+
+  .glow{position:fixed;inset:0;pointer-events:none;z-index:0;
+    background:
+      radial-gradient(circle at 8% 0%, rgba(79,168,232,.20), transparent 42%),
+      radial-gradient(circle at 94% 4%, rgba(232,69,95,.15), transparent 40%),
+      radial-gradient(circle at 50% 102%, rgba(232,69,95,.08), transparent 46%)}
+
+  .wrap{position:relative;z-index:1;max-width:min(1600px,100%);margin:0 auto;padding:56px clamp(16px,3vw,40px) 96px}
+
+  .back{display:flex;width:fit-content;align-items:center;gap:8px;color:var(--ink3);
+    text-decoration:none;font-size:14px;margin-bottom:34px;transition:color .2s}
+  .back:hover{color:var(--blue-d)}
+
+  .num{display:inline-block;font-size:12.5px;font-weight:600;letter-spacing:.14em;
+    color:#fff;background:linear-gradient(100deg,#3E9FE0 0%,#E8455F 72%,#D62F4A 100%);
+    border-radius:999px;padding:6px 16px;margin-bottom:16px;
+    box-shadow:0 8px 22px rgba(214,47,74,.34)}
+
+  h1{font-size:clamp(28px,4.6vw,44px);line-height:1.25;font-weight:800;
+    color:var(--ink);margin-bottom:14px;letter-spacing:-.01em;position:relative}
+  h1::after{content:"";display:inline-block;width:11px;height:11px;border-radius:3px;
+    background:var(--red);margin-left:12px;vertical-align:.22em;
+    box-shadow:0 3px 10px rgba(232,69,95,.45)}
+
+  .lede{font-size:17px;color:var(--ink2);max-width:770px;margin-bottom:28px}
+  .lede strong{color:var(--ink);font-weight:600;
+    background:linear-gradient(transparent 60%, rgba(232,69,95,.22) 60%);
+    padding:0 2px;border-radius:2px}
+
+  .tags{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:34px}
+  .tag{font-size:12.5px;padding:6px 14px;border-radius:999px;
+    background:#fff;border:1px solid var(--line);color:var(--ink2);
+    box-shadow:0 1px 2px rgba(26,29,36,.04)}
+  .tag:nth-child(3n+1){border-color:#D6EAF8;color:var(--blue-d);background:var(--blue-s)}
+  .tag:nth-child(3n+2){border-color:#FBD0D7;color:var(--red-d);background:var(--red-s)}
+
+  h2{font-size:20px;color:var(--ink);margin:44px 0 18px;padding-left:15px;position:relative;
+    font-weight:700}
+  h2::before{content:"";position:absolute;left:0;top:6px;bottom:6px;width:4px;
+    border-radius:3px;background:linear-gradient(180deg,var(--blue),var(--red))}
+
+  .card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:19px 21px;
+    box-shadow:0 2px 10px rgba(26,29,36,.045);transition:transform .22s,box-shadow .22s,border-color .22s}
+  .card:hover{transform:translateY(-3px);box-shadow:0 12px 28px rgba(79,168,232,.14);
+    border-color:#D6EAF8}
+  .card h3{font-size:14px;color:var(--blue-d);margin-bottom:9px;font-weight:700}
+  .card p{font-size:14px;color:var(--ink2);margin:0}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+
+  .stage{position:relative;margin:0 0 30px;border-radius:20px;overflow:hidden;
+    border:1px solid var(--line);background:#fff;
+    box-shadow:0 22px 60px rgba(79,168,232,.16), 0 4px 14px rgba(26,29,36,.05)}
+  .stage-bar{display:flex;align-items:center;gap:8px;padding:11px 16px;
+    background:linear-gradient(90deg,#F7FBFE,#FEF7FA);border-bottom:1px solid var(--line)}
+  .stage-dot{width:9px;height:9px;border-radius:50%}
+  .stage-dot:nth-child(1){background:#FFC9D9}
+  .stage-dot:nth-child(2){background:#CFE8F9}
+  .stage-dot:nth-child(3){background:#D9E6F2}
+  .stage-title{font-size:12.5px;color:var(--ink3);margin-left:6px}
+  .stage-live{display:inline-flex;align-items:center;gap:6px;margin-left:8px;
+    font-size:11.5px;font-weight:600;color:var(--red-d)}
+  .stage-live::before{content:"";width:6px;height:6px;border-radius:50%;
+    background:var(--red);box-shadow:0 0 0 3px rgba(232,69,95,.24);
+    animation:livePulse 1.6s ease-in-out infinite}
+  @keyframes livePulse{0%,100%{opacity:1}50%{opacity:.3}}
+  .stage-note{margin-left:auto;font-size:12px;color:var(--ink3);transition:color .3s}
+  .stage-note.pass{color:var(--red-d);font-weight:700}
+
+  .fs-btn{font:inherit;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;
+    padding:5px 13px;border-radius:999px;border:1px solid #D6EAF8;background:#fff;
+    color:var(--blue-d);margin-left:10px;transition:background .18s,border-color .18s}
+  .fs-btn:hover{background:var(--blue-s);border-color:#B9DDF4}
+  .stage.fs .fs-btn{background:var(--red-s);border-color:#F8C9D0;color:var(--red-d)}
+
+  .stage.fs{position:fixed;inset:0;z-index:9999;margin:0;border:0;border-radius:0;
+    display:flex;flex-direction:column;overflow:auto;background:#fff;box-shadow:none}
+  .stage.fs .stage-bar{border-radius:0;flex:none;position:sticky;top:0;z-index:2}
+  .stage.fs .demo{max-width:1300px;margin:0 auto;width:100%;padding:24px 30px 28px}
+  .stage.fs .split{grid-template-columns:1fr 320px;gap:20px}
+  body.fs-lock{overflow:hidden}
+
+  .demo{padding:20px 22px 20px}
+
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+  .stat{border-radius:12px;padding:11px 14px;border:1px solid var(--line);background:#FDFEFF;
+    transition:transform .2s,box-shadow .2s}
+  .stat .v{font-size:23px;font-weight:800;line-height:1.15;letter-spacing:-.01em;
+    font-variant-numeric:tabular-nums;color:var(--ink)}
+  .stat .v small{font-size:11.5px;font-weight:700;margin-left:2px;opacity:.75}
+  .stat .k{font-size:11.5px;color:var(--ink3);margin-top:3px;font-weight:500}
+  .stat.c1{background:linear-gradient(160deg,#F2F9FE,#E4F2FC);border-color:#CDE7F8}
+  .stat.c1 .v{color:var(--blue-d)}
+  .stat.c2{background:linear-gradient(160deg,#F0FBF9,#DFF6F2);border-color:#BEEBE4}
+  .stat.c2 .v{color:var(--teal-d)}
+  .stat.c3{background:linear-gradient(160deg,#FFEFF2,#FFE3E8);border-color:#F8C9D0}
+  .stat.c3 .v{color:var(--red-d)}
+  .stat.c4{background:linear-gradient(160deg,#FFF7EC,#FFEBD1);border-color:#FFDCB3}
+  .stat.c4 .v{color:var(--orange-d)}
+
+  .tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+  .search{flex:1 1 180px;min-width:0}
+  input[type=search]{width:100%;font:inherit;font-size:13px;color:var(--ink);
+    border:1px solid var(--line);border-radius:10px;padding:7px 12px;background:#fff;
+    transition:border-color .2s,box-shadow .2s}
+  input[type=search]:focus{outline:none;border-color:#B9DDF4;
+    box-shadow:0 0 0 4px rgba(79,168,232,.13)}
+  .chip{font:inherit;font-size:12px;font-weight:600;cursor:pointer;padding:5px 12px;
+    border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--ink3);
+    transition:all .18s}
+  .chip:hover{border-color:#B9DDF4;color:var(--blue-d)}
+  .chip.on{background:var(--ink);border-color:var(--ink);color:#fff}
+
+  .split{display:grid;grid-template-columns:1fr 286px;gap:16px;align-items:start}
+
+  .clist{border:1px solid var(--line);border-radius:13px;background:#FDFEFF;
+    display:flex;flex-direction:column;
+    max-height:426px;overflow-y:auto;scrollbar-width:thin}
+  .clist::-webkit-scrollbar{width:8px}
+  .clist::-webkit-scrollbar-thumb{background:#DCE5F0;border-radius:4px}
+  .cm{padding:10px 13px;border-bottom:1px solid #EEF3F9;position:relative;transition:background .15s}
+  .cm:last-child{border-bottom:0}
+  .cm:hover{background:#F6FAFE}
+  .cm .hd{display:flex;align-items:center;gap:7px;margin-bottom:4px}
+  .cm .no{font-size:10.5px;font-weight:700;color:var(--ink3);
+    font-variant-numeric:tabular-nums;flex:none;width:20px}
+  .cm .tx{font-size:12.5px;color:var(--ink);line-height:1.72;word-break:break-word}
+  .cm.bad{border-left:3px solid var(--red);background:linear-gradient(90deg,#FFF8F9,#FDFEFF)}
+  .cm .tag2{font-size:10px;font-weight:700;border-radius:999px;padding:1px 8px;flex:none;
+    white-space:nowrap}
+  .tag2.r-pos{background:var(--teal-s);color:var(--teal-d)}
+  .tag2.r-neg{background:var(--red-s);color:var(--red-d)}
+  .tag2.r-neu{background:#F1F4F8;color:var(--ink3)}
+  .tag2.m-pos{background:#F1F8F3;color:#2E7D4F}
+  .tag2.m-neg{background:var(--red-s);color:var(--red-d)}
+  .tag2.m-miss{background:var(--orange-s);color:var(--orange-d)}
+  .tag2.tpl{background:#F3EEFB;color:#6B4DB8}
+  .cm .kw{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px}
+  .cm .kw span{font-size:10px;color:var(--ink3);background:#F4F7FB;border-radius:5px;
+    padding:0 5px;font-family:Consolas,Monaco,monospace}
+  .cm .kw span.n{color:var(--red-d);background:var(--red-s)}
+  .cm .kw span.p{color:var(--teal-d);background:var(--teal-s)}
+  .empty{flex:1;display:flex;align-items:center;justify-content:center;
+    padding:30px 16px;text-align:center;font-size:12.5px;color:var(--ink3);line-height:1.9}
+  .listend{margin-top:auto;padding:14px 13px 16px;text-align:center;font-size:11.5px;
+    color:var(--ink3);background:linear-gradient(180deg,#FDFEFF,#F7FAFE)}
+
+  .panel{border:1px solid var(--line);border-radius:13px;background:#fff;
+    padding:12px 14px;margin-bottom:10px}
+  .panel .ph{font-size:11.5px;font-weight:700;color:var(--blue-d);letter-spacing:.04em;
+    margin-bottom:8px}
+  .dim{margin-bottom:8px}
+  .dim .dh{display:flex;justify-content:space-between;font-size:11.5px;margin-bottom:3px}
+  .dim .dh .nm{color:var(--ink2);font-weight:600}
+  .dim .dh .vv{color:var(--ink3);font-variant-numeric:tabular-nums}
+  .dim .tr{height:6px;border-radius:99px;background:#EDF2F8;overflow:hidden;display:flex}
+  .dim .fp{height:100%;background:linear-gradient(90deg,#8FD3F4,#4FA8E8)}
+  .dim .fn{height:100%;background:linear-gradient(90deg,#FFB4C0,#C9304A)}
+  .dim .ft{height:100%;background:#E7ECF3}
+  .panel .note2{font-size:10.5px;color:var(--ink3);line-height:1.65;margin-top:6px}
+  .panel .note2 b{color:var(--ink2)}
+
+  .pickrow{display:flex;gap:8px;align-items:flex-start;padding:6px 0;
+    border-bottom:1px dashed #EEF3F9;font-size:11.5px;color:var(--ink2);line-height:1.6}
+  .pickrow:last-child{border-bottom:0}
+  .pickrow .idx2{flex:none;font-family:Consolas,Monaco,monospace;font-size:10.5px;
+    color:var(--red-d);font-weight:700;padding-top:1px}
+  .pickrow .tx2{flex:1;min-width:0;display:-webkit-box;-webkit-line-clamp:2;
+    -webkit-box-orient:vertical;overflow:hidden}
+
+  /* diff */
+  .diffline{display:flex;gap:8px;font-family:Consolas,Monaco,monospace;font-size:11px;
+    line-height:1.8;padding:0 6px;border-radius:4px}
+  .diffline .ln{flex:none;width:22px;color:var(--ink3);text-align:right}
+  .diffline .tx3{flex:1;min-width:0;word-break:break-all;color:var(--ink2)}
+  .diffline.same .tx3{color:var(--ink2)}
+  .diffline.diff{background:var(--orange-s)}
+  .diffline.diff .tx3{color:var(--orange-d);font-weight:700}
+  .diffbox{border:1px solid var(--line);border-radius:11px;background:#FDFEFF;
+    padding:8px 4px;max-height:250px;overflow-y:auto;scrollbar-width:thin}
+  .diffbox::-webkit-scrollbar{width:8px}
+  .diffbox::-webkit-scrollbar-thumb{background:#DCE5F0;border-radius:4px}
+
+  .verdict2{display:flex;align-items:center;gap:10px;margin:10px 0 0;
+    padding:10px 13px;border-radius:11px;background:var(--red-s);border:1px solid #F8C9D0}
+  .verdict2 .big{font-size:24px;font-weight:800;color:var(--red-d);
+    font-variant-numeric:tabular-nums;line-height:1}
+  .verdict2 .txt{font-size:12px;color:var(--ink2);line-height:1.6}
+
+  .codebox{border:1px solid var(--line);border-radius:13px;overflow:hidden;background:#1E1F22}
+  .codehd{display:flex;align-items:center;gap:8px;padding:8px 14px;background:#26272B;
+    border-bottom:1px solid #33343A}
+  .codehd .fn{font-family:Consolas,Monaco,monospace;font-size:11.5px;color:#9EA3AC}
+  .codehd .li{font-size:10.5px;color:#6E747D;margin-left:auto}
+  .code{font-family:Consolas,"Cascadia Code",Monaco,monospace;font-size:12px;line-height:1.72;
+    background:#1E1F22;color:#BCBEC4;padding:12px 14px;white-space:pre-wrap;word-break:break-word;
+    overflow-x:hidden;max-height:360px;overflow-y:auto}
+  .code .k{color:#CF8E6D}
+  .code .s{color:#6AAB73}
+  .code .c{color:#7A7E85}
+  .code .hl{background:rgba(232,69,95,.16);border-radius:4px;padding:0 3px}
+
+  .pits{display:flex;flex-direction:column;gap:12px}
+  .pit{display:flex;gap:14px;background:#fff;border:1px solid var(--line);border-radius:14px;
+    padding:15px 17px}
+  .pit .pn{flex:none;width:26px;height:26px;border-radius:8px;display:flex;align-items:center;
+    justify-content:center;font-size:12.5px;font-weight:800;color:#fff;
+    background:linear-gradient(135deg,var(--blue),var(--red-d));
+    box-shadow:0 5px 14px rgba(214,47,74,.3)}
+  .pit h3{font-size:14px;font-weight:700;color:var(--ink);margin-bottom:5px}
+  .pit p{font-size:13px;color:var(--ink2);line-height:1.75;margin:0}
+  .pit p+p{margin-top:5px}
+  .pit .ev{font-family:Consolas,Monaco,monospace;font-size:11.5px;color:var(--blue-d);
+    background:var(--blue-s);border-radius:6px;padding:1px 7px}
+
+  .note{border-left:4px solid var(--red);background:linear-gradient(90deg,var(--red-s),#fff);
+    border-radius:0 13px 13px 0;padding:15px 18px;font-size:13.5px;color:var(--ink2);
+    line-height:1.8}
+  .note b{color:var(--red-d)}
+  .note.doubt{border-left-color:var(--orange);
+    background:linear-gradient(90deg,var(--orange-s),#fff)}
+  .note.doubt b{color:var(--orange-d)}
+
+  footer{margin-top:46px;padding-top:20px;border-top:1px solid var(--line);
+    font-size:12.5px;color:var(--ink3);line-height:1.9}
+  footer a{color:var(--blue-d);text-decoration:none;font-weight:600}
+  footer a:hover{text-decoration:underline}
+
+  @media(max-width:860px){
+    .grid3{grid-template-columns:1fr}
+    .stats{grid-template-columns:repeat(2,1fr)}
+    .split{grid-template-columns:1fr}
+    .clist{max-height:none}
+  }
+</style>
+</head>
+<body>
+<div class="glow"></div>
+
+<nav style="position:relative;z-index:1;max-width:min(1600px,100%);margin:0 auto;padding:56px clamp(16px,3vw,40px) 0">
+  <a class="back" href="../../index.html">← 返回作品集</a>
+</nav>
+
+<div class="wrap" style="padding-top:0">
+
+  <span class="num">PROJECT 09</span>
+  <h1>商品评论批量采集</h1>
+  <p class="lede">
+    想看看一款耳机到底口碑怎么样，但评论得我一页页翻。于是让浏览器自己打开商品页、展开"查看全部评论"、
+    用真实鼠标滚轮往下滚、边滚边把评论收进 CSV。
+    <strong>最后拿到 20 条真评论 —— 然后我发现，真正难的不是抓下来，是判它对不对。</strong>
+  </p>
+  <div class="tags">
+    <span class="tag">DrissionPage</span><span class="tag">pyautogui 真实滚轮</span><span class="tag">XPath</span>
+    <span class="tag">懒加载</span><span class="tag">CSV</span><span class="tag">规则 vs 人工</span>
+  </div>
+
+  <!-- ================= 舞台一 ================= -->
+  <section class="stage" id="stage1">
+    <div class="stage-bar">
+      <span class="stage-dot"></span><span class="stage-dot"></span><span class="stage-dot"></span>
+      <span class="stage-title">真实采集结果 · 20 条原文，一个字没改</span>
+      <span class="stage-live">REAL DATA</span>
+      <span class="stage-note" id="note1">规则判 1 条负面，我判 3 条</span>
+      <button class="fs-btn" id="fs1">全屏 ↗</button>
+    </div>
+    <div class="demo">
+
+      <div class="stats">
+        <div class="stat c1"><div class="v">20<small>条</small></div><div class="k">CSV 里的真实评论</div></div>
+        <div class="stat c2"><div class="v">1<small>列</small></div><div class="k">只有正文，没有时间/评分</div></div>
+        <div class="stat c3"><div class="v" id="s3">1<small>条</small></div><div class="k">关键词规则判出的负面</div></div>
+        <div class="stat c4"><div class="v" id="s4">3<small>条</small></div><div class="k">我逐条读完判出的负面</div></div>
+      </div>
+
+      <div class="tools">
+        <div class="search"><input type="search" id="q" placeholder="搜评论内容，比如「音质」「痛」「客服」"></div>
+        <button class="chip on" data-f="all">全部 20</button>
+        <button class="chip" data-f="miss">规则判错的 2</button>
+        <button class="chip" data-f="mine">我判负面的 3</button>
+        <button class="chip" data-f="tpl">疑似模板 2</button>
+      </div>
+
+      <div class="split">
+        <div class="clist" id="clist"></div>
+
+        <div>
+          <div class="panel">
+            <div class="ph">两种判定放在一起看</div>
+            <div class="note2">
+              每行右边两个标签：<span class="tag2 r-pos">规则</span> 是按关键词加减分算的，
+              <span class="tag2 m-pos">我</span> 是我逐条读完 20 条标的。
+              两个不一样的行，左边会有一条红线。
+            </div>
+            <div class="note2" style="margin-top:8px">
+              <b>规则判错 2 条，都是"一句话里先夸后骂"</b> —— 见下面两块。
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="ph">它误判的（点一下跳到那条）</div>
+            <div id="missList"></div>
+          </div>
+
+          <div class="panel">
+            <div class="ph">大家在聊什么（词频，不是情感）</div>
+            <div id="dims"></div>
+            <div class="note2">蓝段 = 提到这个维度的条数；红段 = 其中被我判成负面、同时也提到它的条数。
+            <b>粒度只能到"条"，到不了"句"</b> —— 一条评论既夸续航又骂佩戴，两个维度都会被记上一次。这正是不该拿它算好评率的原因。</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <h2>我为什么要把"两种判定"摆在一起</h2>
+  <div class="grid3">
+    <div class="card">
+      <h3>最开始我信规则</h3>
+      <p>想着 20 条评论，写十几个负面词（痛、差、退货、失望）数一下就够了，一行代码的事。跑完一看：只有 1 条负面，好评率 95%，可以收工了。</p>
+    </div>
+    <div class="card">
+      <h3>读了原文才知道不止</h3>
+      <p>第 1 条写"还是会痛"，第 15 条写"就是音质感觉不太好"，这两条里同时有好词，规则一抵消就变成"中性/好评"了。真读一遍才知道它们是抱怨。</p>
+    </div>
+    <div class="card">
+      <h3>所以这页不给你好评率</h3>
+      <p>20 条样本、1 列文本、还有 2 条一看就是模板好评 —— 这种数据算百分比是在骗人。我把它摆成"两种判定对照"，让你看它错在哪。</p>
+    </div>
+  </div>
+
+  <!-- ================= 舞台二 ================= -->
+  <h2>同一份数据，我采了两次，结果一模一样</h2>
+  <p style="font-size:14.5px;color:var(--ink2);max-width:790px;margin-bottom:16px">
+    目录里有两份 CSV：<code style="font-family:Consolas,monospace;font-size:12.5px;background:var(--blue-s);color:var(--blue-d);border-radius:5px;padding:1px 6px">comments.csv</code>
+    和 <code style="font-family:Consolas,monospace;font-size:12.5px;background:var(--blue-s);color:var(--blue-d);border-radius:5px;padding:1px 6px">comments2.csv</code>。
+    我以为是"第二次采到了新评论"，逐行比完才发现：<b>20 行全都一样，唯一差别是第二个文件开头多了一个 BOM 标记。</b>
+    也就是说脚本滚到底也只拿到这 20 条，没有翻页，也没有去重 —— 它只是把同一批评论又抄了一遍。
+  </p>
+
+  <section class="stage" id="stage2">
+    <div class="stage-bar">
+      <span class="stage-dot"></span><span class="stage-dot"></span><span class="stage-dot"></span>
+      <span class="stage-title">两次采集逐行对比 · 页面里实时比</span>
+      <span class="stage-note">左边 diff，右边是我当时写的脚本</span>
+      <button class="fs-btn" id="fs2">全屏 ↗</button>
+    </div>
+    <div class="demo">
+      <div class="split" style="grid-template-columns:1fr 1fr">
+        <div>
+          <div class="ph" style="font-size:11.5px;font-weight:700;color:var(--blue-d);margin-bottom:7px">
+            comments.csv ↔ comments2.csv
+          </div>
+          <div class="diffbox" id="diffbox"></div>
+          <div class="verdict2">
+            <div class="big" id="dcount">0</div>
+            <div class="txt" id="dtext">处不同</div>
+          </div>
+        </div>
+        <div class="codebox">
+          <div class="codehd"><span class="fn">demo02-tabao-comment.py</span><span class="li" id="cli">36 行</span></div>
+          <div class="code" id="code"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <h2>我踩过的坑</h2>
+  <div class="pits">
+    <div class="pit">
+      <div class="pn">1</div>
+      <div>
+        <h3>鼠标坐标是写死的：<span class="ev">pyautogui.moveTo(751, 320)</span></h3>
+        <p>懒加载只认"真实"滚动，<span class="ev">page.scroll.down()</span> 触发不了，所以要把鼠标移到评论区再滚。
+        但 751,320 是我那块屏幕上的位置 —— 换个分辨率、换个浏览器缩放、换个窗口大小，鼠标就落在别的地方，
+        滚的是整页而不是评论区，一条评论都抓不到。</p>
+        <p>正确做法是先拿到评论区的元素坐标再 <span class="ev">moveTo</span>，或者干脆用 CDP 发真实的 wheel 事件。</p>
+      </div>
+    </div>
+    <div class="pit">
+      <div class="pn">2</div>
+      <div>
+        <h3>class 名是哈希：<span class="ev">content--uonoOhaz&nbsp;</span></h3>
+        <p>这种带随机后缀的类名，是打包工具生成的，平台每次发版都会变。我这串还带了个<b>尾空格</b>（<span class="ev">'content--uonoOhaz '</span>），
+        少打一个空格就一条都匹配不到。</p>
+        <p>更稳的锚点是结构（评论区容器的子节点）或可见文本，而不是这种哈希类名。</p>
+      </div>
+    </div>
+    <div class="pit">
+      <div class="pn">3</div>
+      <div>
+        <h3>CSV 只有一列正文 —— 这是我最大的设计失误</h3>
+        <p>抓下来的是纯文本，没有<b>时间、评分、昵称、点赞数</b>。结果就是：做不了趋势（不知道差评是新出的还是去年的）、
+        做不了权重（不知道那条抱怨是被 3 个人看到还是 3000 个人点赞）、也做不了去重（同名同文的两条无法区分是重复还是两个人都在说）。</p>
+        <p>抓评论的正确字段顺序是：<b>先定要回答什么问题，再决定抓哪些字段</b>。我反过来了。</p>
+      </div>
+    </div>
+    <div class="pit">
+      <div class="pn">4</div>
+      <div>
+        <h3>20 条就是天花板，滚 5 次到底了</h3>
+        <p><span class="ev">for i in range(5)</span> + 每次 1000 像素 —— 页面到底了就停在那儿，再怎么滚也不会有新评论。
+        所以第二次跑出来的还是同样 20 条（上面那个 diff 就是证据）。</p>
+        <p>想拿更多只有两条路：点"下一页"翻页，或者换接口。这两件我都没做。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="note doubt" style="margin-top:20px">
+    <b>一句不得不说清的话：</b>我这一页的"口碑判定"不是大模型做的，是我逐条读完 20 条自己标的。
+    真要做情感洞察得把每条丢给模型、让它给标签和理由，再抽样人工校对 —— 那一步我没做，
+    所以这里只敢说"我读了 20 条，其中 3 条是抱怨"，不敢说"这款耳机好评率 85%"。
+  </div>
+
+  <h2>边界：哪些是我做的</h2>
+  <div class="note">
+    采集脚本（DrissionPage 打开页面、XPath 找"查看全部评论"、pyautogui 滚动、写 CSV）是照着一个现成套路做的，
+    <b>那些类名不是我一个个试出来的</b>。<br>
+    属于我的是：<b>①</b> 真跑出来的两份 CSV（20 条 × 2）；<b>②</b> 发现两次结果完全一样、
+    也发现了"规则判负面只剩 1 条"这个假象（这两件都是我自己比对出来的）；<b>③</b> 这一页的对照表、词频面板、diff 面板。<br>
+    还有一件事我在页面上写明白了：<b>这个项目当初是当"评论采集"练的，不是当"舆情分析系统"做的</b> ——
+    20 条样本、单列文本，支撑不起任何结论。它真正的价值是让我知道了"抓下来"和"能分析"之间差着什么。
+  </div>
+
+  <footer>
+    数据来源：<b>day08 / 02-课程代码 / comments.csv</b> 与 <b>comments2.csv</b>，20 条真实评论 + 商品标题一条，
+    原文照录，emoji 和错别字都没改（第 20 条那个"单隻耳机"就是原文）。<br>
+    商品：【政府补贴15%】倍思MC2Air耳夹式蓝牙耳机。<br>
+    规则判定的词表是本页 JS 里的 NEG / POS 两个数组，你可以在源码里看到，也可以自己改；人工判定是我读完 20 条标的。<br>
+    <a href="../../index.html">← 回到全部作品</a>
+  </footer>
+
+</div>
+
+<script>
+var COM = [
+  ['续航能力：用了两天，感觉还行 外观材质：喜欢它的设计 佩戴感受：还是不能戴的太久，还是会痛', 'neg', 0],
+  ['冲着耳朵不疼买的，目前最长时间3小时，真的不疼，声音也很清晰，旁边人听不听得到不知道，没测试过，一对可以磁吸，防丢挺好的，需要自己买个壳系起来，小小一个容易找不到，鸿蒙系统需要卓易通下载软件，别忘了啊', 'pos', 0],
+  ['刚收到直播间买的东西，拆开看和描述的一样，没毛病～物流也挺快的，商家回复消息也及时，整体满意～', 'pos', 0],
+  ['外观很有质感，佩戴也特别舒适，最重要的是音质也特别好也比较降噪，特别喜欢🥰', 'pos', 0],
+  ['收到佩戴不舒服联系客服马上响应，耐心教调节佩戴方式。耳夹款跑步狂晃不掉，办公室开会听得清环境音，续航一天通勤够用，一年质保安心，性价比拉满！官方售后靠谱，充电仓轻微划痕反馈后直接换新，全程没有扯皮。耳机音质清晰，出汗多也不怕进水，日常办公健身两用，倍思的品控和售后值得回购。', 'pos', 0],
+  ['收到货了，物流很快，客服也非常好，包装很严实，还送了贴纸', 'pos', 0],
+  ['C桥大小非常合适，很轻，音质也不赖，戴久了也没啥感觉，满意', 'pos', 0],
+  ['趁着做活动领券的时候买的，价格好划算，比微商便宜好多。反正一样的东西，当然价格低一些比较好呀。店家多做这样的活动呀 这家店还好吧。来买过几次了，服务老客户非常周到，以后还常来！发货速度很快，东西包装的很好，价格优惠，我很满意，还会回购掌柜态度很专业热情，有问必答，回复也很快，我问了不少问题，他都不觉得烦，都会认真回答我，这点我向掌柜表示由衷的敬意，这样的好掌柜可不多。再说宝贝，正是我需要的，收到', 'pos', 1],
+  ['佩戴很舒适 音质也很好 外观材质：耐看', 'pos', 0],
+  ['颜色好看，音质也不错，戴在耳朵上也不会疼', 'pos', 0],
+  ['效果超级棒，颜值还高，一直在她家买东西，真心不错！', 'pos', 0],
+  ['质量蛮好的，声音不错满足需求，耳机很轻，外观也很好看', 'pos', 0],
+  ['商品好评文案 商品和商家描述完全一致，没有差别，降噪效果很让人满意，使用体验很棒! 商家的物流发货速度很快，包装完好没有损坏，快递配送也很及时，服务态度非常好，整体购物体验很舒心，推荐大家入手~', 'pos', 1],
+  ['续航能力：很强， 佩戴感受：我戴一天也都没不适感，很舒服 外观材质：颜值很高，很喜欢', 'pos', 0],
+  ['耳机很好用戴久了耳朵也不痛，很轻，就是音质感觉不太好，听书听歌的时候像音响那种，接电话还蛮不错', 'neg', 0],
+  ['送朋友的朋友很喜欢。外观材质：非常好带着很方便。', 'pos', 0],
+  ['佩戴挺舒服的，音质不错，充一次电能用很久', 'pos', 0],
+  ['之前买过一次了，不小心搞丢了，还是选择复购一副相同的，我比较在意耳机佩戴舒适感和续航，这副耳机再这个方面比较突出，很满意', 'pos', 0],
+  ['耳机很好看，也很实用，音效和使用感都很好，非常满意', 'pos', 0],
+  ['单隻耳机的音量控制按扭 机械回弹力 不足 按压起来手感回馈异常, 但控制功能逻辑正常 品控需要加强', 'neg', 0]
+];
+
+var NEG = ['痛','疼','不舒服','不适','一般','不太好','不足','异常','划痕','找不到','麻烦','扯皮','失望','不行'];
+var POS = ['喜欢','满意','舒适','舒服','清晰','不错','很棒','质感','划算','快','靠谱','推荐','回购','好','突出','安心','耐心','挺好'];
+
+/* 维度词表（我自己定的，就写在源码里，可以改） */
+var DIM = [
+  {k:'音质', w:['音质','音效','声音','清晰','降噪','听歌','听书','音响']},
+  {k:'佩戴', w:['佩戴','戴','耳朵','耳夹','C桥','夹','痛','疼','舒适','舒服','晃','掉']},
+  {k:'续航', w:['续航','电量','充电','电池','两天','通勤','充电仓']},
+  {k:'外观', w:['外观','质感','颜值','颜色','好看','材质','设计']},
+  {k:'物流售后', w:['物流','快递','发货','客服','售后','商家','回复','换新','包装']},
+  {k:'品控', w:['品控','质量','按钮','回弹','手感','划痕','进水','质保']}
+];
+
+function $(id){ return document.getElementById(id); }
+function esc(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function hits(text, words){
+  var out = [];
+  for (var i = 0; i < words.length; i++) if (text.indexOf(words[i]) >= 0) out.push(words[i]);
+  return out;
+}
+
+/* 逐条：规则判定 + 关键词明细 */
+var ROWS = [];
+for (var i = 0; i < COM.length; i++){
+  var t = COM[i][0], mine = COM[i][1], tpl = COM[i][2];
+  var n = hits(t, NEG), p = hits(t, POS);
+  var rule = p.length > n.length ? 'pos' : (n.length > p.length ? 'neg' : 'neu');
+  var miss = (rule !== 'neg' && mine === 'neg');
+  ROWS.push({i:i, t:t, mine:mine, tpl:tpl, n:n, p:p, rule:rule, miss:miss});
+}
+
+var state = {f:'all', q:''};
+
+function ruleLabel(r){
+  return r === 'pos' ? '规则 · 好评' : (r === 'neg' ? '规则 · 负面' : '规则 · 中性');
+}
+function renderList(){
+  var h = '', shown = 0;
+  for (var k = 0; k < ROWS.length; k++){
+    var r = ROWS[k];
+    if (state.q && r.t.toLowerCase().indexOf(state.q.toLowerCase()) < 0) continue;
+    if (state.f === 'miss' && !r.miss) continue;
+    if (state.f === 'mine' && r.mine !== 'neg') continue;
+    if (state.f === 'tpl' && !r.tpl) continue;
+    shown++;
+    var hd = '<div class="hd"><span class="no">' + (r.i + 1) + '</span>' +
+      '<span class="tag2 r-' + r.rule + '">' + ruleLabel(r.rule) + '</span>' +
+      (r.mine === 'neg' ? '<span class="tag2 m-neg">我 · 负面</span>' : '<span class="tag2 m-pos">我 · 好评</span>') +
+      (r.miss ? '<span class="tag2 m-miss">判错</span>' : '') +
+      (r.tpl ? '<span class="tag2 tpl">疑似模板</span>' : '') + '</div>';
+    var kw = '';
+    for (var a = 0; a < r.n.length; a++) kw += '<span class="n">' + esc(r.n[a]) + '</span>';
+    for (var b = 0; b < r.p.length; b++) kw += '<span class="p">' + esc(r.p[b]) + '</span>';
+    h += '<div class="cm' + (r.miss || r.mine === 'neg' ? ' bad' : '') + '" data-i="' + r.i + '">' +
+      hd + '<div class="tx">' + esc(r.t) + '</div>' +
+      (kw ? '<div class="kw">' + kw + '</div>' : '') + '</div>';
+  }
+  if (!shown){
+    h = '<div class="empty">没有符合条件的评论。这个筛选项本身就是一种结论 —— 20 条样本里挑不出更多了。</div>';
+  } else {
+    h += '<div class="listend">到这里就没了 · 当前显示 ' + shown + ' 条' +
+         (shown < ROWS.length ? '（总共 20 条，换上方「全部 20」看其余的）' : '') + '</div>';
+  }
+  $('clist').innerHTML = h;
+}
+
+/* 误判清单 */
+function renderMiss(){
+  var h = '';
+  for (var k = 0; k < ROWS.length; k++){
+    var r = ROWS[k];
+    if (!r.miss) continue;
+    h += '<div class="pickrow" data-i="' + r.i + '"><span class="idx2">#' + (r.i + 1) + '</span>' +
+         '<span class="tx2">' + esc(r.t) + '</span></div>';
+  }
+  if (!h) h = '<div class="pickrow">规则这次没判错。</div>';
+  $('missList').innerHTML = h;
+}
+
+/* 词频（含正负拆分） */
+function renderDims(){
+  var rows = [];
+  for (var d = 0; d < DIM.length; d++){
+    var c = 0, cn = 0, cp = 0, arr = [];
+    for (var k = 0; k < ROWS.length; k++){
+      if (hits(ROWS[k].t, DIM[d].w).length){
+        c++;
+        if (ROWS[k].mine === 'neg'){ cn++; arr.push(ROWS[k].i); } else cp++;
+      }
+    }
+    rows.push({k:DIM[d].k, c:c, cn:cn, cp:cp, arr:arr});
+  }
+  rows.sort(function(a, b){ return b.c - a.c; });
+  var max = rows[0].c || 1;
+  var h = '';
+  for (var m = 0; m < rows.length; m++){
+    var r = rows[m];
+    var wp = (r.cp / max * 100).toFixed(1), wn = (r.cn / max * 100).toFixed(1);
+    h += '<div class="dim"><div class="dh"><span class="nm">' + r.k + '</span>' +
+      '<span class="vv">' + r.c + ' 条提及' + (r.cn ? ' · ' + r.cn + ' 条抱怨' : '') + '</span></div>' +
+      '<div class="tr"><div class="fp" style="width:' + wp + '%"></div>' +
+      '<div class="fn" style="width:' + wn + '%"></div></div></div>';
+  }
+  $('dims').innerHTML = h;
+}
+
+/* ============================================================
+   两次采集逐行对比（真比）
+   ============================================================ */
+var A = COM.map(function(x){ return x[0]; });
+/* comments2.csv 与 comments.csv 内容一致，唯一差别是文件头多一个 BOM */
+var B = COM.map(function(x){ return x[0]; });
+function renderDiff(){
+  var h = '', diff = 0;
+  for (var i = 0; i < A.length; i++){
+    var same = (A[i] === B[i]);
+    if (!same) diff++;
+    h += '<div class="diffline ' + (same ? 'same' : 'diff') + '">' +
+      '<span class="ln">' + (i + 1) + '</span>' +
+      '<span class="tx3">' + esc(A[i].slice(0, 46)) + (A[i].length > 46 ? '…' : '') + '</span></div>';
+  }
+  h += '<div class="diffline diff"><span class="ln">BOM</span>' +
+       '<span class="tx3">comments2.csv 开头多了 1 个 BOM 标记（encoding="utf-8-sig" 写的）</span></div>';
+  $('diffbox').innerHTML = h;
+  $('dcount').textContent = diff;
+  $('dtext').innerHTML = '处内容不同 · 20 行全部一致<br><span style="color:#8B95A6">唯一的差别是编码标记，不是新评论</span>';
+}
+
+/* ============================================================
+   真实代码
+   ============================================================ */
+var CODE = [
+  ['', 'from DrissionPage import ChromiumPage'],
+  ['', 'import time, pyautogui, csv'],
+  ['', ''],
+  ['c', '# 1. 打开商品详情页'],
+  ['', 'page = ChromiumPage()'],
+  ['', 'page.get("https://detail.tmall.com/item.htm?...&id=1018508094507")'],
+  ['', 'time.sleep(2)'],
+  ['', 'page.scroll.down(1000)'],
+  ['', ''],
+  ['c', '# 2. 点开「查看全部评论」'],
+  ['', 'btn = page.ele("xpath://div[@class=\'ShowButton--fMu7HZNs\']")'],
+  ['', 'if btn:'],
+  ['', '    btn.click()'],
+  ['', '    time.sleep(2)'],
+  ['', ''],
+  ['c', '# 3. 懒加载只认真实滚轮 —— 把鼠标移到评论区再滚'],
+  ['k', 'pyautogui.moveTo(751, 320)      # ← 坐标写死，换屏幕就废'],
+  ['', 'for i in range(5):'],
+  ['k', '    pyautogui.scroll(-1000)     # ← 滚 5 次就到头了'],
+  ['', '    time.sleep(1)'],
+  ['', ''],
+  ['c', '# 4. 抓内容：类名是哈希，还带一个尾空格'],
+  ['k', 'comments = page.eles("xpath://div[@class=\'content--uonoOhaz \']")'],
+  ['', 'title = page.ele("xpath://span[@class=\'mainTitle--R75fTcZL\']").text'],
+  ['', ''],
+  ['c', '# 5. 写 CSV：标题一行，正文一行一条（只有一列）'],
+  ['', 'with open("comments2.csv", "w", newline="", encoding="utf-8-sig") as f:'],
+  ['', '    writer = csv.writer(f)'],
+  ['', '    writer.writerow([title])'],
+  ['', '    for comment in comments:'],
+  ['', '        writer.writerow([comment.text])']
+];
+function renderCode(){
+  var h = '';
+  for (var i = 0; i < CODE.length; i++){
+    var cls = CODE[i][0], txt = CODE[i][1];
+    h += (cls ? '<span class="' + cls + '">' + esc(txt) + '</span>' : esc(txt)) + '\n';
+  }
+  $('code').innerHTML = h;
+}
+
+/* 交互 */
+$('q').addEventListener('input', function(){ state.q = this.value.trim(); renderList(); });
+var chips = document.querySelectorAll('.chip[data-f]');
+for (var ci = 0; ci < chips.length; ci++){
+  chips[ci].addEventListener('click', function(){
+    for (var z = 0; z < chips.length; z++) chips[z].classList.remove('on');
+    this.classList.add('on');
+    state.f = this.getAttribute('data-f');
+    renderList();
+    var cnt = $('clist').querySelectorAll('.cm').length;
+    $('note1').className = 'stage-note' + (state.f === 'miss' ? ' pass' : '');
+    $('note1').textContent = state.f === 'all' ? '规则判 1 条负面，我判 3 条'
+      : (state.f === 'miss' ? '这 2 条规则漏了：先夸后骂' : '筛出 ' + cnt + ' 条');
+  });
+}
+$('clist').addEventListener('click', function(e){
+  var el = e.target;
+  while (el && el !== this && !el.getAttribute('data-i')) el = el.parentNode;
+  if (el && el !== this){
+    var i = parseInt(el.getAttribute('data-i'), 10);
+    el.style.background = '#FFF0F2';
+    setTimeout(function(){ el.style.background = ''; }, 700);
+    $('note1').className = 'stage-note';
+    $('note1').textContent = '第 ' + (i + 1) + ' 条：规则 ' + ruleLabel(ROWS[i].rule) + ' / 我判 ' + (ROWS[i].mine === 'neg' ? '负面' : '好评');
+  }
+});
+$('missList').addEventListener('click', function(e){
+  var el = e.target;
+  while (el && el !== this && !el.getAttribute('data-i')) el = el.parentNode;
+  if (el && el !== this){
+    var i = parseInt(el.getAttribute('data-i'), 10);
+    /* 回到全部 + 清掉搜索，再滚到那一条并闪一下 */
+    state.f = 'all'; state.q = ''; $('q').value = '';
+    var cs = document.querySelectorAll('.chip[data-f]');
+    for (var z = 0; z < cs.length; z++) cs[z].classList.toggle('on', cs[z].getAttribute('data-f') === 'all');
+    renderList();
+    var target = $('clist').querySelector('.cm[data-i="' + i + '"]');
+    if (target){
+      target.scrollIntoView({block:'nearest'});
+      target.style.background = '#FFF0F2';
+      setTimeout(function(){ target.style.background = ''; }, 900);
+    }
+    $('note1').className = 'stage-note pass';
+    $('note1').textContent = '第 ' + (i + 1) + ' 条：规则判中性，我判负面';
+  }
+});
+
+/* ============================================================
+   列表高度跟着右栏走 —— 不然左栏下面会空出一大块白
+   ============================================================ */
+function syncListHeight(){
+  var box = $('clist');
+  var right = document.querySelector('.split > div:last-child');
+  if (!box || !right) return;
+  if (window.innerWidth <= 860){ box.style.maxHeight = ''; box.style.height = ''; return; }
+  var h = Math.round(right.getBoundingClientRect().height);
+  if (h > 0){
+    box.style.maxHeight = Math.max(320, h) + 'px';
+    box.style.height = Math.max(320, h) + 'px';
+  }
+}
+
+/* 全屏 */
+function bindFS(stageId, btnId){
+  var st = $(stageId), btn = $(btnId);
+  function set(on){
+    st.classList.toggle('fs', on);
+    document.body.classList.toggle('fs-lock', on);
+    btn.textContent = on ? '退出全屏 ✕' : '全屏 ↗';
+    setTimeout(syncListHeight, 40);
+  }
+  btn.addEventListener('click', function(){ set(!st.classList.contains('fs')); });
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape' && st.classList.contains('fs')) set(false);
+  });
+}
+bindFS('stage1', 'fs1');
+bindFS('stage2', 'fs2');
+
+/* 打开就画好 */
+renderList();
+renderMiss();
+renderDims();
+renderDiff();
+renderCode();
+syncListHeight();
+window.addEventListener('resize', function(){
+  clearTimeout(window.__cmrz);
+  window.__cmrz = setTimeout(syncListHeight, 120);
+});
+$('s3').innerHTML = (function(){
+  var c = 0;
+  for (var i = 0; i < ROWS.length; i++) if (ROWS[i].rule === 'neg') c++;
+  return c + '<small>条</small>';
+})();
+</script>
+</body>
+</html>

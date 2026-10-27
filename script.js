@@ -6,13 +6,15 @@ Object.entries(portfolio).forEach(([key, value]) => {
   if (typeof value === "string") bindText(key, value);
 });
 
+// emailLink 是从 email 推出来的，必须在统一绑定之前算好。
+// 否则下面那轮会把 [data-bind-href="emailLink"] 当成"没填"直接 hidden。
+portfolio.emailLink = `mailto:${portfolio.email}`;
+
 document.querySelectorAll("[data-bind-href]").forEach((node) => {
   const value = portfolio[node.dataset.bindHref];
   if (value) node.href = value;
   else node.hidden = true;
 });
-
-bindText("emailLink", `mailto:${portfolio.email}`);
 
 // ═══════════════ 导航栏：滚动感知 + 活跃链接 + 进度条 ═══════════════
 const siteHeader = document.getElementById("site-header");
@@ -120,6 +122,13 @@ document.getElementById("year").textContent = new Date().getFullYear();
 
 document.getElementById("project-count").textContent = String(portfolio.projects.length).padStart(2, "0");
 
+// ═══════════════ 数据条：项目 / 方向 / 工具，全部从 content.js 算出来 ═══════════════
+const dirCount = document.getElementById("dir-count");
+if (dirCount) dirCount.textContent = String(new Set(portfolio.projects.map((p) => p.category)).size).padStart(2, "0");
+
+const toolCount = document.getElementById("tool-count");
+if (toolCount) toolCount.textContent = String(portfolio.skills.length).padStart(2, "0");
+
 // ═══════════════ 滚动入场动画 ═══════════════
 // 必须定义在 renderProjects() 之前，避免 TDZ
 const fadeObserver = new IntersectionObserver((entries) => {
@@ -159,6 +168,27 @@ const renderProjects = (category = "all") => {
 
 document.getElementById("skills").innerHTML = portfolio.skills.map((skill) => `<span>${skill}</span>`).join("");
 renderProjects();
+
+// ═══════════════ 资料卡：项目方向分布（不是装饰条，是真数出来的） ═══════════════
+const distBar = document.getElementById("dist-bar");
+if (distBar) {
+  const ORDER = ["crawler", "analysis", "automation", "ai", "creative", "web"];
+  const PALETTE = {
+    crawler: "#00809a", analysis: "#4888c8", automation: "#c89820",
+    ai: "#8b5cf6", creative: "#b84870", web: "#389e70",
+  };
+  const dist = ORDER
+    .map((key) => ({ key, n: portfolio.projects.filter((p) => p.category === key).length }))
+    .filter((d) => d.n > 0);
+
+  document.getElementById("dist-total").textContent = String(portfolio.projects.length).padStart(2, "0");
+  distBar.innerHTML = dist
+    .map((d) => `<i style="flex:${d.n} 1 0;background:${PALETTE[d.key]}" title="${labels[d.key]} ${d.n} 个"></i>`)
+    .join("");
+  document.getElementById("dist-legend").innerHTML = dist
+    .map((d) => `<li><i style="background:${PALETTE[d.key]}"></i>${labels[d.key]}<b>${d.n}</b></li>`)
+    .join("");
+}
 
 document.querySelectorAll(".filter").forEach((button) => {
   button.addEventListener("click", () => {

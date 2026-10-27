@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>网页接口加密逆向 · 项目详情</title>
+<link rel="icon" href="../../favicon.svg?v=2" type="image/svg+xml">
+<style>
+  /* ============================================================
+     配色：近白底 / 近黑字 / 浅蓝主色 / 粉点缀 / 红做强调点
+     ============================================================ */
+  :root{
+    --bg:#FBFCFE;
+    --ink:#1A1D24;
+    --ink2:#525B6B;
+    --ink3:#8B95A6;
+    --blue:#4FA8E8;
+    --blue-d:#2E8BD0;
+    --blue-s:#EAF5FD;
+    --pink:#FF8FB1;
+    --pink-d:#E0568A;
+    --pink-s:#FFF0F5;
+    --red:#E8455F;
+    --red-d:#C9304A;
+    --red-s:#FFEBEE;
+    --line:#E4EBF5;
+  }
+
+  @font-face{font-family:"Noto Sans SC";font-style:normal;font-weight:400;
+    font-display:swap;src:url("../../fonts/NotoSansSC-400-subset.woff2") format("woff2")}
+  @font-face{font-family:"Noto Sans SC";font-style:normal;font-weight:500;
+    font-display:swap;src:url("../../fonts/NotoSansSC-500-subset.woff2") format("woff2")}
+  @font-face{font-family:"Noto Sans SC";font-style:normal;font-weight:600;
+    font-display:swap;src:url("../../fonts/NotoSansSC-600-subset.woff2") format("woff2")}
+  @font-face{font-family:"Noto Sans SC";font-style:normal;font-weight:700;
+    font-display:swap;src:url("../../fonts/NotoSansSC-700-subset.woff2") format("woff2")}
+  @font-face{font-family:"Noto Sans SC";font-style:normal;font-weight:800;
+    font-display:swap;src:url("../../fonts/NotoSansSC-700-subset.woff2") format("woff2")}
+
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"Noto Sans SC","Microsoft YaHei","PingFang SC",Arial,sans-serif;
+    font-weight:400;color:var(--ink);background:var(--bg);line-height:1.75;overflow-x:hidden}
+
+  .glow{position:fixed;inset:0;pointer-events:none;z-index:0;
+    background:
+      radial-gradient(circle at 8% 0%, rgba(79,168,232,.20), transparent 42%),
+      radial-gradient(circle at 94% 4%, rgba(232,69,95,.16), transparent 40%),
+      radial-gradient(circle at 50% 102%, rgba(79,168,232,.09), transparent 46%)}
+
+  .wrap{position:relative;z-index:1;max-width:min(1600px,100%);margin:0 auto;padding:56px clamp(16px,3vw,40px) 96px}
+
+  .back{display:flex;width:fit-content;align-items:center;gap:8px;color:var(--ink3);
+    text-decoration:none;font-size:14px;margin-bottom:34px;transition:color .2s}
+  .back:hover{color:var(--blue-d)}
+
+  .num{display:inline-block;font-size:12.5px;font-weight:600;letter-spacing:.14em;
+    color:#fff;background:linear-gradient(100deg,#3E9FE0 0%,#E8455F 72%,#D62F4A 100%);
+    border-radius:999px;padding:6px 16px;margin-bottom:16px;
+    box-shadow:0 8px 22px rgba(214,47,74,.34)}
+
+  h1{font-size:clamp(28px,4.6vw,44px);line-height:1.25;font-weight:800;
+    color:var(--ink);margin-bottom:14px;letter-spacing:-.01em;position:relative}
+  h1::after{content:"";display:inline-block;width:11px;height:11px;border-radius:3px;
+    background:var(--red);margin-left:12px;vertical-align:.22em;
+    box-shadow:0 3px 10px rgba(232,69,95,.45)}
+
+  .lede{font-size:17px;color:var(--ink2);max-width:700px;margin-bottom:28px}
+  .lede strong{color:var(--ink);font-weight:600;
+    background:linear-gradient(transparent 60%, rgba(232,69,95,.22) 60%);
+    padding:0 2px;border-radius:2px}
+
+  .tags{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:34px}
+  .tag{font-size:12.5px;padding:6px 14px;border-radius:999px;
+    background:#fff;border:1px solid var(--line);color:var(--ink2);
+    box-shadow:0 1px 2px rgba(26,29,36,.04)}
+  .tag:nth-child(3n+1){border-color:#D6EAF8;color:var(--blue-d);background:var(--blue-s)}
+  .tag:nth-child(3n+2){border-color:#FBD0D7;color:var(--red-d);background:var(--red-s)}
+
+  h2{font-size:20px;color:var(--ink);margin:0 0 18px;padding-left:15px;position:relative;
+    font-weight:700}
+  h2::before{content:"";position:absolute;left:0;top:6px;bottom:6px;width:4px;
+    border-radius:3px;background:linear-gradient(180deg,var(--blue),var(--red))}
+
+  .card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:19px 21px;
+    box-shadow:0 2px 10px rgba(26,29,36,.045);transition:transform .22s,box-shadow .22s,border-color .22s}
+  .card:hover{transform:translateY(-3px);box-shadow:0 12px 28px rgba(79,168,232,.14);
+    border-color:#D6EAF8}
+  .card h3{font-size:14px;color:var(--blue-d);margin-bottom:9px;font-weight:700}
+  .card p{font-size:14px;color:var(--ink2);margin:0}
+
+  /* ---------- 首屏 demo ---------- */
+  .stage{position:relative;margin:0 0 30px;border-radius:20px;overflow:hidden;
+    border:1px solid var(--line);background:#fff;
+    box-shadow:0 22px 60px rgba(79,168,232,.16), 0 4px 14px rgba(26,29,36,.05)}
+  .stage-bar{display:flex;align-items:center;gap:8px;padding:11px 16px;
+    background:linear-gradient(90deg,#F7FBFE,#FEF7FA);border-bottom:1px solid var(--line)}
+  .stage-dot{width:9px;height:9px;border-radius:50%}
+  .stage-dot:nth-child(1){background:#FFC9D9}
+  .stage-dot:nth-child(2){background:#CFE8F9}
+  .stage-dot:nth-child(3){background:#D9E6F2}
+  .stage-title{font-size:12.5px;color:var(--ink3);margin-left:6px}
+  .stage-live{display:inline-flex;align-items:center;gap:6px;margin-left:8px;
+    font-size:11.5px;font-weight:600;color:var(--red-d)}
+  .stage-live::before{content:"";width:6px;height:6px;border-radius:50%;
+    background:var(--red);box-shadow:0 0 0 3px rgba(232,69,95,.24);
+    animation:livePulse 1.6s ease-in-out infinite}
+  @keyframes livePulse{0%,100%{opacity:1}50%{opacity:.3}}
+  .stage-note{margin-left:auto;font-size:12px;color:var(--ink3);transition:color .3s}
+  .stage-note.pass{color:#1F9D55;font-weight:700}
+
+  /* 全屏按钮 */
+  .fs-btn{font:inherit;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;
+    padding:5px 13px;border-radius:999px;border:1px solid #D6EAF8;background:#fff;
+    color:var(--blue-d);margin-left:10px;transition:background .18s,border-color .18s}
+  .fs-btn:hover{background:var(--blue-s);border-color:#B9DDF4}
+  .stage.fs .fs-btn{background:var(--red-s);border-color:#F8C9D0;color:var(--red-d)}
+
+  /* 全屏：铺满视口，字和结果串都放大 */
+  .stage.fs{position:fixed;inset:0;z-index:9999;margin:0;border:0;border-radius:0;
+    display:flex;flex-direction:column;overflow:auto;background:#fff;box-shadow:none}
+  .stage.fs .stage-bar{border-radius:0;flex:none;position:sticky;top:0;z-index:2}
+  .stage.fs .demo{max-width:1180px;margin:0 auto;width:100%;padding:28px 32px 24px}
+  .stage.fs .demo-lead{font-size:15px;margin-bottom:20px}
+  .stage.fs .ctrl{margin-bottom:24px}
+  .stage.fs .steps{gap:12px;margin-bottom:22px}
+  .stage.fs .stepcard{padding:15px 18px}
+  .stage.fs .stepcard .d{font-size:13px}
+  .stage.fs .stepcard .val{max-height:132px;font-size:12.5px;line-height:1.7}
+  .stage.fs .out-val{max-height:150px;font-size:12.5px}
+  .stage.fs .verify{padding:16px 18px;font-size:13px}
+  body.fs-lock{overflow:hidden}
+
+  .demo{padding:20px 22px 18px}
+  .demo-lead{font-size:13.5px;color:var(--ink2);margin-bottom:16px}
+  .demo-lead code{font-family:Consolas,"Cascadia Code",Monaco,monospace;font-size:12.5px;
+    color:var(--blue-d);background:var(--blue-s);border-radius:5px;padding:1px 6px}
+
+  .ctrl{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:18px}
+  .field{display:flex;align-items:center;gap:8px;flex:1 1 220px;min-width:0}
+  .field label{font-size:13px;color:var(--ink3);white-space:nowrap}
+  input[type=text]{flex:1;min-width:0;font:inherit;font-size:14px;color:var(--ink);
+    border:1px solid var(--line);border-radius:11px;padding:9px 13px;background:#FDFEFF;
+    transition:border-color .2s,box-shadow .2s}
+  input[type=text]:focus{outline:none;border-color:#B9DDF4;
+    box-shadow:0 0 0 4px rgba(79,168,232,.13)}
+
+  button{font:inherit;font-weight:600;font-size:13.5px;cursor:pointer;border-radius:999px;
+    padding:9px 20px;border:1px solid transparent;transition:transform .18s,box-shadow .18s,background .18s}
+  button:active{transform:translateY(1px)}
+  .btn-main{color:#fff;background:linear-gradient(100deg,#3E9FE0 0%,#E8455F 78%);
+    box-shadow:0 8px 20px rgba(232,69,95,.28)}
+  .btn-main:hover{box-shadow:0 12px 26px rgba(232,69,95,.36)}
+  .btn-ghost{color:var(--blue-d);background:#fff;border-color:#D6EAF8}
+  .btn-ghost:hover{background:var(--blue-s)}
+  .btn-line{color:var(--ink2);background:#fff;border-color:var(--line)}
+  .btn-line:hover{border-color:#B9DDF4;color:var(--blue-d)}
+
+  /* 三步流水线 */
+  .steps{display:grid;gap:9px;margin-bottom:16px}
+  .stepcard{position:relative;border:1px solid var(--line);border-left:4px solid var(--line);
+    border-radius:13px;padding:11px 15px;background:#fff;
+    opacity:.42;transition:opacity .3s,border-color .3s,background .3s,transform .3s;
+    transform:translateY(2px)}
+  .stepcard.on{opacity:1;transform:none;background:#FDFEFF}
+  .stepcard.s1.on{border-left-color:var(--blue);border-color:#DCEBF8;
+    background:linear-gradient(100deg,#F5FBFF,#FDFEFF)}
+  .stepcard.s2.on{border-left-color:var(--pink);border-color:#FBDDE7;
+    background:linear-gradient(100deg,#FFF7FA,#FDFEFF)}
+  .stepcard.s3.on{border-left-color:var(--red);border-color:#FAD5DC;
+    background:linear-gradient(100deg,#FFF6F8,#FDFEFF)}
+  .stepcard .sh{display:flex;align-items:center;gap:9px;margin-bottom:6px}
+  .stepcard .no{flex:none;width:20px;height:20px;border-radius:50%;font-size:11.5px;
+    font-weight:700;color:#fff;display:flex;align-items:center;justify-content:center;
+    background:var(--ink3)}
+  .stepcard.s1.on .no{background:linear-gradient(135deg,#3E9FE0,#2E8BD0)}
+  .stepcard.s2.on .no{background:linear-gradient(135deg,#FF8FB1,#E0568A)}
+  .stepcard.s3.on .no{background:linear-gradient(135deg,#E8455F,#C9304A)}
+  .stepcard .t{font-size:13.5px;font-weight:700;color:var(--ink)}
+  .stepcard .m{margin-left:auto;font-size:11.5px;color:var(--ink3);
+    font-family:Consolas,"Cascadia Code",Monaco,monospace}
+  .stepcard .d{font-size:12.5px;color:var(--ink2);margin-bottom:8px}
+  .stepcard .d code{font-family:Consolas,"Cascadia Code",Monaco,monospace;font-size:11.5px;
+    color:var(--blue-d);background:var(--blue-s);border-radius:4px;padding:0 5px}
+  .stepcard .val{font-family:Consolas,"Cascadia Code",Monaco,monospace;font-size:11.5px;
+    color:#3A4557;background:#F4F8FC;border:1px solid #E7EFF7;border-radius:8px;
+    padding:6px 10px;word-break:break-all;line-height:1.55;max-height:52px;overflow:auto}
+  .stepcard .val.empty{color:#B6C0CE}
+
+  /* 输出 */
+  .out{margin-bottom:18px}
+  .out-row{display:flex;gap:10px;align-items:flex-start;margin-bottom:10px}
+  .out-key{flex:none;width:92px;font-size:12px;font-weight:700;color:var(--ink3);
+    padding-top:9px;letter-spacing:.02em}
+  .out-val{flex:1;min-width:0;font-family:Consolas,"Cascadia Code",Monaco,monospace;
+    font-size:11.5px;line-height:1.65;word-break:break-all;color:#CFD6E0;
+    background:#1E1F22;border:1px solid #2A2C30;border-radius:10px;padding:9px 12px;
+    max-height:104px;overflow:auto}
+
+  /* 校验条 */
+  .verify{display:flex;align-items:flex-start;gap:11px;padding:13px 16px;border-radius:13px;
+    background:#F7FAFD;border:1px solid var(--line);font-size:12.5px;color:var(--ink2)}
+  .verify .vu{flex:none;font-weight:800;font-size:15px;line-height:1.4;color:var(--ink3)}
+  .verify.ok{background:#F2FBF5;border-color:#CDEBD8}
+  .verify.ok .vu{color:#1F9D55}
+  .verify.bad{background:var(--red-s);border-color:#F8C9D0}
+  .verify.bad .vu{color:var(--red-d)}
+  .verify .vt{flex:1;min-width:0}
+  .verify b{color:var(--ink);font-weight:700}
+  .verify code{font-family:Consolas,"Cascadia Code",Monaco,monospace;font-size:11.5px;
+    color:#3A4557;background:#fff;border:1px solid #E7EFF7;border-radius:5px;padding:0 5px;
+    word-break:break-all}
+
+  .demo-foot{font-size:11.5px;color:var(--ink3);margin-top:14px;line-height:1.7}
+
+  /* ---------- 正文 ---------- */
+  section.body{margin-top:46px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px;margin-bottom:10px}
+
+  ul.flow{list-style:none;counter-reset:step;margin-bottom:10px}
+  ul.flow li{position:relative;padding-left:34px;margin-bottom:14px;font-size:14.5px;color:var(--ink2)}
+  ul.flow li::before{content:counter(step);counter-increment:step;position:absolute;left:0;top:2px;
+    width:22px;height:22px;border-radius:50%;font-size:12px;font-weight:700;color:#fff;
+    text-align:center;line-height:22px;
+    background:linear-gradient(135deg,var(--blue),var(--red))}
+  ul.flow li strong{color:var(--ink);font-weight:600}
+  ul.flow li code{font-family:Consolas,"Cascadia Code",Monaco,monospace;font-size:12.5px;
+    color:var(--blue-d);background:var(--blue-s);border-radius:5px;padding:1px 6px}
+
+  /* 代码块：PyCharm Darcula 配色 */
+  .code{white-space:pre-wrap;word-break:break-word;
+    background:#1E1F22;border:1px solid #2A2C30;border-radius:14px;
+    padding:19px 21px;font-family:Consolas,"Cascadia Code",Monaco,monospace;font-size:13px;
+    color:#BCBEC4;overflow-x:auto;margin-bottom:12px;line-height:1.8;
+    box-shadow:0 10px 28px rgba(26,29,36,.22), inset 0 1px 0 rgba(255,255,255,.05)}
+  .code .c{color:#7A7E85}
+  .code .k{color:#CF8E6D}
+  .code .s{color:#6AAB73}
+  .code .n{color:#2AACB8}
+  .cap{font-size:12.5px;color:var(--ink3);margin:0 0 40px}
+  .cap code{font-family:Consolas,"Cascadia Code",Monaco,monospace;font-size:12px;
+    color:var(--blue-d);background:var(--blue-s);border-radius:4px;padding:1px 5px}
+
+  .note{border-radius:14px;padding:16px 19px;font-size:13.5px;color:var(--ink2);
+    background:var(--blue-s);border:1px solid #D6EAF8;margin-bottom:40px}
+  .note.warn{background:var(--red-s);border-color:#F8C9D0}
+  .note b{color:var(--ink);font-weight:700}
+  .note code{font-family:Consolas,"Cascadia Code",Monaco,monospace;font-size:12.5px;
+    color:var(--blue-d);background:#fff;border-radius:5px;padding:1px 6px}
+
+  footer{text-align:center;font-size:13px;color:var(--ink3);padding-top:38px;
+    border-top:1px solid var(--line);margin-top:56px}
+  footer a{color:var(--blue-d);text-decoration:none;font-weight:600}
+  footer a:hover{color:var(--red-d)}
+
+  @media (max-width:720px){
+    .wrap{padding:40px 18px 72px}
+    .demo{padding:18px 16px}
+    .out-row{flex-direction:column;gap:5px}
+    .out-key{width:auto;padding-top:0}
+    .stage-note{display:none}
+  }
+</style>
+</head>
+<body>
+<div class="glow"></div>
+
+<div class="wrap">
+  <a class="back" href="../../index.html">← 返回作品集</a>
+
+  <div class="num">PROJECT 31</div>
+  <h1>网页接口加密逆向</h1>
+  <p class="lede">我抓歌单的时候卡在这里：搜索接口的请求体里没有明文关键词，只有一串
+  <strong>params</strong> 和一串 <strong>encSecKey</strong>。改一个字就查不出东西，
+  抄一次 body 又只能查那一个词。所以我花了很久把这两串东西的生成过程拆开，
+  再用纯 Python 在本地一模一样算出来——<strong>现在是随便换关键词都能自己算</strong>，不是抄的。</p>
+
+  <div class="tags">
+    <span class="tag">Python</span>
+    <span class="tag">AES-128-CBC</span>
+    <span class="tag">RSA</span>
+    <span class="tag">MD5</span>
+    <span class="tag">requests</span>
+  </div>
+
+  <!-- ============ 首屏：真的在算，不是动画 ============ -->
+  <div class="stage" id="stage">
+    <div class="stage-bar">
+      <span class="stage-dot"></span><span class="stage-dot"></span><span class="stage-dot"></span>
+      <span class="stage-title">实时运算 · 浏览器内真跑三层加密</span>
+      <span class="stage-live">LIVE</span>
+      <span class="stage-note">不联网、不调后端</span>
+      <button class="fs-btn" id="fsBtn" type="button">全屏 ↗</button>
+    </div>
+
+    <div class="demo">
+      <p class="demo-lead">输入一个搜索词，它会按网易云 <code>weapi</code> 的流程真实加密一遍。
+      下面每个字节都是现场算出来的。</p>
+
+      <div class="ctrl">
+        <div class="field">
+          <label for="kw">搜索词</label>
+          <input type="text" id="kw" value="周杰伦" maxlength="20" autocomplete="off"
+                 spellcheck="false">
+        </div>
+        <button class="btn-main" id="run">运行加密流水线</button>
+        <button class="btn-line" id="reroll">换随机密钥</button>
+        <button class="btn-ghost" id="verify">跑校验</button>
+      </div>
+
+      <div class="steps" id="steps">
+        <div class="stepcard s1">
+          <div class="sh"><span class="no">1</span><span class="t">AES 第一层 · 固定密钥</span>
+            <span class="m" id="m1">待运行</span></div>
+          <div class="d">用页面里写死的 <code>0CoJUm6Qyw8W8jud</code> 加密明文 JSON，
+            IV 固定 <code>0102030405060708</code>，PKCS7 填充，输出 base64。</div>
+          <div class="val empty" id="v1">—</div>
+        </div>
+        <div class="stepcard s2">
+          <div class="sh"><span class="no">2</span><span class="t">AES 第二层 · 随机密钥</span>
+            <span class="m" id="m2">待运行</span></div>
+          <div class="d">再拿一个随机生成的 16 位密钥，把第一层的 base64 结果当成明文，
+            再 AES 一遍。这一层的结果就是 <code>params</code>。</div>
+          <div class="val empty" id="v2">—</div>
+        </div>
+        <div class="stepcard s3">
+          <div class="sh"><span class="no">3</span><span class="t">RSA 加密随机密钥</span>
+            <span class="m" id="m3">待运行</span></div>
+          <div class="d">把那个随机密钥补零到 126 字节，按小端拼成大整数，
+            做 <code>c = m^e mod n</code>，转成十六进制——这就是 <code>encSecKey</code>。</div>
+          <div class="val empty" id="v3">—</div>
+        </div>
+      </div>
+
+      <div class="out">
+        <div class="out-row">
+          <div class="out-key">params</div>
+          <div class="out-val" id="o-params">—</div>
+        </div>
+        <div class="out-row">
+          <div class="out-key">encSecKey</div>
+          <div class="out-val" id="o-key">—</div>
+        </div>
+      </div>
+
+      <div class="verify" id="verifyBox">
+        <span class="vu">?</span>
+        <span class="vt">点「跑校验」，拿固定输入跟浏览器里 <code>CryptoJS</code> 的真实输出
+          逐字节比对——只有完全一致才算复刻成功。</span>
+      </div>
+
+      <p class="demo-foot">
+        说明：这里的 RSA 指数、模数和固定 AES 密钥，都是从页面 JS 的混淆代码里抠出来的常量，
+        属于逆向结果。搜索词只在你自己浏览器里参与运算，<b>页面不会真的去请求网易云</b>——
+        真正打接口的那段在下面的 Python 代码里。
+      </p>
+    </div>
+  </div>
+
+  <!-- ============ 正文 ============ -->
+  <section class="body">
+    <h2>我为什么要把它拆开</h2>
+    <p style="font-size:14.5px;color:var(--ink2);margin-bottom:16px">
+      搜索框里输入「周杰伦」，浏览器发出去的请求长这样：
+      <span style="font-family:Consolas,monospace;font-size:13px;color:var(--blue-d)">POST /weapi/cloudsearch/get/web</span>，
+      请求体只有两个字段，都是 base64 / 十六进制串，看不出任何东西。
+      直接 <code style="font-family:Consolas,monospace;font-size:12.5px;color:var(--blue-d);background:var(--blue-s);border-radius:5px;padding:1px 6px">requests.post</code>
+      抄一遍 body 也能成功——但那是<b>把结果抄下来</b>，换个关键词就废了。
+    </p>
+    <div class="grid">
+      <div class="card">
+        <h3>我第一版就是抄 body</h3>
+        <p>把浏览器里的 <code>params</code> 抄进脚本直接发，确实能出结果。但换个歌手就得重新抄一遍——
+          <code>encSecKey</code> 里装的是那一次的随机密钥，抄来的东西天生只能用一次。</p>
+      </div>
+      <div class="card">
+        <h3>我怎么确认自己真的算对了</h3>
+        <p>不看接口有没有返回——返回空也可能是别的原因。我拿同一个输入对页面真值做断言，
+          要求<b>逐字节一致</b>。差一个字节，接口就是空的，这一点没有中间地带。</p>
+      </div>
+      <div class="card">
+        <h3>难的地方跟我想的不一样</h3>
+        <p>我原以为难在加密算法。其实算法是标准的，难的是那三个常量藏在混淆过的 JS 里——
+          模数被拆成数组、用 emoji 做索引解码，直接搜十六进制串是搜不到的。</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="body">
+    <h2>我是怎么一步步拆的</h2>
+    <ul class="flow">
+      <li><strong>先找到入口。</strong>我顺着搜索接口翻 JS，发现所有参数都从
+        <code>asrsea()</code> 这一个函数出——只盯它一个就够了。</li>
+      <li><strong>再把三个常量抠出来。</strong>固定 AES 密钥 <code>0CoJUm6Qyw8W8jud</code>、
+        IV <code>0102030405060708</code>、RSA 模数与指数 <code>010001</code>。</li>
+      <li><strong>然后还原 AES 的两层。</strong>第一层用固定密钥，第二层用随机密钥；
+        都是 AES-128-CBC + PKCS7 + base64。</li>
+      <li><strong>RSA 这一段最绕。</strong>它不是标准 PEM，是把 16 字节密钥补零到
+        126 字节后按<b>小端</b>拼成一个大整数，再模幂——我在这里对不上的时间最长。</li>
+      <li><strong>最后端到端验证。</strong>断言通过了我才敢拿去打接口，不然就是在瞎试。</li>
+    </ul>
+  </section>
+
+  <section class="body">
+    <h2>关键代码</h2>
+    <p style="font-size:14px;color:var(--ink2);margin-bottom:14px">
+      AES 一层只有四行，真正绕的是 RSA 那段「补零 → 小端 → 模幂」：
+    </p>
+    <div class="code"><span class="c"># AES-128-CBC + PKCS7，输出 base64（与页面 CryptoJS 一致）</span>
+<span class="k">def</span> aes_encrypt(text, key):
+    key_b = key <span class="k">if</span> isinstance(key, bytes) <span class="k">else</span> key.encode(<span class="s">"utf-8"</span>)
+    cipher = AES.new(key_b, AES.MODE_CBC, IV)
+    <span class="k">return</span> base64.b64encode(cipher.encrypt(_pkcs7_pad(data))).decode(<span class="s">"utf-8"</span>)
+
+<span class="c"># RSA：补零到 126 字节 → 小端拼大整数 → c = m^e mod n → 十六进制</span>
+<span class="k">def</span> rsa_encrypt(text):
+    bs = list(text.encode(<span class="s">"utf-8"</span>))
+    <span class="k">while</span> len(bs) % CHUNK_SIZE != <span class="n">0</span>:      <span class="c"># CHUNK_SIZE = 126</span>
+        bs.append(<span class="n">0</span>)
+    value = <span class="n">0</span>
+    <span class="k">for</span> i, b <span class="k">in</span> enumerate(bs):
+        value |= b &lt;&lt; (<span class="n">8</span> * i)              <span class="c"># 小端：低字节在前</span>
+    <span class="k">return</span> format(pow(value, <span class="n">0x10001</span>, <span class="n">0x00e0b509f625...</span>), <span class="s">"x"</span>)</div>
+    <p class="cap">上面是课程提供的参考实现（<code>netease_weapi.py</code>），逐字节校验过。</p>
+
+    <p style="font-size:14px;color:var(--ink2);margin-bottom:14px">
+      我自己写的是调用它、把关键词变成请求的那一层，也是实际跑通的那一步：
+    </p>
+    <div class="code"><span class="c"># 输入歌手名 → 生成加密参数 → 直接 POST 拿真实结果</span>
+kw = input(<span class="s">"请输入歌手名字:"</span>)
+r = weapi({<span class="s">"s"</span>: kw, <span class="s">"type"</span>: <span class="n">1</span>, <span class="s">"limit"</span>: <span class="n">10</span>,
+           <span class="s">"offset"</span>: <span class="n">0</span>, <span class="s">"csrf_token"</span>: CSRF})
+response = requests.post(url, headers=headers,
+                         data={<span class="s">"params"</span>: r[<span class="s">"params"</span>],
+                               <span class="s">"encSecKey"</span>: r[<span class="s">"encSecKey"</span>]})
+<span class="k">print</span>(response.text)   <span class="c"># code 200 + 真实歌曲列表</span></div>
+    <p class="cap">Cookie 与 csrf_token 已脱敏——真实值属于账号凭证，不能贴到公开页面。</p>
+
+    <div class="note warn">
+      <b>这一点说清楚，不含糊</b>：三层加密的完整实现是课程提供的参考代码，我做的事是
+      <b>跑通整条链路</b>（关键词 → 生成参数 → 请求 → 拿到数据），并且用固定输入对页面真值
+      做断言确认逐字节一致。<b>不是我从零手写的密码学实现</b>——那需要另外的功底，
+      写了才叫虚报。
+    </div>
+  </section>
+
+  <section class="body">
+    <h2>我踩过的坑</h2>
+    <ul class="flow">
+      <li><strong>我第一版只是抄 body。</strong>把浏览器里的 <code>params</code> 抄进脚本直接发，
+        能出结果，但换关键词就不行——因为 <code>encSecKey</code> 里装的是那一次的随机密钥。</li>
+      <li><strong>我一开始用标准库，怎么都对不上。</strong>换成 <code>PyCryptodome</code> 的
+        <code>PKCS1_v1_5</code> 怎么都对不上，因为它不是 ASN.1 结构，而是手写的补零 + 小端拼数。</li>
+      <li><strong>第二层该传字符串还是二进制，我搞反过一次。</strong>第一层输出是 base64 字符串，第二层要把它
+        <b>当成文本</b>再加密，不是当成二进制。</li>
+      <li><strong>常量藏在混淆里。</strong>模数被拆成数组、用 emoji 做索引解码，
+        直接搜十六进制串是搜不到的。</li>
+    </ul>
+  </section>
+
+  <section class="body">
+    <h2>怎么运行</h2>
+    <div class="code"><span class="c"># 1. 装依赖</span>
+pip install requests pycryptodome
+
+<span class="c"># 2. 把 netease_weapi.py 和 demo03 放同一目录</span>
+<span class="c"># 3. 运行，输入歌手名</span>
+python demo03-ai获取歌单.py</div>
+    <p class="cap">输出是接口原始 JSON。我平时在打印前加一段写 CSV，落成表再看——
+      调试加密参数的时候，直接打接口看返回，比读日志快得多。</p>
+  </section>
+
+  <footer>
+    王思洋 · 网页接口加密逆向 ·
+    <a href="https://github.com/wangsy1150" target="_blank" rel="noopener">GitHub</a>
+  </footer>
+</div>
+
+<script>
+/* ============================================================
+   三层加密的真实实现
+   AES 走浏览器原生 crypto.subtle（真加密，不是模拟）
+   RSA 用 BigInt 手写快速幂（模数 1024 位，BigInt 扛得住）
+   ============================================================ */
+
+var NONCE = '0CoJUm6Qyw8W8jud';        // 第一层固定密钥
+var IV    = '0102030405060708';        // AES IV
+var CHUNK = 126;                        // JS RSAKeyPair.chunkSize
+var MODULUS = '00e0b509f6259df8642dbc35662901477df22677ec152b5ff68ace615bb7b725152b3ab17a876aea8a5aa76d2e417629ec4ee341f56135fccf695280104e0312ecbda92557c93870114af6c9d05c4f7f0c3685b7a46bee255932575cce10b424d813cfe4875d3e82047b97ddef52741d546b8e289dc6935b3ece0462db0a22b8e7';
+var PUBKEY  = '010001';
+var CSRF    = '01562503b22650749c554440c4a3a38d';
+
+var CHARS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+
+var $ = function (id) { return document.getElementById(id); };
+
+/* ---------- AES-128-CBC / PKCS7 → base64 ---------- */
+async function aesEncrypt(text, keyStr) {
+  var enc = new TextEncoder();
+  var key = await crypto.subtle.importKey(
+    'raw', enc.encode(keyStr), { name: 'AES-CBC' }, false, ['encrypt']);
+  var buf = await crypto.subtle.encrypt(
+    { name: 'AES-CBC', iv: enc.encode(IV) }, key, enc.encode(text));
+  var bytes = new Uint8Array(buf), s = '';
+  for (var i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i]);
+  return btoa(s);
+}
+
+/* ---------- RSA：补零 → 小端 → 模幂 → hex ---------- */
+function rsaEncrypt(text) {
+  var bs = [], enc = new TextEncoder().encode(text);
+  for (var i = 0; i < enc.length; i++) bs.push(enc[i]);
+  while (bs.length % CHUNK !== 0) bs.push(0);
+
+  var value = 0n;
+  for (var j = 0; j < bs.length; j++) {
+    value |= BigInt(bs[j]) << BigInt(8 * j);
+  }
+
+  var n = BigInt('0x' + MODULUS);
+  var e = BigInt('0x' + PUBKEY);
+  var c = 1n, base = value % n, exp = e;
+  while (exp > 0n) {
+    if (exp & 1n) c = (c * base) % n;
+    base = (base * base) % n;
+    exp >>= 1n;
+  }
+  return c.toString(16);
+}
+
+/* ---------- 随机 16 位密钥 ---------- */
+function randomKey() {
+  var arr = new Uint32Array(16);
+  crypto.getRandomValues(arr);
+  var s = '';
+  for (var i = 0; i < 16; i++) s += CHARS[arr[i] % CHARS.length];
+  return s;
+}
+
+/* ---------- 完整流水线 ---------- */
+async function weapi(keyword, fixedKey) {
+  var payload = JSON.stringify({
+    s: keyword, type: 1, limit: 10, offset: 0, csrf_token: CSRF
+  });
+  var rk = fixedKey || randomKey();
+
+  var t0 = performance.now();
+  var p1 = await aesEncrypt(payload, NONCE);
+  var t1 = performance.now();
+  var p2 = await aesEncrypt(p1, rk);
+  var t2 = performance.now();
+  var ek = rsaEncrypt(rk);
+  var t3 = performance.now();
+
+  return {
+    plain: payload, key: rk,
+    layer1: p1, params: p2, encSecKey: ek,
+    ms: [Math.max(1, Math.round(t1 - t0)),
+         Math.max(1, Math.round(t2 - t1)),
+         Math.max(1, Math.round(t3 - t2))]
+  };
+}
+
+/* ---------- 渲染 ---------- */
+var lastKey = null;
+
+function paint(r) {
+  var cards = document.querySelectorAll('.stepcard');
+  cards.forEach(function (c) { c.classList.remove('on'); });
+
+  $('v1').classList.remove('empty');
+  $('v1').textContent = r.layer1;
+  $('m1').textContent = 'AES-128-CBC · ' + r.ms[0] + ' ms';
+
+  $('v2').classList.remove('empty');
+  $('v2').textContent = r.params;
+  $('m2').textContent = '密钥 ' + r.key.slice(0,8) + '… · ' + r.ms[1] + ' ms';
+
+  $('v3').classList.remove('empty');
+  $('v3').textContent = r.encSecKey;
+  $('m3').textContent = '1024 bit · ' + r.encSecKey.length + ' 字符 · ' + r.ms[2] + ' ms';
+
+  $('o-params').textContent = r.params;
+  $('o-key').textContent = r.encSecKey;
+  lastKey = r.key;
+}
+
+/* 一步步点亮，让过程看得见，而不是一下子全出来 */
+async function runAnimated(keyword, fixedKey) {
+  var r = await weapi(keyword, fixedKey);
+  var cards = document.querySelectorAll('.stepcard');
+  cards.forEach(function (c) { c.classList.remove('on'); });
+
+  $('v1').classList.add('empty'); $('v1').textContent = '—';
+  $('v2').classList.add('empty'); $('v2').textContent = '—';
+  $('v3').classList.add('empty'); $('v3').textContent = '—';
+  $('o-params').textContent = '—';
+  $('o-key').textContent = '—';
+  $('m1').textContent = '计算中'; $('m2').textContent = '计算中'; $('m3').textContent = '计算中';
+
+  await sleep(90);
+  cards[0].classList.add('on');
+  $('v1').classList.remove('empty'); $('v1').textContent = r.layer1;
+  $('m1').textContent = 'AES-128-CBC · ' + r.ms[0] + ' ms';
+
+  await sleep(300);
+  cards[1].classList.add('on');
+  $('v2').classList.remove('empty'); $('v2').textContent = r.params;
+  $('m2').textContent = '密钥 ' + r.key.slice(0,8) + '… · ' + r.ms[1] + ' ms';
+  $('o-params').textContent = r.params;
+
+  await sleep(320);
+  cards[2].classList.add('on');
+  $('v3').classList.remove('empty'); $('v3').textContent = r.encSecKey;
+  $('m3').textContent = '1024 bit · ' + r.encSecKey.length + ' 字符 · ' + r.ms[2] + ' ms';
+  $('o-key').textContent = r.encSecKey;
+
+  lastKey = r.key;
+}
+
+function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+
+/* ---------- 校验：跟浏览器里的真实输出逐字节比 ---------- */
+var TRUTH = {
+  plain: '{"s":"林俊杰","limit":"8","csrf_token":"01562503b22650749c554440c4a3a38d"}',
+  aes:   '1GPYHo/IkS9hDiM0Dj6g7yYRy2s46MsRe/YPaVJnnCHH4i/sGJPZ1Vc6TbOGW8u4LzsCgZkC3h74qNiV/2NIyLoatqKqCLKPOFn0fTI74tk=',
+  rsain: 'AbCd1234EfGh5678',
+  rsa:   'd446acb2826cbd3e9b453a2e992cc4c00eb97eba00c8841f288e92c8a2a610a4c5c543caf87b09503be5919ccca9b22cb3adfe8d21d49f3659e61abdc9a26c1afb45c011679dc168b52597250904effa1e11c08d1a478c750ed6d3715677b3d389fdf84b7e442e89c09905f92a703bc46c68e8e18091bc01662abe125f5497c6'
+};
+
+async function doVerify() {
+  var box = $('verifyBox');
+  box.className = 'verify';
+  box.querySelector('.vu').textContent = '…';
+  box.querySelector('.vt').textContent = '正在计算…';
+
+  var a = await aesEncrypt(TRUTH.plain, NONCE);
+  var r = rsaEncrypt(TRUTH.rsain);
+  var aesOK = a === TRUTH.aes;
+  var rsaOK = r === TRUTH.rsa;
+
+  var lines = [];
+  lines.push('<b>AES 第一层</b> ' + (aesOK ? '一致 ✓' : '不一致 ✗'));
+  lines.push('<code>' + a.slice(0, 40) + '…</code>');
+  lines.push('<b>RSA</b> ' + (rsaOK ? '一致 ✓' : '不一致 ✗'));
+  lines.push('<code>' + r.slice(0, 40) + '…</code>');
+
+  var note = document.querySelector('.stage-note');
+  if (aesOK && rsaOK) {
+    if (note) { note.textContent = '✓ 与浏览器真值逐字节一致'; note.classList.add('pass'); }
+    box.className = 'verify ok';
+    box.querySelector('.vu').textContent = '✓';
+    box.querySelector('.vt').innerHTML =
+      lines.join('<br>') + '<br><b>两项都与浏览器真值逐字节相同 —— 复刻成功。</b>';
+  } else {
+    box.className = 'verify bad';
+    box.querySelector('.vu').textContent = '✗';
+    box.querySelector('.vt').innerHTML =
+      lines.join('<br>') + '<br><b>有字节对不上，实现还不对。</b>';
+  }
+}
+
+/* ---------- 绑定 ---------- */
+$('run').addEventListener('click', function () {
+  var kw = ($('kw').value || '').trim() || '周杰伦';
+  runAnimated(kw, null);
+});
+$('reroll').addEventListener('click', function () {
+  var kw = ($('kw').value || '').trim() || '周杰伦';
+  runAnimated(kw, null);
+});
+$('verify').addEventListener('click', doVerify);
+$('kw').addEventListener('keydown', function (e) {
+  if (e.key === 'Enter') runAnimated(this.value.trim() || '周杰伦', null);
+});
+
+/* ---------- 全屏 ---------- */
+var stageEl = $('stage'), fsBtn = $('fsBtn');
+function setFS(on) {
+  stageEl.classList.toggle('fs', on);
+  document.body.classList.toggle('fs-lock', on);
+  fsBtn.textContent = on ? '退出全屏 ✕' : '全屏 ↗';
+}
+fsBtn.addEventListener('click', function () { setFS(!stageEl.classList.contains('fs')); });
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'Escape' && stageEl.classList.contains('fs')) setFS(false);
+});
+
+/* 打开就自己跑一遍：不用点任何东西就能看到结果 */
+(function autoStart() {
+  if (!(window.crypto && crypto.subtle)) {
+    $('verifyBox').className = 'verify bad';
+    $('verifyBox').querySelector('.vu').textContent = '!';
+    $('verifyBox').querySelector('.vt').textContent =
+      '这个浏览器用不了 crypto.subtle（需要 https 或 localhost）。用本地服务打开即可正常运行。';
+    return;
+  }
+  setTimeout(function () {
+    runAnimated('周杰伦', null).then(function () {
+      // 流水线跑完顺手校验一次：逐字节一致是我手里最硬的证据，
+      // 藏在一个按钮后面就没人会点
+      setTimeout(doVerify, 520);
+    });
+  }, 260);
+})();
+</script>
+</body>
+</html>

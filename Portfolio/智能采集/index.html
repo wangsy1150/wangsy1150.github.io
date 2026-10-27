@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>智能采集框架实战 · 项目详情</title>
+<link rel="icon" href="../../favicon.svg?v=2" type="image/svg+xml">
+<style>
+  :root{
+    --bg:#FBFCFE; --ink:#1A1D24; --ink2:#525B6B; --ink3:#8B95A6;
+    --blue:#4FA8E8; --blue-d:#2E8BD0; --blue-s:#EAF5FD;
+    --pink:#FF8FB1; --pink-d:#E0568A; --pink-s:#FFF0F5;
+    --red:#E8455F; --red-d:#C9304A; --red-s:#FFEBEE;
+    --orange:#FF8A1E; --orange-d:#D96A00; --orange-s:#FFF1DC;
+    --teal:#10B6A6; --teal-d:#0B8578; --teal-s:#E2F8F5;
+    --line:#E4EBF5;
+  }
+  @font-face{font-family:"Noto Sans SC";font-style:normal;font-weight:400;
+    font-display:swap;src:url("../../fonts/NotoSansSC-400-subset.woff2") format("woff2")}
+  @font-face{font-family:"Noto Sans SC";font-style:normal;font-weight:500;
+    font-display:swap;src:url("../../fonts/NotoSansSC-500-subset.woff2") format("woff2")}
+  @font-face{font-family:"Noto Sans SC";font-style:normal;font-weight:600;
+    font-display:swap;src:url("../../fonts/NotoSansSC-600-subset.woff2") format("woff2")}
+  @font-face{font-family:"Noto Sans SC";font-style:normal;font-weight:700;
+    font-display:swap;src:url("../../fonts/NotoSansSC-700-subset.woff2") format("woff2")}
+
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"Noto Sans SC","Microsoft YaHei","PingFang SC",Arial,sans-serif;
+    color:var(--ink);background:var(--bg);line-height:1.75;overflow-x:hidden}
+
+  .glow{position:fixed;inset:0;pointer-events:none;z-index:0;
+    background:
+      radial-gradient(circle at 8% 0%, rgba(79,168,232,.20), transparent 42%),
+      radial-gradient(circle at 94% 4%, rgba(232,69,95,.16), transparent 40%),
+      radial-gradient(circle at 50% 102%, rgba(79,168,232,.09), transparent 46%)}
+
+  .wrap{position:relative;z-index:1;max-width:min(1600px,100%);margin:0 auto;padding:56px clamp(16px,3vw,40px) 96px}
+
+  .back{display:flex;width:fit-content;align-items:center;gap:8px;color:var(--ink3);
+    text-decoration:none;font-size:14px;margin-bottom:34px;transition:color .2s}
+  .back:hover{color:var(--blue-d)}
+
+  .num{display:inline-block;font-size:12.5px;font-weight:600;letter-spacing:.14em;
+    color:#fff;background:linear-gradient(100deg,#3E9FE0 0%,#E8455F 72%,#D62F4A 100%);
+    border-radius:999px;padding:6px 16px;margin-bottom:16px;
+    box-shadow:0 8px 22px rgba(214,47,74,.34)}
+
+  h1{font-size:clamp(28px,4.6vw,44px);line-height:1.25;font-weight:800;
+    margin-bottom:14px;letter-spacing:-.01em}
+  h1::after{content:"";display:inline-block;width:11px;height:11px;border-radius:3px;
+    background:var(--red);margin-left:12px;vertical-align:.22em;
+    box-shadow:0 3px 10px rgba(232,69,95,.45)}
+
+  .lede{font-size:17px;color:var(--ink2);max-width:700px;margin-bottom:28px}
+  .lede strong{color:var(--ink);font-weight:600;
+    background:linear-gradient(transparent 60%, rgba(232,69,95,.22) 60%);
+    padding:0 2px;border-radius:2px}
+
+  .tags{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:34px}
+  .tag{font-size:12.5px;padding:6px 14px;border-radius:999px;background:#fff;
+    border:1px solid var(--line);color:var(--ink2);box-shadow:0 1px 2px rgba(26,29,36,.04)}
+  .tag:nth-child(3n+1){border-color:#D6EAF8;color:var(--blue-d);background:var(--blue-s)}
+  .tag:nth-child(3n+2){border-color:#FBD0D7;color:var(--red-d);background:var(--red-s)}
+
+  h2{font-size:20px;margin:0 0 18px;padding-left:15px;position:relative;font-weight:700}
+  h2::before{content:"";position:absolute;left:0;top:6px;bottom:6px;width:4px;
+    border-radius:3px;background:linear-gradient(180deg,var(--blue),var(--red))}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:19px 21px;
+    box-shadow:0 2px 10px rgba(26,29,36,.045);transition:transform .22s,box-shadow .22s,border-color .22s}
+  .card:hover{transform:translateY(-3px);box-shadow:0 12px 28px rgba(79,168,232,.14);
+    border-color:#D6EAF8}
+  .card h3{font-size:14px;color:var(--blue-d);margin-bottom:9px;font-weight:700}
+  .card p{font-size:14px;color:var(--ink2);margin:0}
+
+  /* ---------- 首屏 demo ---------- */
+  .stage{margin-bottom:30px;border-radius:20px;overflow:hidden;border:1px solid var(--line);
+    background:#fff;box-shadow:0 22px 60px rgba(79,168,232,.16),0 4px 14px rgba(26,29,36,.05)}
+  .stage-bar{display:flex;align-items:center;gap:8px;padding:11px 16px;
+    background:linear-gradient(90deg,#F7FBFE,#FEF7FA);border-bottom:1px solid var(--line)}
+  .stage-dot{width:9px;height:9px;border-radius:50%}
+  .stage-dot:nth-child(1){background:#FFC9D9}
+  .stage-dot:nth-child(2){background:#CFE8F9}
+  .stage-dot:nth-child(3){background:#D9E6F2}
+  .stage-title{font-size:12.5px;color:var(--ink3);margin-left:6px}
+  .stage-live{display:inline-flex;align-items:center;gap:6px;margin-left:8px;
+    font-size:11.5px;font-weight:600;color:var(--red-d)}
+  .stage-live::before{content:"";width:6px;height:6px;border-radius:50%;
+    background:var(--red);box-shadow:0 0 0 3px rgba(232,69,95,.24);
+    animation:livePulse 1.6s ease-in-out infinite}
+  @keyframes livePulse{0%,100%{opacity:1}50%{opacity:.3}}
+  .stage-note{margin-left:auto;font-size:12px;color:var(--ink3)}
+
+  /* 全屏按钮 */
+  .fs-btn{font:inherit;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;
+    padding:5px 13px;border-radius:999px;border:1px solid #D6EAF8;background:#fff;
+    color:var(--blue-d);margin-left:10px;transition:background .18s,border-color .18s,color .18s}
+  .fs-btn:hover{background:var(--blue-s);border-color:#B9DDF4;color:var(--blue-d)}
+  .stage.fs .fs-btn{background:var(--red-s);border-color:#F8C9D0;color:var(--red-d)}
+
+  /* 全屏模式：铺满整个视口，列表吃掉剩余高度 */
+  .stage.fs{position:fixed;inset:0;z-index:9999;margin:0;border:0;border-radius:0;
+    display:flex;flex-direction:column;overflow:hidden;background:#fff;box-shadow:none}
+  .stage.fs .stage-bar{border-radius:0;flex:none}
+  .stage.fs .demo{flex:1;display:flex;flex-direction:column;min-height:0;
+    max-width:1280px;margin:0 auto;width:100%;padding:24px 32px 16px}
+  .stage.fs .list{flex:1;max-height:none;min-height:0;display:grid;
+    grid-template-columns:1fr 1fr;align-content:start}
+  .stage.fs .row:nth-child(odd){border-right:1px solid #EEF3F9}
+  .stage.fs .row{padding:9px 16px}
+  .stage.fs .row .price .p{font-size:17px}
+  .stage.fs .stat .v{font-size:28px}
+  .stage.fs .demo-foot{display:none}
+  body.fs-lock{overflow:hidden}
+
+  .demo{padding:22px}
+
+  /* 指令条 */
+  .prompt{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border-radius:13px;
+    background:linear-gradient(100deg,#EAF5FD,#FDF7FA);border:1px solid #DCEAF7}
+  .prompt .ico{flex:none;width:26px;height:26px;border-radius:8px;display:flex;
+    align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;
+    background:linear-gradient(135deg,#3E9FE0,#E8455F);box-shadow:0 4px 10px rgba(232,69,95,.28)}
+  .prompt .txt{flex:1;min-width:0;font-size:13.5px;color:var(--ink2);line-height:1.7}
+  .prompt .txt b{color:var(--ink);font-weight:700}
+  .prompt .tagline{display:inline-block;margin-left:6px;font-size:11px;padding:1px 8px;
+    border-radius:999px;background:#fff;border:1px solid #D6EAF8;color:var(--blue-d);
+    font-weight:600;vertical-align:1px}
+
+  .arrow{display:flex;align-items:center;gap:10px;margin:11px 0 11px 12px;
+    font-size:12px;color:var(--ink3)}
+  .arrow i{font-style:normal;font-size:15px;color:var(--blue);line-height:1}
+  .arrow code{font-family:Consolas,"Cascadia Code",Monaco,monospace;font-size:11.5px;
+    color:var(--blue-d);background:var(--blue-s);border-radius:4px;padding:0 5px}
+
+  /* 字段 pills */
+  .fields{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:4px}
+  .field-pill{font-family:Consolas,"Cascadia Code",Monaco,monospace;font-size:11.5px;
+    padding:4px 10px;border-radius:8px;background:#FDFEFF;border:1px solid var(--line);
+    color:#3A4557;transition:border-color .2s,background .2s}
+  .field-pill.hot{border-color:#FBD0D7;background:var(--red-s);color:var(--red-d);font-weight:600}
+
+  /* 统计条：每格一个颜色，关键数字要跳出来 */
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:18px 0 14px}
+  .stat{border-radius:12px;padding:12px 14px;border:1px solid var(--line);background:#FDFEFF;
+    transition:transform .2s,box-shadow .2s}
+  .stat:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(26,29,36,.08)}
+  .stat .v{font-size:24px;font-weight:800;line-height:1.15;letter-spacing:-.01em;
+    font-variant-numeric:tabular-nums;color:var(--ink)}
+  .stat .v small{font-size:12px;font-weight:700;margin-left:2px;opacity:.75}
+  .stat .k{font-size:11.5px;color:var(--ink3);margin-top:3px;font-weight:500}
+
+  .stat.c1{background:linear-gradient(160deg,#F2F9FE,#E4F2FC);border-color:#CDE7F8}
+  .stat.c1 .v{color:var(--blue-d)}
+  .stat.c2{background:linear-gradient(160deg,#F0FBF9,#DFF6F2);border-color:#BEEBE4}
+  .stat.c2 .v{color:var(--teal-d)}
+  .stat.c3{background:linear-gradient(160deg,#FFEFF2,#FFE3E8);border-color:#F8C9D0}
+  .stat.c3 .v{color:var(--red-d)}
+  .stat.c4{background:linear-gradient(160deg,#FFF7EC,#FFEBD1);border-color:#FFDCB3}
+  .stat.c4 .v{color:var(--orange-d)}
+
+  /* 工具条 */
+  .tools{display:flex;flex-wrap:wrap;gap:9px;align-items:center;margin-bottom:12px}
+  .search{flex:1 1 180px;min-width:0}
+  input[type=search]{width:100%;font:inherit;font-size:13.5px;color:var(--ink);
+    border:1px solid var(--line);border-radius:10px;padding:8px 12px;background:#FDFEFF;
+    transition:border-color .2s,box-shadow .2s}
+  input[type=search]:focus{outline:none;border-color:#B9DDF4;
+    box-shadow:0 0 0 4px rgba(79,168,232,.13)}
+  .chips{display:flex;gap:6px;flex-wrap:wrap}
+  .chip{font:inherit;font-size:12.5px;font-weight:500;cursor:pointer;padding:6px 13px;
+    border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--ink2);
+    transition:all .18s}
+  .chip:hover{border-color:#B9DDF4;color:var(--blue-d)}
+  .chip.on{background:var(--ink);border-color:var(--ink);color:#fff;font-weight:600}
+
+  /* 结果列表 */
+  .list{max-height:352px;overflow-y:auto;border:1px solid var(--line);border-radius:13px;
+    background:#FDFEFF;scrollbar-width:thin}
+  .list::-webkit-scrollbar{width:8px}
+  .list::-webkit-scrollbar-thumb{background:#DCE5F0;border-radius:4px}
+  .row{display:flex;align-items:center;gap:12px;padding:11px 15px;
+    border-bottom:1px solid #EEF3F9;transition:background .15s}
+  .row:last-child{border-bottom:0}
+  .row:hover{background:#F6FAFE}
+  .row .car{flex:1;min-width:0}
+  .row .name{font-size:13.5px;font-weight:600;color:var(--ink);white-space:nowrap;
+    overflow:hidden;text-overflow:ellipsis}
+  .row .meta{font-size:11.5px;color:var(--ink3);margin-top:1px;
+    font-variant-numeric:tabular-nums}
+  .row .price{flex:none;text-align:right}
+  .row .price .p{font-size:16px;font-weight:800;color:var(--red-d);
+    font-variant-numeric:tabular-nums;line-height:1.2}
+  .row .price .p small{font-size:11px;font-weight:600;margin-left:1px}
+  .row .price .d{font-size:10.5px;color:var(--ink3);margin-top:1px}
+  .empty{padding:34px 16px;text-align:center;font-size:13px;color:var(--ink3)}
+
+  .demo-foot{font-size:11.5px;color:var(--ink3);margin-top:13px;line-height:1.7}
+  .demo-foot b{color:var(--ink2)}
+
+  /* ---------- 正文 ---------- */
+  section.body{margin-top:46px}
+  ul.flow{list-style:none;counter-reset:step}
+  ul.flow li{position:relative;padding-left:34px;margin-bottom:14px;font-size:14.5px;color:var(--ink2)}
+  ul.flow li::before{content:counter(step);counter-increment:step;position:absolute;left:0;top:2px;
+    width:22px;height:22px;border-radius:50%;font-size:12px;font-weight:700;color:#fff;
+    text-align:center;line-height:22px;background:linear-gradient(135deg,var(--blue),var(--red))}
+  ul.flow li strong{color:var(--ink);font-weight:600}
+  ul.flow li code{font-family:Consolas,"Cascadia Code",Monaco,monospace;font-size:12.5px;
+    color:var(--blue-d);background:var(--blue-s);border-radius:5px;padding:1px 6px}
+
+  .code{white-space:pre-wrap;word-break:break-word;background:#1E1F22;
+    border:1px solid #2A2C30;border-radius:14px;padding:19px 21px;
+    font-family:Consolas,"Cascadia Code",Monaco,monospace;font-size:13px;color:#BCBEC4;
+    overflow-x:auto;margin-bottom:12px;line-height:1.8;
+    box-shadow:0 10px 28px rgba(26,29,36,.22),inset 0 1px 0 rgba(255,255,255,.05)}
+  .code .c{color:#7A7E85}
+  .code .k{color:#CF8E6D}
+  .code .s{color:#6AAB73}
+  .code .n{color:#2AACB8}
+  .cap{font-size:12.5px;color:var(--ink3);margin:0 0 40px}
+  .cap code{font-family:Consolas,"Cascadia Code",Monaco,monospace;font-size:12px;
+    color:var(--blue-d);background:var(--blue-s);border-radius:4px;padding:1px 5px}
+
+  .note{border-radius:14px;padding:16px 19px;font-size:13.5px;color:var(--ink2);
+    background:var(--blue-s);border:1px solid #D6EAF8;margin-bottom:40px}
+  .note.warn{background:var(--red-s);border-color:#F8C9D0}
+  .note b{color:var(--ink);font-weight:700}
+  .note code{font-family:Consolas,"Cascadia Code",Monaco,monospace;font-size:12.5px;
+    color:var(--blue-d);background:#fff;border-radius:5px;padding:1px 6px}
+
+  footer{text-align:center;font-size:13px;color:var(--ink3);padding-top:38px;
+    border-top:1px solid var(--line);margin-top:56px}
+  footer a{color:var(--blue-d);text-decoration:none;font-weight:600}
+  footer a:hover{color:var(--red-d)}
+
+  @media (max-width:720px){
+    .wrap{padding:40px 18px 72px}
+    .demo{padding:16px}
+    .stats{grid-template-columns:repeat(2,1fr)}
+    .stage-note{display:none}
+    .row{gap:9px;padding:10px 12px}
+  }
+</style>
+</head>
+<body>
+<div class="glow"></div>
+
+<div class="wrap">
+  <a class="back" href="../../index.html">← 返回作品集</a>
+
+  <div class="num">PROJECT 10</div>
+  <h1>智能采集框架实战</h1>
+  <p class="lede">我以前抓一个站，得先 F12 一行行抄 CSS 选择器，站方改个 class 就全废，一晚上白干。
+  后来我换了个做法：<strong>用一句自然语言说清要什么</strong>，让大模型生成提取规则，
+  再交给 crawl4ai 去抓。<strong>规则写错了不用回去改代码，改那句话就行</strong>。</p>
+
+  <div class="tags">
+    <span class="tag">crawl4ai</span>
+    <span class="tag">DeepSeek</span>
+    <span class="tag">JsonCssExtraction</span>
+    <span class="tag">asyncio</span>
+    <span class="tag">pandas</span>
+  </div>
+
+  <!-- ============ 首屏：真实抓取结果，可筛可搜可排 ============ -->
+  <div class="stage" id="stage">
+    <div class="stage-bar">
+      <span class="stage-dot"></span><span class="stage-dot"></span><span class="stage-dot"></span>
+      <span class="stage-title">真实抓取结果 · 不是示例数据</span>
+      <span class="stage-live">LIVE</span>
+      <span class="stage-note">下面 40 条来自实际跑出来的 CSV</span>
+      <button class="fs-btn" id="fsBtn" type="button">全屏 ↗</button>
+    </div>
+
+    <div class="demo">
+      <div class="prompt">
+        <span class="ico">AI</span>
+        <span class="txt">
+          <b>「提取页面所有二手车信息，每条数据包含：车辆标题、售价、上牌年份、行驶里程，只返回车辆列表，过滤广告无关内容」</b>
+          <span class="tagline">自然语言 → 提取规则</span>
+        </span>
+      </div>
+
+      <div class="arrow"><i>↓</i> 不用手写选择器，模型按这句话生成 <code>JsonCssExtractionStrategy</code> 能吃的结构</div>
+
+      <div class="fields">
+        <span class="field-pill hot">title</span>
+        <span class="field-pill hot">price</span>
+        <span class="field-pill hot">year</span>
+        <span class="field-pill hot">mileage</span>
+        <span class="field-pill">location</span>
+        <span class="field-pill">discount</span>
+        <span class="field-pill">tags</span>
+        <span class="field-pill">price_unit</span>
+        <span class="field-pill">link</span>
+        <span class="field-pill">image</span>
+      </div>
+
+      <div class="arrow"><i>↓</i> 抓完直接落成 CSV，下面就是那 40 条</div>
+
+      <div class="stats">
+        <div class="stat c1"><div class="v" id="s-count">40<small>条</small></div><div class="k">抓取记录</div></div>
+        <div class="stat c2"><div class="v" id="s-city">3<small>个</small></div><div class="k">覆盖城市</div></div>
+        <div class="stat c3"><div class="v" id="s-low">1.03<small>万</small></div><div class="k">最低价</div></div>
+        <div class="stat c4"><div class="v" id="s-span">1.03–3.00<small>万</small></div><div class="k">价格区间</div></div>
+      </div>
+
+      <div class="tools">
+        <div class="search">
+          <input type="search" id="kw" placeholder="搜车型关键词，比如「大众」「2018」" autocomplete="off">
+        </div>
+        <div class="chips" id="cityChips">
+          <button class="chip on" data-city="all">全部</button>
+          <button class="chip" data-city="成都">成都</button>
+          <button class="chip" data-city="西安">西安</button>
+          <button class="chip" data-city="重庆">重庆</button>
+        </div>
+        <div class="chips" id="sortChips">
+          <button class="chip on" data-sort="p-asc">价格↑</button>
+          <button class="chip" data-sort="y-desc">年份新</button>
+          <button class="chip" data-sort="m-asc">里程少</button>
+        </div>
+      </div>
+
+      <div class="list" id="list"></div>
+
+      <p class="demo-foot">
+        <b>这些都是真的。</b>数据来自 <code style="font-family:Consolas,monospace;font-size:11px">guazi.csv</code>
+        —— 用 <code style="font-family:Consolas,monospace;font-size:11px">demo03-瓜子二手车.py</code>
+        实际跑出来的 40 条，我把它压成一份内嵌数据，只做了筛选 / 搜索 / 排序。
+        图片链接指向对方 CDN 且会失效，所以列表里没有放图。
+      </p>
+    </div>
+  </div>
+
+  <!-- ============ 正文 ============ -->
+  <section class="body">
+    <h2>我为什么把手写选择器换掉</h2>
+    <div class="grid">
+      <div class="card">
+        <h3>我抄的选择器碎过</h3>
+        <p><code style="font-family:Consolas,monospace;font-size:12px;color:#2E8BD0">.hotsearch-item</code>
+          这类选择器我抄过一版，跑通了挺高兴。结果站方改了一次 class，全部失效，
+          规则和页面绑得太死，我改不动。</p>
+      </div>
+      <div class="card">
+        <h3>后来变成「改那句话」</h3>
+        <p>字段漏了不用回去翻 HTML。我第一次只写了「标题、售价」，发现少了年份和里程，
+          就把那句话补全，让它重新生成一遍——比改代码快得多。</p>
+      </div>
+      <div class="card">
+        <h3>其实还是 CSS 在干活</h3>
+        <p>我一开始以为模型在逐条读页面，那样又慢又贵。不是——它只负责<b>写规则</b>，
+          真正提取还是 CSS 选择器在跑。所以快、稳，不用每次请求都问模型。</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="body">
+    <h2>我是怎么串起来的</h2>
+    <ul class="flow">
+      <li><strong>先决定浏览器怎么开。</strong><code>headless=True</code> 不开窗口，
+        我调规则的时候把它设成 <code>False</code>，能看着它点，出问题一眼就看见。</li>
+      <li><strong>再把那句话翻译成规则。</strong>传 URL + 一句 instruction，
+        模型读一遍页面结构，吐一份 JSON schema 出来。</li>
+      <li><strong>然后拿着规则去跑。</strong>缓存、等待超时、提取策略都在这层配——
+        这几个参数我调了最久。</li>
+      <li><strong>最后落成 CSV。</strong><code>res.extracted_content</code> 是个 JSON 字符串，
+        <code>json.loads</code> 之后 <code>pd.DataFrame</code> 直接写文件。</li>
+    </ul>
+  </section>
+
+  <section class="body">
+    <h2>关键代码</h2>
+    <div class="code"><span class="c"># 1. 只描述「要什么」，不写选择器</span>
+strategy = JsonCssExtractionStrategy.generate_schema(
+    url=url,
+    llm_config=LLMConfig(provider=<span class="s">'deepseek/deepseek-chat'</span>,
+                         api_token=os.getenv(<span class="s">"DEEPSEEK_API_KEY"</span>)),
+    instruction=<span class="s">"提取页面所有二手车信息，每条数据包含：车辆标题、售价、"</span>
+                <span class="s">"上牌年份、行驶里程，只返回车辆列表，过滤广告无关内容"</span>
+)
+
+<span class="c"># 2. 拿这份 schema 当作运行时的提取策略</span>
+run_config = CrawlerRunConfig(
+    cache_mode=CacheMode.ENABLED,
+    wait_for_timeout=<span class="n">3000</span>,
+    extraction_strategy=JsonCssExtractionStrategy(strategy)
+)
+
+<span class="c"># 3. 抓完直接落表</span>
+<span class="k">async with</span> AsyncWebCrawler(config=browser_config) <span class="k">as</span> crawler:
+    res = <span class="k">await</span> crawler.arun(url=url, config=run_config)
+    data = json.loads(res.extracted_content)
+    pd.DataFrame(data).to_csv(<span class="s">'guazi.csv'</span>, index=False, encoding=<span class="s">'utf-8-sig'</span>)</div>
+    <p class="cap">这段是 <code>demo03-瓜子二手车.py</code> 的主体，实测能跑通并落出 40 行。</p>
+
+    <div class="note">
+      <b><code>utf-8-sig</code> 这个细节不是随手写的。</b>
+      用 Excel 打开普通的 <code>utf-8</code> CSV，中文会变乱码——因为 Excel 默认按 GBK 读，
+      而带 BOM 的 <code>utf-8-sig</code> 它会认。这个坑我在别的项目里踩过一次。
+    </div>
+  </section>
+
+  <section class="body">
+    <h2>我踩过的坑</h2>
+    <ul class="flow">
+      <li><strong>我以为 schema 生成一次就能一直用。</strong>不是。换个站点、甚至同站改版，
+        规则就可能抓空。要么重新生成，要么把 schema 存下来做版本管理。</li>
+      <li><strong>等太短只能抓到空壳。</strong>我第一版拿到 0 条，还以为是规则写错了。
+        其实是列表靠 JS 渲染，<code>wait_for_timeout=3000</code>
+        是因为列表靠 JS 渲染，不等就只剩骨架。</li>
+      <li><strong>广告混在列表里。</strong>我过滤出来发现有台「车」的价格明显不对，
+        点进去是推广位。所以 instruction 里那句「过滤广告无关内容」不是凑字数的。</li>
+      <li><strong>缓存骗过我一次。</strong><code>CacheMode.ENABLED</code> 省时间，
+        但调规则的时候得临时换成 <code>BYPASS</code>——不然改了规则也看不出变化，
+        我在这上面浪费了不少时间。</li>
+    </ul>
+  </section>
+
+  <footer>
+    王思洋 · 智能采集框架实战 ·
+    <a href="https://github.com/wangsy1150" target="_blank" rel="noopener">GitHub</a>
+  </footer>
+</div>
+
+<script>
+/* 真实抓取结果：guazi.csv 的 40 条，字段压成短名
+   t=标题 y=年份 m=里程(万公里) c=城市 p=价格(万) d=降价说明 */
+var CARS = [{"t":"本田 锋范 2015款 1.5L 手动舒适版","y":2016,"m":16.32,"c":"成都","p":1.62,"d":"已减1.40万"},{"t":"吉利汽车 海景 2015款 1.5L 手动精英型","y":2015,"m":10.95,"c":"西安","p":1.16,"d":"已减9000元"},{"t":"凯翼X5 2017款 2.0L CVT豪华型","y":2018,"m":6.17,"c":"成都","p":1.66,"d":"已减1.16万"},{"t":"现代 维拉克斯 2009款 3.8L 舒适版","y":2011,"m":21.01,"c":"成都","p":1.84,"d":"已减1.41万"},{"t":"斯柯达 晶锐 2014款 1.4L 手动晶灵版","y":2014,"m":8.21,"c":"成都","p":1.14,"d":"已减7100元"},{"t":"Jeep 大切诺基(进口) 2012款 3.6L 周年导航版","y":2013,"m":26.84,"c":"成都","p":2.78,"d":"已减1.73万"},{"t":"哈弗H2 2017款 红标 1.5T 手动两驱舒适型","y":2017,"m":10.15,"c":"成都","p":1.47,"d":"已减9000元"},{"t":"大众 Tiguan 2012款 2.0TSI 豪华版","y":2016,"m":18.6,"c":"成都","p":3.0,"d":"已减1.76万"},{"t":"标致3008 2015款 1.6THP 罗兰·加洛斯版","y":2016,"m":5.05,"c":"成都","p":2.5,"d":"已减1.45万"},{"t":"马自达 阿特兹 2014款 2.5L 蓝天尊崇版","y":2014,"m":19.16,"c":"成都","p":2.41,"d":"已减1.36万"},{"t":"大众 桑塔纳 2015款 1.4L 手动舒适版","y":2016,"m":10.6,"c":"成都","p":1.23,"d":"已减6800元"},{"t":"别克 昂科拉 2016款 18T 自动两驱都市时尚型","y":2016,"m":15.17,"c":"成都","p":1.56,"d":"已减8500元"},{"t":"长安CS35 2015款 1.6L 自动尊贵型 国V","y":2016,"m":16.13,"c":"成都","p":1.26,"d":"已减6900元"},{"t":"奔驰E级 2013款 E 260 L CGI时尚型","y":2013,"m":37.28,"c":"成都","p":2.43,"d":"已减1.32万"},{"t":"五菱汽车 五菱宏光 2014款 1.2L 标准型国IV","y":2025,"m":6.57,"c":"成都","p":1.57,"d":"已减8400元"},{"t":"众泰T600 2017款 1.5T 手动豪华贺岁版","y":2017,"m":5.66,"c":"成都","p":2.02,"d":"已减1.08万"},{"t":"大众 桑塔纳 2015款 1.6L 手动舒适版","y":2015,"m":12.5,"c":"成都","p":1.17,"d":"已减6200元"},{"t":"大众 速腾 2014款 改款 1.6L 手动领先型","y":2014,"m":17.65,"c":"成都","p":1.49,"d":"已减9100元"},{"t":"名爵 锐腾 2015款 2.0TGI TST豪华版","y":2015,"m":10.38,"c":"成都","p":1.21,"d":"已减6100元"},{"t":"东风风行 风行S500 2016款 1.6L CVT豪华型","y":2016,"m":15.01,"c":"成都","p":1.06,"d":"已减7000元"},{"t":"奥迪Q5(进口) 2010款 3.2FSI 运动版","y":2013,"m":25.45,"c":"成都","p":2.45,"d":"已减1.23万"},{"t":"捷途X70 2018款 1.5T 自动畅行版","y":2019,"m":7.02,"c":"成都","p":2.72,"d":"已减1.35万"},{"t":"现代 索纳塔 2014款 2.0L 自动尊贵版","y":2014,"m":9.87,"c":"成都","p":2.01,"d":"已减9800元"},{"t":"奥迪A6L 2010款 2.8 FSI 舒适型","y":2011,"m":18.39,"c":"成都","p":2.3,"d":"已减1.25万"},{"t":"哈弗H1 2016款 改款 蓝标 1.5L AMT尊贵型","y":2016,"m":5.21,"c":"成都","p":1.46,"d":"已减7100元"},{"t":"东风风行 菱智 2016款 V3 1.5L 7座标准型 国V","y":2017,"m":7.55,"c":"西安","p":1.27,"d":"已减6100元"},{"t":"现代 索纳塔 2014款 2.0L 自动尊贵版","y":2014,"m":11.43,"c":"成都","p":2.08,"d":"已减9900元"},{"t":"凯迪拉克XTS 2013款 28T 科技型","y":2013,"m":26.0,"c":"成都","p":2.43,"d":"已减1.13万"},{"t":"大众 帕萨特 2013款 3.0L V6 DSG旗舰版","y":2014,"m":18.32,"c":"成都","p":2.66,"d":"已减1.30万"},{"t":"启辰T70 2015款 2.0L 手动睿趣版","y":2015,"m":13.63,"c":"重庆","p":1.03,"d":"已减6400元"},{"t":"大众 捷达 2017款 1.4L 手动时尚型","y":2018,"m":10.78,"c":"成都","p":1.62,"d":"已减7500元"},{"t":"雪铁龙 世嘉 2013款 1.6L 手动品尚型CNG","y":2014,"m":13.6,"c":"成都","p":1.16,"d":"已减5400元"},{"t":"MINI Clubman 2011款 1.6L ONE","y":2014,"m":21.55,"c":"成都","p":2.67,"d":"已减1.23万"},{"t":"长安CS75 2017款 尚酷版 1.5T 自动锋锐型","y":2017,"m":8.53,"c":"成都","p":1.8,"d":"已减8200元"},{"t":"斯巴鲁 森林人 2013款 2.5i 自动尊贵导航版","y":2015,"m":24.61,"c":"成都","p":2.42,"d":"已减1.10万"},{"t":"金杯 小海狮X30 2019款 1.5L 标准型国VI SWC15M","y":2020,"m":8.24,"c":"重庆","p":1.26,"d":"已减6000元"},{"t":"现代 朗动 2016款 1.6L 自动尊贵型","y":2017,"m":18.02,"c":"成都","p":1.88,"d":"已减8500元"},{"t":"哈弗H2 2015款 1.5T 自动两驱精英版","y":2015,"m":9.81,"c":"成都","p":1.18,"d":"已减5300元"},{"t":"江汽集团 瑞风M5 2017款 2.0T 汽油双离合商务版","y":2018,"m":21.15,"c":"成都","p":2.13,"d":"已减9500元"},{"t":"宝马X1 2013款 sDrive18i 运动设计套装","y":2013,"m":11.39,"c":"成都","p":2.13,"d":"已减9500元"}];
+
+var state = { city: 'all', sort: 'p-asc', kw: '' };
+
+var $ = function (id) { return document.getElementById(id); };
+
+function filtered() {
+  var kw = state.kw.trim().toLowerCase();
+  var out = CARS.filter(function (c) {
+    if (state.city !== 'all' && c.c !== state.city) return false;
+    if (kw && (c.t.toLowerCase().indexOf(kw) < 0 && !String(c.y).includes(kw))) return false;
+    return true;
+  });
+  out.sort(function (a, b) {
+    if (state.sort === 'p-asc') return a.p - b.p;
+    if (state.sort === 'y-desc') return b.y - a.y || a.p - b.p;
+    return a.m - b.m;
+  });
+  return out;
+}
+
+function render() {
+  var rows = filtered();
+  var box = $('list');
+
+  if (!rows.length) {
+    box.innerHTML = '<div class="empty">没有匹配的车。换个关键词，或者点「全部」。</div>';
+  } else {
+    box.innerHTML = rows.map(function (c) {
+      return '<div class="row">' +
+        '<div class="car">' +
+          '<div class="name">' + esc(c.t) + '</div>' +
+          '<div class="meta">' + c.y + ' 年 · ' + c.m.toFixed(2) + ' 万公里 · ' + esc(c.c) + '</div>' +
+        '</div>' +
+        '<div class="price">' +
+          '<div class="p">' + c.p.toFixed(2) + '<small>万</small></div>' +
+          '<div class="d">' + esc(c.d || '—') + '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  $('s-count').innerHTML = rows.length + '<small>条</small>';
+  var cities = {};
+  rows.forEach(function (c) { cities[c.c] = 1; });
+  $('s-city').innerHTML = Object.keys(cities).length + '<small>个</small>';
+  if (rows.length) {
+    var ps = rows.map(function (c) { return c.p; });
+    var lo = Math.min.apply(null, ps), hi = Math.max.apply(null, ps);
+    $('s-low').innerHTML = lo.toFixed(2) + '<small>万</small>';
+    $('s-span').innerHTML = lo.toFixed(2) + '–' + hi.toFixed(2) + '<small>万</small>';
+  }
+}
+
+function esc(s) {
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+$('cityChips').addEventListener('click', function (e) {
+  var b = e.target.closest('.chip');
+  if (!b) return;
+  state.city = b.dataset.city;
+  [].forEach.call(this.children, function (c) { c.classList.toggle('on', c === b); });
+  render();
+});
+
+$('sortChips').addEventListener('click', function (e) {
+  var b = e.target.closest('.chip');
+  if (!b) return;
+  state.sort = b.dataset.sort;
+  [].forEach.call(this.children, function (c) { c.classList.toggle('on', c === b); });
+  render();
+});
+
+$('kw').addEventListener('input', function () {
+  state.kw = this.value;
+  render();
+});
+
+/* ---------- 全屏 ---------- */
+var stageEl = $('stage'), fsBtn = $('fsBtn');
+function setFS(on) {
+  stageEl.classList.toggle('fs', on);
+  document.body.classList.toggle('fs-lock', on);
+  fsBtn.textContent = on ? '退出全屏 ✕' : '全屏 ↗';
+}
+fsBtn.addEventListener('click', function () { setFS(!stageEl.classList.contains('fs')); });
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'Escape' && stageEl.classList.contains('fs')) setFS(false);
+});
+
+render();
+</script>
+</body>
+</html>

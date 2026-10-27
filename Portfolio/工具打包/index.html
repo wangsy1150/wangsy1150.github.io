@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>工具打包集 · 项目详情</title>
+<link rel="icon" href="../../favicon.svg?v=2" type="image/svg+xml">
+<style>
+  :root{
+    --bg:#FBFCFE;
+    --ink:#1A1D24;
+    --ink2:#525B6B;
+    --ink3:#8B95A6;
+    --blue:#4FA8E8;
+    --blue-d:#2E8BD0;
+    --blue-s:#EAF5FD;
+    --pink:#FF8FB1;
+    --pink-d:#E0568A;
+    --pink-s:#FFF0F5;
+    --red:#E8455F;
+    --red-d:#C9304A;
+    --red-s:#FFEBEE;
+    --orange:#FF8A1E;
+    --orange-d:#D96A00;
+    --orange-s:#FFF1DC;
+    --teal:#10B6A6;
+    --teal-d:#0B8578;
+    --teal-s:#E2F8F5;
+    --green:#1F9D55;
+    --line:#E4EBF5;
+  }
+
+  @font-face{font-family:"Noto Sans SC";font-style:normal;font-weight:400;
+    font-display:swap;src:url("../../fonts/NotoSansSC-400-subset.woff2") format("woff2")}
+  @font-face{font-family:"Noto Sans SC";font-style:normal;font-weight:500;
+    font-display:swap;src:url("../../fonts/NotoSansSC-500-subset.woff2") format("woff2")}
+  @font-face{font-family:"Noto Sans SC";font-style:normal;font-weight:600;
+    font-display:swap;src:url("../../fonts/NotoSansSC-600-subset.woff2") format("woff2")}
+  @font-face{font-family:"Noto Sans SC";font-style:normal;font-weight:700;
+    font-display:swap;src:url("../../fonts/NotoSansSC-700-subset.woff2") format("woff2")}
+  @font-face{font-family:"Noto Sans SC";font-style:normal;font-weight:800;
+    font-display:swap;src:url("../../fonts/NotoSansSC-700-subset.woff2") format("woff2")}
+
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"Noto Sans SC","Microsoft YaHei","PingFang SC",Arial,sans-serif;
+    font-weight:400;color:var(--ink);background:var(--bg);line-height:1.75;overflow-x:hidden}
+
+  .glow{position:fixed;inset:0;pointer-events:none;z-index:0;
+    background:
+      radial-gradient(circle at 8% 0%, rgba(79,168,232,.20), transparent 42%),
+      radial-gradient(circle at 94% 4%, rgba(232,69,95,.15), transparent 40%),
+      radial-gradient(circle at 50% 102%, rgba(255,138,30,.09), transparent 46%)}
+
+  .wrap{position:relative;z-index:1;max-width:min(1600px,100%);margin:0 auto;padding:56px clamp(16px,3vw,40px) 96px}
+
+  .back{display:flex;width:fit-content;align-items:center;gap:8px;color:var(--ink3);
+    text-decoration:none;font-size:14px;margin-bottom:34px;transition:color .2s}
+  .back:hover{color:var(--blue-d)}
+
+  .num{display:inline-block;font-size:12.5px;font-weight:600;letter-spacing:.14em;
+    color:#fff;background:linear-gradient(100deg,#3E9FE0 0%,#E8455F 72%,#D62F4A 100%);
+    border-radius:999px;padding:6px 16px;margin-bottom:16px;
+    box-shadow:0 8px 22px rgba(214,47,74,.34)}
+
+  h1{font-size:clamp(28px,4.6vw,44px);line-height:1.25;font-weight:800;
+    color:var(--ink);margin-bottom:14px;letter-spacing:-.01em;position:relative}
+  h1::after{content:"";display:inline-block;width:11px;height:11px;border-radius:3px;
+    background:var(--red);margin-left:12px;vertical-align:.22em;
+    box-shadow:0 3px 10px rgba(232,69,95,.45)}
+
+  .lede{font-size:17px;color:var(--ink2);max-width:770px;margin-bottom:28px}
+  .lede strong{color:var(--ink);font-weight:600;
+    background:linear-gradient(transparent 60%, rgba(232,69,95,.22) 60%);
+    padding:0 2px;border-radius:2px}
+
+  .tags{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:34px}
+  .tag{font-size:12.5px;padding:6px 14px;border-radius:999px;
+    background:#fff;border:1px solid var(--line);color:var(--ink2);
+    box-shadow:0 1px 2px rgba(26,29,36,.04)}
+  .tag:nth-child(3n+1){border-color:#D6EAF8;color:var(--blue-d);background:var(--blue-s)}
+  .tag:nth-child(3n+2){border-color:#FBD0D7;color:var(--red-d);background:var(--red-s)}
+
+  h2{font-size:20px;color:var(--ink);margin:44px 0 18px;padding-left:15px;position:relative;
+    font-weight:700}
+  h2::before{content:"";position:absolute;left:0;top:6px;bottom:6px;width:4px;
+    border-radius:3px;background:linear-gradient(180deg,var(--blue),var(--red))}
+
+  .card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:19px 21px;
+    box-shadow:0 2px 10px rgba(26,29,36,.045);transition:transform .22s,box-shadow .22s,border-color .22s}
+  .card:hover{transform:translateY(-3px);box-shadow:0 12px 28px rgba(79,168,232,.14);
+    border-color:#D6EAF8}
+  .card h3{font-size:14px;color:var(--blue-d);margin-bottom:9px;font-weight:700}
+  .card p{font-size:14px;color:var(--ink2);margin:0}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+
+  .stage{position:relative;margin:0 0 30px;border-radius:20px;overflow:hidden;
+    border:1px solid var(--line);background:#fff;
+    box-shadow:0 22px 60px rgba(79,168,232,.16), 0 4px 14px rgba(26,29,36,.05)}
+  .stage-bar{display:flex;align-items:center;gap:8px;padding:11px 16px;
+    background:linear-gradient(90deg,#F7FBFE,#FEF7FA);border-bottom:1px solid var(--line)}
+  .stage-dot{width:9px;height:9px;border-radius:50%}
+  .stage-dot:nth-child(1){background:#FFC9D9}
+  .stage-dot:nth-child(2){background:#CFE8F9}
+  .stage-dot:nth-child(3){background:#D9E6F2}
+  .stage-title{font-size:12.5px;color:var(--ink3);margin-left:6px}
+  .stage-live{display:inline-flex;align-items:center;gap:6px;margin-left:8px;
+    font-size:11.5px;font-weight:600;color:var(--red-d)}
+  .stage-live::before{content:"";width:6px;height:6px;border-radius:50%;
+    background:var(--red);box-shadow:0 0 0 3px rgba(232,69,95,.24);
+    animation:livePulse 1.6s ease-in-out infinite}
+  @keyframes livePulse{0%,100%{opacity:1}50%{opacity:.3}}
+  .stage-note{margin-left:auto;font-size:12px;color:var(--ink3);transition:color .3s}
+  .stage-note.pass{color:var(--red-d);font-weight:700}
+
+  .fs-btn{font:inherit;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;
+    padding:5px 13px;border-radius:999px;border:1px solid #D6EAF8;background:#fff;
+    color:var(--blue-d);margin-left:10px;transition:background .18s,border-color .18s}
+  .fs-btn:hover{background:var(--blue-s);border-color:#B9DDF4}
+  .stage.fs .fs-btn{background:var(--red-s);border-color:#F8C9D0;color:var(--red-d)}
+
+  .stage.fs{position:fixed;inset:0;z-index:9999;margin:0;border:0;border-radius:0;
+    display:flex;flex-direction:column;overflow:auto;background:#fff;box-shadow:none}
+  .stage.fs .stage-bar{border-radius:0;flex:none;position:sticky;top:0;z-index:2}
+  .stage.fs .demo{max-width:1300px;margin:0 auto;width:100%;padding:24px 30px 28px}
+  body.fs-lock{overflow:hidden}
+
+  .demo{padding:20px 22px 20px}
+
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+  .stat{border-radius:12px;padding:11px 14px;border:1px solid var(--line);background:#FDFEFF;
+    transition:transform .2s,box-shadow .2s}
+  .stat .v{font-size:23px;font-weight:800;line-height:1.15;letter-spacing:-.01em;
+    font-variant-numeric:tabular-nums;color:var(--ink)}
+  .stat .v small{font-size:11.5px;font-weight:700;margin-left:2px;opacity:.75}
+  .stat .k{font-size:11.5px;color:var(--ink3);margin-top:3px;font-weight:500}
+  .stat.c1{background:linear-gradient(160deg,#F2F9FE,#E4F2FC);border-color:#CDE7F8}
+  .stat.c1 .v{color:var(--blue-d)}
+  .stat.c2{background:linear-gradient(160deg,#F0FBF9,#DFF6F2);border-color:#BEEBE4}
+  .stat.c2 .v{color:var(--teal-d)}
+  .stat.c3{background:linear-gradient(160deg,#FFEFF2,#FFE3E8);border-color:#F8C9D0}
+  .stat.c3 .v{color:var(--red-d)}
+  .stat.c4{background:linear-gradient(160deg,#FFF7EC,#FFEBD1);border-color:#FFDCB3}
+  .stat.c4 .v{color:var(--orange-d)}
+
+  .tools{display:flex;flex-wrap:wrap;gap:7px;align-items:center;margin-bottom:14px}
+  .chip{font:inherit;font-size:12px;font-weight:600;cursor:pointer;padding:5px 13px;
+    border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--ink3);
+    transition:all .18s}
+  .chip:hover{border-color:#B9DDF4;color:var(--blue-d)}
+  .chip.on{background:var(--ink);border-color:var(--ink);color:#fff}
+
+  /* 条形图 */
+  .bars{display:flex;flex-direction:column;gap:7px;margin-bottom:6px}
+  .bar{display:flex;align-items:center;gap:10px;transition:opacity .3s}
+  .bar .nm{flex:none;width:96px;font-size:12.5px;font-weight:600;color:var(--ink);
+    text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .bar .track{flex:1;height:26px;background:#F2F6FB;border-radius:7px;position:relative;
+    overflow:hidden}
+  .bar .fill{position:absolute;left:0;top:0;bottom:0;width:0;border-radius:7px;
+    transition:width .7s cubic-bezier(.22,.9,.3,1),background .3s}
+  .bar .fill.s1{background:linear-gradient(90deg,#8FD3F4,#4FA8E8)}
+  .bar .fill.s2{background:linear-gradient(90deg,#7FE0D4,#10B6A6)}
+  .bar .fill.s3{background:linear-gradient(90deg,#FFC98F,#FF8A1E)}
+  .bar .fill.s4{background:linear-gradient(90deg,#FFB4C0,#E8455F)}
+  .bar .mb{flex:none;width:74px;font-size:12.5px;font-weight:800;
+    font-variant-numeric:tabular-nums;color:var(--ink2);text-align:right}
+  .bar .mb big{font-size:14px;color:var(--ink)}
+  .bar.dim{opacity:.22}
+  .bar .tag3{flex:none;width:66px;font-size:10.5px;font-weight:700;border-radius:999px;
+    padding:1px 7px;text-align:center;background:#F1F4F8;color:var(--ink3)}
+
+  .detail{display:grid;grid-template-columns:1fr 356px;gap:14px;margin-top:14px;
+    align-items:start}
+  .dbox{border:1px solid var(--line);border-radius:13px;background:#FDFEFF;padding:13px 15px}
+  .dbox .dh{font-size:12px;font-weight:700;color:var(--blue-d);letter-spacing:.04em;
+    margin-bottom:7px}
+  .dbox p{font-size:12.5px;color:var(--ink2);line-height:1.75;margin:0 0 6px}
+  .dbox p:last-child{margin-bottom:0}
+  .dbox p b{color:var(--ink)}
+  .dbox .why{font-size:12.5px;color:var(--ink2);line-height:1.75;margin-top:8px;
+    padding-top:8px;border-top:1px dashed #E7EEF7}
+  .dbox .why b{color:var(--red-d)}
+
+  .code{font-family:Consolas,"Cascadia Code",Monaco,monospace;font-size:12px;line-height:1.72;
+    background:#1E1F22;color:#BCBEC4;border-radius:11px;padding:11px 13px;
+    white-space:pre-wrap;word-break:break-word;overflow-x:hidden;max-height:260px;overflow-y:auto}
+  .code .k{color:#CF8E6D}
+  .code .s{color:#6AAB73}
+  .code .c{color:#7A7E85}
+  .code .hl{background:rgba(232,69,95,.18);border-radius:4px;padding:0 3px}
+  .code .hl2{background:rgba(79,168,232,.18);border-radius:4px;padding:0 3px}
+
+  /* 命令生成器 */
+  .gen{display:grid;grid-template-columns:270px 1fr;gap:16px;align-items:start}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);
+    border-radius:11px;background:#fff;padding:9px 12px;cursor:pointer;
+    transition:all .18s;text-align:left;font:inherit}
+  .opt:hover{border-color:#B9DDF4}
+  .opt.on{border-color:#F8C9D0;background:var(--red-s)}
+  .opt .sw{flex:none;width:32px;height:18px;border-radius:99px;background:#E3E9F2;
+    position:relative;transition:background .2s;margin-top:2px}
+  .opt .sw::after{content:"";position:absolute;top:2px;left:2px;width:14px;height:14px;
+    border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:transform .2s}
+  .opt.on .sw{background:var(--red)}
+  .opt.on .sw::after{transform:translateX(14px)}
+  .opt .t1{display:block;font-size:12px;font-weight:700;color:var(--ink);
+    font-family:Consolas,Monaco,monospace;line-height:1.4}
+  .opt .t2{display:block;font-size:10.5px;color:var(--ink3);line-height:1.5;margin-top:2px}
+
+  .genout{display:flex;flex-direction:column;gap:12px}
+  .gh{font-size:11.5px;font-weight:700;color:var(--blue-d);letter-spacing:.04em;
+    margin-bottom:6px;display:flex;align-items:center;gap:8px}
+  .gh span{font-weight:600;color:var(--ink3);font-size:10.5px;letter-spacing:0}
+  .risks{display:flex;flex-direction:column;gap:5px}
+  .risk{display:flex;gap:8px;font-size:11.5px;line-height:1.65;padding:6px 10px;
+    border-radius:9px;background:#FDFEFF;border:1px solid var(--line)}
+  .risk .ic{flex:none;width:15px;height:15px;border-radius:5px;display:flex;align-items:center;
+    justify-content:center;font-size:9.5px;font-weight:800;background:var(--orange-s);
+    color:var(--orange-d);margin-top:1px}
+  .risk.bad{border-color:#F8C9D0;background:var(--red-s)}
+  .risk.bad .ic{background:var(--red);color:#fff}
+  .risk.good{border-color:#BEEBE4;background:var(--teal-s)}
+  .risk.good .ic{background:var(--teal);color:#fff}
+  .risk b{color:var(--ink)}
+  .risk span{color:var(--ink2)}
+
+  /* 路径对照 */
+  .pathdemo{border:1px solid var(--line);border-radius:13px;background:#FDFEFF;padding:14px 16px}
+  .pathdemo .pb{display:flex;align-items:center;gap:8px;font-family:Consolas,Monaco,monospace;
+    font-size:11.5px;color:var(--ink2);padding:5px 0;flex-wrap:wrap}
+  .pathdemo .pb .lab{font-family:"Noto Sans SC",sans-serif;font-size:11px;font-weight:700;
+    color:var(--ink3);flex:none;width:52px}
+  .pathdemo .pb code{background:#fff;border:1px solid var(--line);border-radius:6px;
+    padding:1px 7px;word-break:break-all}
+  .pathdemo .pb .ar{color:var(--ink3)}
+  .pathdemo .pb.bad code{border-color:#F8C9D0;background:var(--red-s);color:var(--red-d)}
+  .pathdemo .pb.good code{border-color:#BEEBE4;background:var(--teal-s);color:var(--teal-d)}
+
+  .pits{display:flex;flex-direction:column;gap:12px}
+  .pit{display:flex;gap:14px;background:#fff;border:1px solid var(--line);border-radius:14px;
+    padding:15px 17px}
+  .pit .pn{flex:none;width:26px;height:26px;border-radius:8px;display:flex;align-items:center;
+    justify-content:center;font-size:12.5px;font-weight:800;color:#fff;
+    background:linear-gradient(135deg,var(--blue),var(--red-d));
+    box-shadow:0 5px 14px rgba(214,47,74,.3)}
+  .pit h3{font-size:14px;font-weight:700;color:var(--ink);margin-bottom:5px}
+  .pit p{font-size:13px;color:var(--ink2);line-height:1.75;margin:0}
+  .pit p+p{margin-top:5px}
+  .pit .ev{font-family:Consolas,Monaco,monospace;font-size:11.5px;color:var(--blue-d);
+    background:var(--blue-s);border-radius:6px;padding:1px 7px}
+
+  .note{border-left:4px solid var(--red);background:linear-gradient(90deg,var(--red-s),#fff);
+    border-radius:0 13px 13px 0;padding:15px 18px;font-size:13.5px;color:var(--ink2);
+    line-height:1.8}
+  .note b{color:var(--red-d)}
+  .note.doubt{border-left-color:var(--orange);
+    background:linear-gradient(90deg,var(--orange-s),#fff)}
+  .note.doubt b{color:var(--orange-d)}
+
+  footer{margin-top:46px;padding-top:20px;border-top:1px solid var(--line);
+    font-size:12.5px;color:var(--ink3);line-height:1.9}
+  footer a{color:var(--blue-d);text-decoration:none;font-weight:600}
+  footer a:hover{text-decoration:underline}
+
+  @media(max-width:860px){
+    .grid3,.grid2{grid-template-columns:1fr}
+    .stats{grid-template-columns:repeat(2,1fr)}
+    .detail{grid-template-columns:1fr}
+    .gen{grid-template-columns:1fr}
+    .bar .nm{width:76px;font-size:11.5px}
+    .bar .tag3{display:none}
+  }
+</style>
+</head>
+<body>
+<div class="glow"></div>
+
+<nav style="position:relative;z-index:1;max-width:min(1600px,100%);margin:0 auto;padding:56px clamp(16px,3vw,40px) 0">
+  <a class="back" href="../../index.html">← 返回作品集</a>
+</nav>
+
+<div class="wrap" style="padding-top:0">
+
+  <span class="num">PROJECT 13</span>
+  <h1>工具打包集</h1>
+  <p class="lede">
+    自己写的脚本，发给不会装环境的人就是一堆 .py。打包成 exe 才算交到别人手里。
+    我按四种情况各打了一遍：<strong>同一条 --onefile，最小的 7.0MB，最大的 203.0MB —— 差 29 倍</strong>。
+    下面这九根柱子是我机器上真实的产物体积，一个字节都没编。
+  </p>
+  <div class="tags">
+    <span class="tag">PyInstaller</span><span class="tag">onefile</span><span class="tag">--add-data</span>
+    <span class="tag">--collect-all</span><span class="tag">sys._MEIPASS</span><span class="tag">tkinter</span>
+  </div>
+
+  <!-- ================= 舞台一 ================= -->
+  <section class="stage" id="stage1">
+    <div class="stage-bar">
+      <span class="stage-dot"></span><span class="stage-dot"></span><span class="stage-dot"></span>
+      <span class="stage-title">真实产物 · 9 个 exe 的实测体积</span>
+      <span class="stage-live">REAL</span>
+      <span class="stage-note" id="note1">点上面四个场景，柱子会跟着变</span>
+      <button class="fs-btn" id="fs1">全屏 ↗</button>
+    </div>
+    <div class="demo">
+
+      <div class="stats">
+        <div class="stat c1"><div class="v">9<small>个</small></div><div class="k">真的打出来的 exe</div></div>
+        <div class="stat c2"><div class="v">7.0<small>MB</small></div><div class="k">最小的（只有 random）</div></div>
+        <div class="stat c3"><div class="v">203<small>MB</small></div><div class="k">最大的（pandas）</div></div>
+        <div class="stat c4"><div class="v">29<small>倍</small></div><div class="k">最大 ÷ 最小</div></div>
+      </div>
+
+      <div class="tools">
+        <button class="chip on" data-sc="all">全部 9 个</button>
+        <button class="chip" data-sc="s1">① 单文件</button>
+        <button class="chip" data-sc="s2">② 带静态资源</button>
+        <button class="chip" data-sc="s3">③ 带第三方库</button>
+        <button class="chip" data-sc="s4">④ 多文件</button>
+      </div>
+
+      <div class="bars" id="bars"></div>
+
+      <div class="detail">
+        <div class="dbox" id="dbox"></div>
+        <div class="code" id="dcode"></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="note" style="margin-bottom:34px">
+    <b>为什么柱子差这么远？</b>因为 PyInstaller 的 onefile 不是"压缩我的代码"，
+    而是<b>把整个 Python 运行时 + 用到的每一个库都塞进一个 exe</b>。
+    你 import 了 random，就只塞 random；你 import 了 pandas，就得把 numpy、pytz、sqlalchemy 那一串全带上。
+    所以体积不是你写了多少行，是你 import 了什么。
+  </div>
+
+  <h2>最要命的一步：打包之后图片去哪了</h2>
+  <p style="font-size:14.5px;color:var(--ink2);max-width:790px;margin-bottom:16px">
+    开发时 <code style="font-family:Consolas,monospace;font-size:12.5px;background:var(--blue-s);color:var(--blue-d);border-radius:5px;padding:1px 6px">cat_normal.png</code>
+    和脚本在同一个文件夹，<code style="font-family:Consolas,monospace;font-size:12.5px;background:var(--blue-s);color:var(--blue-d);border-radius:5px;padding:1px 6px">open("cat_normal.png")</code> 就能读到。
+    但 onefile 的 exe 双击之后，会先把自己解压到一个<b>临时目录</b>再运行 —— 当前目录已经不是脚本所在的目录了，
+    相对路径全部失效，图片裂开、图标变白框。
+  </p>
+  <div class="grid2" style="margin-bottom:16px">
+    <div class="pathdemo">
+      <div style="font-size:12px;font-weight:700;color:var(--blue-d);margin-bottom:6px">开发时（python 直接跑）</div>
+      <div class="pb good"><span class="lab">当前目录</span><code>D:\…\02-依赖静态资源文件打包\</code></div>
+      <div class="pb good"><span class="lab">读图片</span><code>cat_normal.png</code><span class="ar">→ 就地能找到</span></div>
+    </div>
+    <div class="pathdemo">
+      <div style="font-size:12px;font-weight:700;color:var(--red-d);margin-bottom:6px">打包后（exe 双击）</div>
+      <div class="pb bad"><span class="lab">解压到</span><code>C:\Users\你\AppData\Local\Temp\_MEI123456\</code></div>
+      <div class="pb bad"><span class="lab">读图片</span><code>cat_normal.png</code><span class="ar">→ 当前目录里没有，崩</span></div>
+    </div>
+  </div>
+  <p style="font-size:13.5px;color:var(--ink3);margin-bottom:8px">
+    我桌宠那个项目的解法（<b style="color:var(--ink2)">pet_v2.py 里的原函数</b>）：先问一句"我是不是被打包了"，是的话就去临时目录找。
+  </p>
+
+  <!-- ================= 舞台二 ================= -->
+  <section class="stage" id="stage2">
+    <div class="stage-bar">
+      <span class="stage-dot"></span><span class="stage-dot"></span><span class="stage-dot"></span>
+      <span class="stage-title">打包命令生成器 · 勾选项，看命令和代价</span>
+      <span class="stage-note" id="note2">左边的开关随便点</span>
+      <button class="fs-btn" id="fs2">全屏 ↗</button>
+    </div>
+    <div class="demo">
+      <div class="gen">
+        <div class="opts" id="opts"></div>
+        <div class="genout">
+          <div>
+            <div class="gh">生成的命令 <span>复制走就能用</span></div>
+            <div class="code" id="gcmd"></div>
+          </div>
+          <div>
+            <div class="gh">对应的 spec 里会多出什么</div>
+            <div class="code" id="gspec"></div>
+          </div>
+          <div>
+            <div class="gh">每一项的代价 <span>这些是我踩过或拦下来的</span></div>
+            <div class="risks" id="grisk"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <h2>四种情况，各自卡在哪</h2>
+  <div class="grid3">
+    <div class="card">
+      <h3>① 单文件：最省事</h3>
+      <p>没有资源、没有第三方库，<span style="font-family:Consolas,monospace;font-size:12px">--onefile</span> 一句话就完了。三个 exe 都在 7–10MB，因为 tkinter 和 random 就这么多。</p>
+    </div>
+    <div class="card">
+      <h3>② 静态资源：路径要重写</h3>
+      <p>图片得用 <span style="font-family:Consolas,monospace;font-size:12px">--add-data</span> 带进去，代码里还要用 <span style="font-family:Consolas,monospace;font-size:12px">sys._MEIPASS</span> 改路径。两件事少一件，图就裂。</p>
+    </div>
+    <div class="card">
+      <h3>③ 第三方库：体积失控</h3>
+      <p>pandas 默认打不全，要 <span style="font-family:Consolas,monospace;font-size:12px">--collect-all</span>；一加就 203MB。同样的程序只 import requests 时是 16MB。</p>
+    </div>
+  </div>
+
+  <h2>我踩过的坑</h2>
+  <div class="pits">
+    <div class="pit">
+      <div class="pn">1</div>
+      <div>
+        <h3>--add-data 的分隔符：Windows 是 <span class="ev">;</span>，macOS/Linux 是 <span class="ev">:</span></h3>
+        <p>我写的 <span class="ev">--add-data "yzm.png;."</span> 在 Windows 上没问题，换台 Mac 打包就报错 —— 因为 <code style="font-family:Consolas,monospace;font-size:11.5px">;</code> 在那边是路径的一部分。
+        <b>同一条命令不是跨平台的</b>，这一点最容易在"我给你发个命令你照着敲"的时候翻车。</p>
+      </div>
+    </div>
+    <div class="pit">
+      <div class="pn">2</div>
+      <div>
+        <h3>--windowed 之后，报错全都不见了</h3>
+        <p>加 <span class="ev">--windowed</span>（spec 里是 <span class="ev">console=False</span>）exe 双击不再弹黑框，很好看 —— 但程序一崩，什么提示都没有，窗口直接消失。</p>
+        <p>我现在的顺序是：<b>先带控制台打包跑通，确认没异常，最后才加 --windowed 再打一次。</b>反过来做，等于自己把唯一的出错信息关掉了。</p>
+      </div>
+    </div>
+    <div class="pit">
+      <div class="pn">3</div>
+      <div>
+        <h3>--collect-all pandas 换来 203MB</h3>
+        <p>pandas 的好处是它会把 pandas 的所有子模块、数据、二进制一次性收进来，打包成功率高；
+        坏处是它连测试数据、所有可选依赖一起收 —— demo02 就这么变成了 203.0MB，而同样只打印一句话的 requests 版本是 16.0MB。</p>
+        <p>这不是"必须接受的代价"：正确的做法是 <span class="ev">--exclude-module</span> 排掉用不到的（matplotlib / tests / IPython），或者干脆用 <b>onedir</b> 模式，第一次启动还更快。</p>
+      </div>
+    </div>
+    <div class="pit">
+      <div class="pn">4</div>
+      <div>
+        <h3>控制台程序一秒闪退</h3>
+        <p>双击 exe，黑框一闪就没了 —— 因为程序跑完就结束了，打印的内容根本来不及看。
+        我在 <span class="ev">main.py</span> 的最后加了一句 <span class="ev">input("按回车键退出...")</span>，就为了让它停住。</p>
+        <p>这是最土也最有效的办法；正经做法是写日志文件，但当时我只需要看见它跑完了没。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="note doubt" style="margin-top:20px">
+    <b>有一件事我没跑完，如实说：</b>目录里还有一个 <b>demo03.py</b>（pandas 读数据、再 <b>to_csv 写出</b> 一个文件），
+    <b>但它没有对应的 exe</b> —— dist 里只有 demo1 和 demo02。
+    为什么没打，我没有当时的记录，不能替自己编一个理由；只能说这个场景我停在源码，没交产物。
+    要补的话，它其实是个好问题：onefile 下程序往磁盘写东西，到底该写在哪、下次启动还在不在。
+  </div>
+
+  <h2>边界：哪些是我做的</h2>
+  <div class="note">
+    这九个 exe 是 9 月 30 日晚上打出来的，<b>PyInstaller 的命令和 spec 写法是照官方文档学的，不是我摸索出来的</b>。<br>
+    属于我的是：<b>①</b> 这九个体积数字（<span style="font-family:Consolas,monospace;font-size:12px">ls -l</span> 实测）和"29 倍"这个对比；
+    <b>②</b> 上面四个坑里，第 1、2、4 条是我自己撞过的，第 3 条是看着 203MB 去查为什么才知道的；
+    <b>③</b> 这一页的条形图、命令生成器、路径对照，是我为了把这些事讲清楚自己写的。<br>
+    还有一句实话：<b>打包集本身不算一个"项目"</b>，它是同一天晚上练的四套动作。
+    它的价值不在代码量，在于我现在知道"发给别人能跑"和"在我机器上能跑"之间隔着什么。
+  </div>
+
+  <footer>
+    体积数据来源：<b>day18 / 02-课程代码 / 各个 dist 目录</b>，用 <span style="font-family:Consolas,monospace">ls -l</span> 读的原始字节数换算成 MB（1024 进制，保留一位小数）。<br>
+    九个体积分别是：读心术 7.0 · 你好 7.0 · 摸鱼神器v1 9.9 · 缘分检测 9.9 · 摸鱼神器v2 9.9 · 桌宠v1 9.9 · demo1 16.0 · 验证码识别 16.0 · demo02 203.0（MB）。<br>
+    <a href="../../index.html">← 回到全部作品</a>
+  </footer>
+
+</div>
+
+<script>
+/* ============================================================
+   真实产物（体积 = ls -l 的 KB ÷ 1024，一位小数）
+   ============================================================ */
+var EXES = [
+  {n:'demo02',      sc:'s3', mb:203.0, tag:'③ 三方库', note:'pandas + --collect-all'},
+  {n:'demo1',       sc:'s3', mb:16.0,  tag:'③ 三方库', note:'requests 一次 GET'},
+  {n:'验证码识别',   sc:'s4', mb:16.0,  tag:'④ 多文件', note:'加 yzm.png + 超级鹰 API'},
+  {n:'摸鱼神器v1',   sc:'s1', mb:9.9,   tag:'① 单文件', note:'tkinter 倒计时窗口'},
+  {n:'缘分检测',     sc:'s1', mb:9.9,   tag:'① 单文件', note:'tkinter + 生肖配对'},
+  {n:'摸鱼神器v2',   sc:'s2', mb:9.9,   tag:'② 资源',   note:'datas 带 fish.png'},
+  {n:'桌宠v1',      sc:'s2', mb:9.9,   tag:'② 资源',   note:'PIL + 3 张 cat png'},
+  {n:'读心术',       sc:'s1', mb:7.0,   tag:'① 单文件', note:'只有 random，纯控制台'},
+  {n:'你好',        sc:'s1', mb:7.0,   tag:'① 单文件', note:'最短的 hello'}
+];
+
+var SCENE = {
+  all: {
+    t:'四个场景放在一起看',
+    p:['同一条 <b>--onefile</b>，体积从 7.0MB 到 203.0MB，<b>差 29 倍</b>。',
+       '更扎心的是：代码最多的那份是 <b>583 行的桌宠</b>，只有 <b>9.9MB</b>；代码最少的 <b>10 行的 demo02</b>，<b>203.0MB</b>。'],
+    why:'体积取决于 <b>import 了什么</b>，跟你写了多少行几乎没关系。',
+    code:[
+      ['c','# 四个场景，四条命令，区别就这几行'],
+      ['k','pyinstaller --onefile 读心术.py'],
+      [''],
+      ['k','pyinstaller --onefile --add-data "fish.png;." 摸鱼神器v2.py'],
+      [''],
+      ['k','pyinstaller --onefile demo1.py                    # 16.0MB'],
+      ['k','pyinstaller --onefile --collect-all pandas demo02.py   # 203.0MB'],
+      [''],
+      ['k','pyinstaller --onefile --add-data "yzm.png;." 图片验证码识别02.py']
+    ]
+  },
+  s1: {
+    t:'① 单文件 · 无资源无第三方库',
+    p:['<b>读心术</b>只有 random，7.0MB；<b>摸鱼神器v1</b> 和 <b>缘分检测</b> 用 tkinter 画窗口，9.9MB。',
+       '三个都是 <b>--onefile</b> 一句话，没有 spec 要改，双击就能用。'],
+    why:'多出来那 2.9MB 是 <b>tkinter 整个 GUI 框架</b>被打进去了。体积的第一层真相：连"画个窗口"都要付钱。',
+    code:[
+      ['c','# 就是这么一句，没有别的参数'],
+      ['k','pyinstaller --onefile 读心术.py'],
+      [''],
+      ['c','# 产物'],
+      ['','dist/读心术.exe            7.0 MB'],
+      ['','dist/摸鱼神器v1.exe        9.9 MB   # + tkinter'],
+      ['','dist/缘分检测.exe          9.9 MB   # + tkinter']
+    ]
+  },
+  s2: {
+    t:'② 带静态资源 · 图片不会自己跟进来',
+    p:['<b>摸鱼神器v2</b> 要 fish.png 当托盘图，<b>桌宠v1</b> 要三张 cat png。这两个都得两件事一起做：',
+       '① 打包时 <b>--add-data</b> 把文件塞进去；② 代码里用 <b>sys._MEIPASS</b> 改读路径。'],
+    why:'只做①不做②：文件在里面，但程序还按老路径找 → 图裂。<b>只做②不做①：路径对了，但文件根本没打进去 → 也裂。</b>',
+    code:[
+      ['c','# 摸鱼神器v2.spec 里那一行（datas 是加资源的正规位置）'],
+      ['k','datas=[("fish.png", ".")],'],
+      [''],
+      ['c','# pet_v2.py / 图片验证码识别02.py 里都有的这个函数'],
+      ['','def resource_path(filename):'],
+      ['','    if hasattr(sys, "_MEIPASS"):        # 只有打包后才存在'],
+      ['','        return os.path.join(sys._MEIPASS, filename)'],
+      ['','    return os.path.join(os.path.dirname(os.path.abspath(__file__)), filename)'],
+      [''],
+      ['c','# 命令行写法（Windows 用分号）'],
+      ['k','pyinstaller --onefile --add-data "fish.png;." 摸鱼神器v2.py']
+    ]
+  },
+  s3: {
+    t:'③ 带第三方库 · 体积在这里失控',
+    p:['<b>demo1</b> 只 import requests，<b>16.0MB</b>；<b>demo02</b> 只 import pandas，<b>203.0MB</b>。',
+       '两个脚本干的事几乎一样：打印几行、停住等回车。'],
+    why:'pandas 默认打不全，要用 <b>--collect-all pandas</b>；它会把 pandas 的<b>所有</b>子模块、测试数据和可选依赖一起收，包括那些你根本没用的。',
+    code:[
+      ['c','# demo02.spec 开头这几行就是 --collect-all 的产物'],
+      ['k','from PyInstaller.utils.hooks import collect_all'],
+      ['','datas = []; binaries = []; hiddenimports = []'],
+      ['k','tmp_ret = collect_all("pandas")'],
+      ['','datas += tmp_ret[0]; binaries += tmp_ret[1]; hiddenimports += tmp_ret[2]'],
+      [''],
+      ['c','# 于是 Analysis 里三项都被塞满'],
+      ['','a = Analysis([' + "'demo02.py'" + '],'],
+      ['',['k','        binaries=binaries, datas=datas, hiddenimports=hiddenimports,']],
+      ['','        ...)']
+    ]
+  },
+  s4: {
+    t:'④ 多文件 · 自己的模块会自动跟进去',
+    p:['<b>验证码识别</b> 拆成了 图片验证码识别02.py + chaojiying02.py（超级鹰客户端），还要读一张 yzm.png。',
+       '自己的 .py 模块<b>不用手动声明</b>，import 了就会被打进去；只有<b>数据文件</b>要 --add-data。'],
+    why:'同一个目录里还有一套 <b>main.py + utils.py + config.py</b>（二手房处理工具），那是练"多模块"的，<b>我没给它打包产物</b>。',
+    code:[
+      ['c','# 多文件：只要 import 得到，PyInstaller 自己会跟进去'],
+      ['','from chaojiying02 import Chaojiying_Client'],
+      ['','from config import APP_NAME, VERSION'],
+      [''],
+      ['c','# 但数据文件不会，要自己加'],
+      ['k','pyinstaller --name "验证码识别" --add-data "yzm.png;." --onefile 图片验证码识别02.py'],
+      [''],
+      ['c','# 代码里读它的时候必须走 resource_path，否则打包后找不到'],
+      ['','im = open(resource_path("yzm.png"), "rb").read()']
+    ]
+  }
+};
+
+var NOTE = {
+  all:'九根柱子，同一把尺子量',
+  s1:'三个单文件：7.0 / 9.9 / 9.9 MB',
+  s2:'加了图片，体积几乎没变 —— 变的是路径',
+  s3:'16.0MB vs 203.0MB，差别只在 import 了谁',
+  s4:'多文件：16.0MB，自己的模块自动带上'
+};
+
+function $(id){ return document.getElementById(id); }
+function esc(s){
+  if (s === undefined || s === null) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+/* 渲染代码：支持 [[cls, text]] 形式的嵌套行 */
+function renderCode(lines){
+  var h = '';
+  for (var i = 0; i < lines.length; i++){
+    var cls = lines[i][0], txt = lines[i][1];
+    var inner = '';
+    if (txt && txt.length === 2 && typeof txt[0] === 'string' && typeof txt[1] === 'string' && (txt[0] === 'k' || txt[0] === 'c' || txt[0] === 's' || txt[0] === '')){
+      inner = '<span class="' + txt[0] + '">' + esc(txt[1]) + '</span>';
+    } else {
+      inner = esc(txt);
+    }
+    h += (cls ? '<span class="' + cls + '">' + inner + '</span>' : inner) + '\n';
+  }
+  return h;
+}
+
+/* ============================================================
+   条形图
+   ============================================================ */
+var scene = 'all';
+
+function renderBars(){
+  var max = 203.0;
+  var h = '';
+  for (var i = 0; i < EXES.length; i++){
+    var e = EXES[i];
+    var dim = (scene !== 'all' && e.sc !== scene) ? ' dim' : '';
+    var pct = (e.mb / max * 100).toFixed(2);
+    h += '<div class="bar' + dim + '" data-n="' + esc(e.n) + '">' +
+      '<span class="nm">' + esc(e.n) + '</span>' +
+      '<span class="tag3">' + e.tag + '</span>' +
+      '<span class="track"><span class="fill ' + e.sc + '" data-w="' + pct + '"></span></span>' +
+      '<span class="mb"><big>' + e.mb.toFixed(1) + '</big> MB</span>' +
+      '</div>';
+  }
+  $('bars').innerHTML = h;
+  /* 下一帧再赋宽度，才有生长动画 */
+  setTimeout(function(){
+    var fills = $('bars').querySelectorAll('.fill');
+    for (var k = 0; k < fills.length; k++){
+      fills[k].style.width = fills[k].getAttribute('data-w') + '%';
+    }
+  }, 30);
+}
+
+function renderScene(){
+  var s = SCENE[scene];
+  var h = '<div class="dh">' + s.t + '</div>';
+  for (var i = 0; i < s.p.length; i++) h += '<p>' + s.p[i] + '</p>';
+  h += '<div class="why">' + s.why + '</div>';
+  $('dbox').innerHTML = h;
+  $('dcode').innerHTML = renderCode(s.code);
+  $('note1').textContent = NOTE[scene];
+  $('note1').className = 'stage-note' + (scene === 's3' ? ' pass' : '');
+}
+
+var chips = document.querySelectorAll('.chip[data-sc]');
+for (var ci = 0; ci < chips.length; ci++){
+  chips[ci].addEventListener('click', function(){
+    for (var z = 0; z < chips.length; z++) chips[z].classList.remove('on');
+    this.classList.add('on');
+    scene = this.getAttribute('data-sc');
+    renderBars();
+    renderScene();
+  });
+}
+
+/* ============================================================
+   命令生成器
+   ============================================================ */
+var OPTS = [
+  {k:'onefile', t1:'--onefile', t2:'打成一个 exe，双击就能发人', on:true},
+  {k:'windowed', t1:'--windowed', t2:'不弹黑框（spec: console=False）', on:false},
+  {k:'adddata', t1:'--add-data', t2:'把 fish.png 一起打进去', on:false},
+  {k:'icon', t1:'--icon', t2:'换掉默认的 exe 图标', on:false},
+  {k:'pandas', t1:'--collect-all pandas', t2:'pandas 打不全时的暴力解', on:false}
+];
+var OPT = {};
+for (var oi = 0; oi < OPTS.length; oi++) OPT[OPTS[oi].k] = OPTS[oi].on;
+
+function renderOpts(){
+  var h = '';
+  for (var i = 0; i < OPTS.length; i++){
+    var o = OPTS[i];
+    h += '<button class="opt' + (OPT[o.k] ? ' on' : '') + '" data-k="' + o.k + '">' +
+      '<span class="sw"></span><span><span class="t1">' + o.t1 + '</span>' +
+      '<span class="t2">' + o.t2 + '</span></span></button>';
+  }
+  $('opts').innerHTML = h;
+}
+
+function buildCmd(){
+  var p = ['pyinstaller'];
+  if (OPT.onefile) p.push('--onefile');
+  if (OPT.windowed) p.push('--windowed');
+  if (OPT.adddata) p.push('--add-data "fish.png;."');
+  if (OPT.icon) p.push('--icon "app.ico"');
+  if (OPT.pandas) p.push('--collect-all pandas');
+  p.push('摸鱼神器v2.py');
+  return p.join(' ');
+}
+
+function renderGen(){
+  /* 命令 */
+  $('gcmd').innerHTML = '<span class="c"># 你在项目目录里敲这一行</span>\n<span class="k">' +
+    esc(buildCmd()) + '</span>';
+
+  /* spec 片段 */
+  var sp = [];
+  sp.push(['c','# 生成的 spec 里，对应的位置长这样']);
+  if (OPT.adddata) sp.push(['k','datas=[("fish.png", ".")],']);
+  else sp.push(['','datas=[],']);
+  if (OPT.pandas){
+    sp.push(['k','from PyInstaller.utils.hooks import collect_all']);
+    sp.push(['k','tmp_ret = collect_all("pandas")']);
+    sp.push(['','datas += tmp_ret[0]; binaries += tmp_ret[1]; hiddenimports += tmp_ret[2]']);
+  }
+  sp.push(['','exe = EXE(pyz, a.scripts, a.binaries, a.datas, [],']);
+  sp.push(['k','    name=' + "'摸鱼神器v2'," ]);
+  sp.push(['','    upx=True,']);
+  sp.push([OPT.windowed ? 'k' : '', '    console=' + (OPT.windowed ? 'False' : 'True') + ',   ' + '']);
+  if (OPT.icon) sp.push(['k','    icon=' + "'app.ico',"]);
+  sp.push(['','    ...)']);
+  $('gspec').innerHTML = renderCode(sp);
+
+  /* 代价 */
+  var r = [];
+  if (OPT.onefile){
+    r.push({c:'good', ic:'✓', t:'<b>--onefile</b> <span>只出一个文件，发给别人最省事。代价：每次双击都要先解压自己，第一次启动慢 1–3 秒（我从没测准过具体秒数，只说"明显慢"）。</span>'});
+  } else {
+    r.push({c:'', ic:'!', t:'<b>没加 --onefile</b> <span>会出一个文件夹（onedir）。文件夹里有几十个 dll，不能只发 exe；好处是启动快、也不需要 sys._MEIPASS。</span>'});
+  }
+  if (OPT.windowed){
+    r.push({c:'bad', ic:'!', t:'<b>--windowed</b> <span>黑框没了，程序崩了也<b>不会告诉你为什么</b>，窗口直接消失。先带控制台跑通，最后才加这个。</span>'});
+  } else {
+    r.push({c:'', ic:'!', t:'<b>没加 --windowed</b> <span>双击会带一个黑框。调试时千万别去掉它 —— 出错信息全在那儿。</span>'});
+  }
+  if (OPT.adddata){
+    r.push({c:'', ic:'!', t:'<b>--add-data</b> <span>分号只对 Windows 有效，macOS/Linux 要换成冒号。<b>光加这个还不够</b>，代码里必须用 sys._MEIPASS 改路径。</span>'});
+  } else {
+    r.push({c:'bad', ic:'!', t:'<b>没加 --add-data</b> <span>fish.png 不会被打进 exe。本机测试可能还是有图（因为图片就在旁边），发到别人机器就裂 —— <b>这种 bug 最容易漏测</b>。</span>'});
+  }
+  if (OPT.pandas){
+    r.push({c:'bad', ic:'!', t:'<b>--collect-all pandas</b> <span>我的实测：同目录下 pandas 版本 203.0MB，requests 版本 16.0MB。能用 --exclude-module 排掉 matplotlib/tests 之类，或者改用 onedir。</span>'});
+  }
+  if (OPT.icon){
+    r.push({c:'', ic:'!', t:'<b>--icon</b> <span>必须是 .ico（不是 png），不然会报错或被忽略。注意任务栏图标不受它控制。</span>'});
+  }
+  var h = '';
+  for (var i = 0; i < r.length; i++){
+    h += '<div class="risk ' + r[i].c + '"><span class="ic">' + r[i].ic + '</span>' +
+         '<span>' + r[i].t + '</span></div>';
+  }
+  $('grisk').innerHTML = h;
+
+  var cnt = 0;
+  for (var k in OPT) if (OPT[k]) cnt++;
+  $('note2').className = 'stage-note' + (OPT.windowed && OPT.pandas ? ' pass' : '');
+  $('note2').textContent = cnt + ' 个开关打开 · ' + (OPT.windowed ? '黑框已关，注意看不见报错' : '黑框还在，出错能看见');
+}
+
+$('opts').addEventListener('click', function(e){
+  var b = e.target.closest ? e.target.closest('.opt') : null;
+  if (!b) return;
+  var k = b.getAttribute('data-k');
+  OPT[k] = !OPT[k];
+  b.classList.toggle('on', OPT[k]);
+  renderGen();
+});
+
+/* 全屏 */
+function bindFS(stageId, btnId){
+  var st = $(stageId), btn = $(btnId);
+  function set(on){
+    st.classList.toggle('fs', on);
+    document.body.classList.toggle('fs-lock', on);
+    btn.textContent = on ? '退出全屏 ✕' : '全屏 ↗';
+    if (on) setTimeout(function(){ renderBars(); }, 60);
+  }
+  btn.addEventListener('click', function(){ set(!st.classList.contains('fs')); });
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape' && st.classList.contains('fs')) set(false);
+  });
+}
+bindFS('stage1', 'fs1');
+bindFS('stage2', 'fs2');
+
+/* 打开就画好 */
+renderOpts();
+renderGen();
+renderScene();
+renderBars();
+</script>
+</body>
+</html>

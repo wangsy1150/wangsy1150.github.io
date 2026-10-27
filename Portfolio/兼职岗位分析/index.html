@@ -3,13 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>兼职岗位技能溢价分析大屏 · 项目详情</title>
-<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+<title>兼职岗位技能溢价分析 · 项目详情</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg?v=2">
 <link rel="preload" href="../../fonts/NotoSansSC-400-subset.woff2" as="font"
       type="font/woff2" crossorigin>
 <style>
-  /* 字体本地化：与首页统一用 Noto Sans SC 子集（16.9MB → 505KB） */
-  /* 静态字重子集（该浏览器不支持可变字体 @font-face，改用 4 个静态字重） */
+  :root{
+    --bg:#FBFCFE; --ink:#1A1D24; --ink2:#525B6B; --ink3:#8B95A6;
+    --blue:#4FA8E8; --blue-d:#2E8BD0; --blue-s:#EAF5FD;
+    --red:#E8455F; --red-d:#C9304A; --red-s:#FFEBEE;
+    --pink:#FF8FB1; --line:#E4EBF5;
+    --orange:#FF8A1E; --orange-d:#C4661A; --orange-s:#FFF4E8;
+    --teal:#10B6A6; --teal-d:#0B8578; --teal-s:#E9F9F7;
+    --grey:#8B95A6; --grey-s:#F3F6FA;
+  }
   @font-face{font-family:"Noto Sans SC";font-style:normal;font-weight:400;
     font-display:swap;src:url("../../fonts/NotoSansSC-400-subset.woff2") format("woff2")}
   @font-face{font-family:"Noto Sans SC";font-style:normal;font-weight:500;
@@ -18,233 +25,561 @@
     font-display:swap;src:url("../../fonts/NotoSansSC-600-subset.woff2") format("woff2")}
   @font-face{font-family:"Noto Sans SC";font-style:normal;font-weight:700;
     font-display:swap;src:url("../../fonts/NotoSansSC-700-subset.woff2") format("woff2")}
-  @font-face{font-family:"Noto Sans SC";font-style:normal;font-weight:800;
-    font-display:swap;src:url("../../fonts/NotoSansSC-700-subset.woff2") format("woff2")}
+
   *{box-sizing:border-box;margin:0;padding:0}
+  code{font-family:Consolas,Monaco,monospace}
   body{font-family:"Noto Sans SC","Microsoft YaHei","PingFang SC",Arial,sans-serif;
-    font-weight:400;
-    color:#eae6f5;background:#0d0a17;line-height:1.75;overflow-x:hidden}
+    font-weight:400;color:var(--ink);background:var(--bg);line-height:1.75;overflow-x:hidden}
   .glow{position:fixed;inset:0;pointer-events:none;z-index:0;
     background:
-      radial-gradient(circle at 18% 6%, rgba(139,92,246,.26), transparent 45%),
-      radial-gradient(circle at 84% 14%, rgba(56,189,248,.16), transparent 40%),
-      radial-gradient(circle at 50% 96%, rgba(236,72,153,.14), transparent 45%)}
-  .wrap{position:relative;z-index:1;max-width:960px;margin:0 auto;padding:56px 24px 96px}
-  .back{display:inline-flex;align-items:center;gap:8px;color:#a89ec9;text-decoration:none;
-    font-size:14px;margin-bottom:36px;transition:color .2s}
-  .back:hover{color:#c4b5fd}
-  .num{display:inline-block;font-size:13px;letter-spacing:.18em;color:#8b7fc7;
-    border:1px solid rgba(139,92,246,.35);border-radius:999px;padding:5px 14px;margin-bottom:18px}
-  h1{font-size:clamp(28px,4.6vw,44px);line-height:1.25;font-weight:800;
-    background:linear-gradient(120deg,#c4b5fd 0%,#a78bfa 40%,#7dd3fc 100%);
-    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:16px}
-  .lede{font-size:17px;color:#b9b0d6;max-width:680px;margin-bottom:30px}
-  .tags{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:34px}
-  .tag{font-size:12.5px;padding:5px 13px;border-radius:999px;
-    background:rgba(139,92,246,.14);border:1px solid rgba(139,92,246,.32);color:#c9bff0}
+      radial-gradient(circle at 8% 0%, rgba(79,168,232,.16), transparent 42%),
+      radial-gradient(circle at 94% 4%, rgba(232,69,95,.09), transparent 38%),
+      radial-gradient(circle at 50% 102%, rgba(255,143,177,.05), transparent 46%)}
+  .wrap{position:relative;z-index:1;max-width:min(1600px,100%);margin:0 auto;padding:56px clamp(16px,3vw,40px) 96px}
 
-  /* 数据口径声明 —— 主动把边界讲在前面 */
-  .notice{display:flex;gap:14px;padding:16px 20px;margin:0 0 46px;border-radius:13px;
-    background:rgba(236,72,153,.07);border:1px solid rgba(236,72,153,.34)}
-  .notice-icon{flex:none;font-size:17px;line-height:1.5}
-  .notice-body{font-size:13.8px;color:#c9bfdd}
-  .notice-body b{color:#f0c4dc}
-  .notice-body code{font-family:Consolas,Monaco,monospace;font-size:12.5px;color:#c9bff0;
-    background:rgba(139,92,246,.16);border-radius:4px;padding:1px 5px}
+  .back{display:flex;width:fit-content;align-items:center;gap:8px;color:var(--ink3);
+    text-decoration:none;font-size:14px;margin-bottom:34px;transition:color .2s}
+  .back:hover{color:var(--blue-d)}
 
-  h2{font-size:20px;color:#ddd6f3;margin:0 0 16px;padding-left:14px;position:relative}
+  .num{display:inline-block;font-size:12.5px;font-weight:600;letter-spacing:.14em;
+    color:#fff;background:linear-gradient(100deg,#3E9FE0 0%,#E8455F 72%,#D62F4A 100%);
+    border-radius:999px;padding:6px 16px;margin-bottom:16px;
+    box-shadow:0 8px 22px rgba(214,47,74,.34)}
+
+  h1{font-size:clamp(26px,3.6vw,38px);line-height:1.28;font-weight:700;
+    color:var(--ink);margin-bottom:14px;letter-spacing:-.01em}
+  h1::after{content:"";display:inline-block;width:11px;height:11px;border-radius:3px;
+    background:var(--red);margin-left:12px;vertical-align:.22em;
+    box-shadow:0 3px 10px rgba(232,69,95,.45)}
+
+  .lede{font-size:17px;color:var(--ink2);max-width:740px;margin-bottom:26px}
+  .lede strong{color:var(--ink);font-weight:600;
+    background:linear-gradient(transparent 60%, rgba(232,69,95,.20) 60%);
+    padding:0 2px;border-radius:2px}
+
+  .tags{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:26px}
+  .tag{font-size:12.5px;padding:6px 14px;border-radius:999px;
+    background:#fff;border:1px solid var(--line);color:var(--ink2);
+    box-shadow:0 1px 2px rgba(26,29,36,.04)}
+  .tag:nth-child(3n+1){border-color:#D6EAF8;color:var(--blue-d);background:var(--blue-s)}
+  .tag:nth-child(3n+2){border-color:#FBD0D7;color:var(--red-d);background:var(--red-s)}
+
+  /* ---------- 数据口径 ---------- */
+  .notice{display:flex;gap:14px;padding:15px 19px;margin:0 0 34px;border-radius:13px;
+    background:var(--orange-s);border:1px solid #FFDCB3}
+  .notice .ic{flex:none;font-size:16px;line-height:1.6;color:var(--orange-d)}
+  .notice .bd{font-size:13.5px;color:#6E4514}
+  .notice .bd b{color:var(--orange-d)}
+  .notice code{font-family:Consolas,Monaco,monospace;font-size:12.3px;
+    color:var(--blue-d);background:rgba(79,168,232,.13);border-radius:4px;padding:1px 5px}
+
+  /* ============================================================
+     舞台
+     ============================================================ */
+  .stage{position:relative;background:#fff;border:1px solid var(--line);border-radius:18px;
+    box-shadow:0 14px 40px rgba(26,29,36,.075),0 2px 6px rgba(26,29,36,.03);
+    overflow:hidden;margin-bottom:12px;display:flex;flex-direction:column}
+  .stage.fs{position:fixed;inset:0;z-index:9999;border-radius:0;border:0;margin:0}
+  body.fs-on{overflow:hidden}
+
+  .bar{display:flex;align-items:center;gap:9px;padding:10px 14px;flex:none;
+    border-bottom:1px solid var(--line);background:#FBFCFE}
+  .dots{display:flex;gap:6px;flex:none}
+  .dots i{width:9px;height:9px;border-radius:50%;display:block}
+  .dots i:nth-child(1){background:#F0A0A8}
+  .dots i:nth-child(2){background:#F2D08A}
+  .dots i:nth-child(3){background:#A6D9B0}
+  .bar .bt{font-size:12px;color:var(--ink3);font-family:Consolas,monospace;
+    letter-spacing:.02em;margin-left:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .bar .sp{flex:1}
+  .badge{font-size:10.5px;padding:3px 9px;border-radius:999px;flex:none;
+    background:var(--red-s);color:var(--red-d);border:1px solid #FBD0D7;font-weight:700;
+    letter-spacing:.02em;display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+  .badge::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--red);
+    box-shadow:0 0 0 3px rgba(232,69,95,.22)}
+  .fsbtn{flex:none;font-size:11.5px;padding:4px 11px;border-radius:8px;cursor:pointer;
+    background:#fff;border:1px solid var(--line);color:var(--ink2);
+    font-family:inherit;transition:.18s}
+  .fsbtn:hover{border-color:#BFDDF4;color:var(--blue-d);background:var(--blue-s)}
+
+  /* ---------- 舞台 A：五方向阶梯 ---------- */
+  .aw{display:grid;grid-template-columns:272px 1fr;min-height:0}
+  .stage.fs .aw{flex:1;overflow:hidden}
+
+  .ladder{padding:13px 12px;border-right:1px solid var(--line);background:#FDFEFF;
+    display:flex;flex-direction:column;gap:6px;min-width:0}
+  .ladder .lt{font-size:10.5px;font-weight:700;color:var(--ink3);letter-spacing:.07em;
+    text-transform:uppercase;margin-bottom:3px;padding-left:2px}
+
+  .dir{position:relative;display:block;width:100%;text-align:left;cursor:pointer;
+    font-family:inherit;padding:8px 10px 9px;border-radius:10px;border:1px solid transparent;
+    background:transparent;transition:.18s;overflow:hidden}
+  .dir:hover{background:#fff;border-color:#E8EFF7}
+  .dir.on{background:#fff;border-color:#D8E8F6;box-shadow:0 4px 16px rgba(26,29,36,.07)}
+  .dir .d1{display:flex;align-items:baseline;justify-content:space-between;gap:6px}
+  .dir .dn{font-size:12.5px;font-weight:600;color:var(--ink2);white-space:nowrap;
+    overflow:hidden;text-overflow:ellipsis}
+  .dir.on .dn{color:var(--ink)}
+  .dir .dv{font-size:13.5px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .dir .dv small{font-size:9.5px;font-weight:600;color:var(--ink3);margin-left:1px}
+  .dir .dbar{height:5px;border-radius:3px;background:#EEF3F9;margin-top:6px;overflow:hidden}
+  .dir .dbar i{display:block;height:100%;border-radius:3px;transition:width .55s cubic-bezier(.2,.8,.2,1)}
+  .dir .dmeta{font-size:10px;color:var(--ink3);margin-top:4px;white-space:nowrap;
+    overflow:hidden;text-overflow:ellipsis}
+
+  .dmain{padding:14px 16px;min-width:0;overflow-y:auto}
+  .stage.fs .dmain{overflow-y:auto}
+  .dh{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;
+    padding-bottom:11px;border-bottom:1px solid var(--line);margin-bottom:12px}
+  .dh .dname{font-size:17px;font-weight:800;color:var(--ink);line-height:1.35}
+  .dh .dname em{font-style:normal;font-size:11px;font-weight:700;padding:2px 8px;
+    border-radius:999px;margin-left:8px;vertical-align:.15em}
+  .dh .dn2{font-size:11.5px;color:var(--ink3);margin-top:2px}
+  .dh .big{text-align:right;flex:none}
+  .dh .big b{display:block;font-size:26px;font-weight:800;line-height:1.1;
+    font-variant-numeric:tabular-nums}
+  .dh .big b small{font-size:11px;font-weight:600;color:var(--ink3);margin-left:2px}
+  .dh .big span{font-size:10.5px;color:var(--ink3)}
+
+  .dgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);
+    border:1px solid var(--line);border-radius:11px;overflow:hidden;margin-bottom:12px}
+  .dg{padding:9px 11px;background:#fff}
+  .dg .gk{font-size:10px;font-weight:700;color:var(--ink3);letter-spacing:.04em;
+    text-transform:uppercase;margin-bottom:1px}
+  .dg .gv{font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--ink)}
+  .dg .gv small{font-size:9.5px;font-weight:600;color:var(--ink3);margin-left:1px}
+
+  .tips{display:flex;flex-direction:column;gap:5px}
+  .tips .tt2{font-size:10.5px;font-weight:700;color:var(--ink3);letter-spacing:.06em;
+    text-transform:uppercase;margin-bottom:2px}
+  .tip{display:grid;grid-template-columns:16px 1fr auto;gap:8px;align-items:center;
+    font-size:12px;padding:5px 8px;border-radius:7px;background:#FBFCFE}
+  .tip .rk{font-size:9.5px;font-weight:800;color:#fff;background:var(--grey);
+    border-radius:4px;text-align:center;line-height:16px;height:16px}
+  .tip:nth-child(2) .rk{background:var(--red)}
+  .tip:nth-child(3) .rk{background:#E8607A}
+  .tip:nth-child(4) .rk{background:#F08398}
+  .tip .tn{color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .tip .tm{font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap;
+    font-size:11.5px;color:var(--ink)}
+  .tip .tm i{font-style:normal;font-size:9.5px;color:var(--ink3);font-weight:600;margin-left:2px}
+
+  /* ---------- 舞台 B：复合超加 ---------- */
+  .bw{padding:16px 18px;display:grid;grid-template-columns:1fr 300px;gap:22px;min-width:0}
+  .stage.fs .bw{flex:1;align-content:center}
+  .cols{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;align-items:end;
+    min-height:270px;padding:0 4px}
+  .col{text-align:center;position:relative}
+  .col .cv{font-size:19px;font-weight:800;font-variant-numeric:tabular-nums;
+    margin-bottom:5px;line-height:1.1}
+  .col .cv small{font-size:10px;font-weight:600;color:var(--ink3);margin-left:1px}
+  .col .cb{width:100%;border-radius:10px 10px 3px 3px;position:relative;
+    transition:height .7s cubic-bezier(.2,.8,.2,1)}
+  .col .cb::after{content:attr(data-h);position:absolute;inset:auto 0 7px;
+    font-size:11px;font-weight:800;color:#fff;letter-spacing:.02em}
+  .col .cn{font-size:12.5px;font-weight:700;color:var(--ink2);margin-top:8px}
+  .col .cc{font-size:10.5px;color:var(--ink3);margin-top:1px}
+  .col.main .cn{color:var(--red-d)}
+  .col.main .cv{color:var(--red-d)}
+
+  .bexp{display:flex;flex-direction:column;gap:9px;justify-content:center}
+  .bx{font-size:10.5px;font-weight:700;color:var(--ink3);letter-spacing:.06em;
+    text-transform:uppercase}
+  .bsum{padding:11px 13px;border-radius:11px;background:var(--red-s);border:1px solid #FBD0D7}
+  .bsum .bl{font-size:11.5px;color:#8E2438;font-weight:600}
+  .bsum .bv{font-size:23px;font-weight:800;color:var(--red-d);
+    font-variant-numeric:tabular-nums;line-height:1.2}
+  .bsum .bv small{font-size:11px;font-weight:600;color:#B4455C;margin-left:3px}
+  .bsum .bd{font-size:11px;color:#8E2438;margin-top:3px;line-height:1.55}
+  .balt{padding:10px 13px;border-radius:11px;background:var(--grey-s);border:1px solid var(--line)}
+  .balt .bl{font-size:11.5px;color:var(--ink2);font-weight:600}
+  .balt .bv{font-size:18px;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums}
+  .balt .bv small{font-size:10.5px;font-weight:600;color:var(--ink3);margin-left:2px}
+  .balt .bd{font-size:11px;color:var(--ink3);margin-top:2px;line-height:1.55}
+
+  /* ---------- 舞台 C：趋势 ---------- */
+  .cw{padding:12px 16px 14px;min-width:0}
+  .stage.fs .cw{flex:1;display:flex;flex-direction:column}
+  .chart{width:100%;height:auto;display:block}
+  .stage.fs .chart{flex:1;min-height:0}
+  .lg{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:6px;padding-left:2px}
+  .lg b{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;
+    color:var(--ink2);cursor:pointer;user-select:none;transition:opacity .2s}
+  .lg b i{width:14px;height:3px;border-radius:2px;display:block}
+  .lg b.off{opacity:.32}
+  .lg b em{font-style:normal;font-size:10.5px;font-weight:800;color:var(--ink);
+    font-variant-numeric:tabular-nums;margin-left:1px}
+  .lg b.off em{color:var(--ink3)}
+  .chart text{font-family:inherit}
+
+  /* ---------- 正文 ---------- */
+  h2{font-size:20px;color:var(--ink);margin:0 0 16px;padding-left:14px;position:relative}
   h2::before{content:"";position:absolute;left:0;top:5px;bottom:5px;width:3px;
-    border-radius:2px;background:linear-gradient(180deg,#a78bfa,#38bdf8)}
-  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:46px}
-  .card{background:rgba(255,255,255,.035);border:1px solid rgba(139,92,246,.18);
-    border-radius:13px;padding:18px 20px}
-  .card h3{font-size:14px;color:#a78bfa;margin-bottom:8px}
-  .card p{font-size:14px;color:#b3aacd;margin:0}
-  .card code{font-family:Consolas,Monaco,monospace;font-size:12.5px;color:#c9bff0;
-    background:rgba(139,92,246,.16);border-radius:4px;padding:1px 5px}
-  ul.flow{list-style:none;counter-reset:step;margin-bottom:46px}
-  ul.flow li{position:relative;padding-left:32px;margin-bottom:16px;font-size:14.5px;color:#b8afd3}
+    border-radius:2px;background:linear-gradient(180deg,var(--blue) 0%,var(--red) 100%)}
+  .sect{margin-bottom:46px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(228px,1fr));gap:14px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:13px;padding:16px 18px;
+    box-shadow:0 2px 8px rgba(26,29,36,.035)}
+  .card h3{font-size:13.5px;color:var(--blue-d);margin-bottom:7px;font-weight:700}
+  .card p{font-size:13.5px;color:var(--ink2);margin:0;line-height:1.68}
+  .card code{font-family:Consolas,Monaco,monospace;font-size:12.3px;color:var(--blue-d);
+    background:rgba(79,168,232,.13);border-radius:4px;padding:1px 5px}
+  .card b{color:var(--ink);font-weight:600}
+
+  ul.flow{list-style:none;counter-reset:step;margin-bottom:0}
+  ul.flow li{position:relative;padding-left:34px;margin-bottom:15px;font-size:14.5px;
+    color:var(--ink2);line-height:1.7}
+  ul.flow li:last-child{margin-bottom:0}
   ul.flow li::before{content:counter(step);counter-increment:step;position:absolute;left:0;top:1px;
-    width:21px;height:21px;border-radius:50%;font-size:12px;font-weight:700;color:#0d0a17;
-    text-align:center;line-height:21px;background:linear-gradient(135deg,#a78bfa,#7dd3fc)}
-  ul.flow li strong{color:#ddd6f3;font-weight:600}
-  ul.flow li code{font-family:Consolas,Monaco,monospace;font-size:12.5px;color:#c9bff0;
-    background:rgba(139,92,246,.16);border-radius:4px;padding:1px 5px}
-  .code{background:#120f1f;border:1px solid rgba(139,92,246,.2);border-radius:12px;
-    padding:18px 20px;font-family:Consolas,Monaco,monospace;font-size:13px;color:#c9d6f5;
-    overflow-x:auto;margin-bottom:46px;line-height:1.7}
-  .code .c{color:#6f6690}.code .k{color:#c4b5fd}.code .s{color:#7dd3fc}
-  .cap{font-size:12.5px;color:#6f6690;margin:-36px 0 46px}
+    width:22px;height:22px;border-radius:50%;font-size:11.5px;font-weight:800;color:#fff;
+    text-align:center;line-height:22px;
+    background:linear-gradient(135deg,var(--blue) 0%,var(--red) 130%)}
+  ul.flow li strong{color:var(--ink);font-weight:600}
+  ul.flow li code{font-family:Consolas,Monaco,monospace;font-size:12.5px;color:var(--blue-d);
+    background:rgba(79,168,232,.13);border-radius:4px;padding:1px 5px}
 
-  /* ---------- 运行截图 ---------- */
-  .shots{display:grid;gap:26px;margin-bottom:46px}
-  .shot{background:rgba(255,255,255,.035);border:1px solid rgba(139,92,246,.18);
-    border-radius:14px;overflow:hidden;transition:border-color .25s,transform .25s}
-  .shot:hover{border-color:rgba(139,92,246,.42);transform:translateY(-2px)}
-  .shot img{display:block;width:100%;height:auto}
-  .shot-body{padding:15px 20px 18px}
-  .shot-body h4{font-size:14.5px;color:#ddd6f3;margin-bottom:7px;font-weight:600}
-  .shot-body p{font-size:13.5px;color:#a89ec9;margin:0}
-  .shot-body code{font-family:Consolas,Monaco,monospace;font-size:12.5px;color:#c9bff0;
-    background:rgba(139,92,246,.16);border-radius:4px;padding:1px 5px}
-  .shot-num{display:inline-block;font-size:11.5px;letter-spacing:.1em;color:#8b7fc7;
-    border:1px solid rgba(139,92,246,.35);border-radius:999px;padding:2px 10px;margin-right:9px}
+  /* 老截图（ECharts 深色版） */
+  .oldshots{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:11px}
+  .osh{display:block;color:inherit;text-decoration:none;background:#fff;
+    border:1px solid var(--line);border-radius:13px;overflow:hidden;
+    box-shadow:0 2px 8px rgba(26,29,36,.04);transition:.2s}
+  .osh:hover{box-shadow:0 10px 28px rgba(26,29,36,.1);transform:translateY(-2px)}
+  .oshimg{position:relative;display:block}
+  .osh img{display:block;width:100%;height:auto;background:#0B0A14}
+  .osh .go{position:absolute;top:10px;right:10px;padding:4px 10px;border-radius:999px;
+    background:rgba(255,255,255,.95);color:#0B0A14;font-size:11px;font-weight:800;
+    letter-spacing:.02em;box-shadow:0 2px 10px rgba(0,0,0,.32);transition:.2s}
+  .osh:hover .go{background:var(--red);color:#fff}
+  .osh .oc{padding:11px 14px 13px}
+  .osh .oc h4{font-size:13px;color:var(--ink);font-weight:700;margin-bottom:3px}
+  .osh .oc p{font-size:12px;color:var(--ink2);line-height:1.6;margin:0}
 
-  /* ---------- KPI 对照表 ---------- */
-  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:46px}
-  .kpi{background:rgba(255,255,255,.035);border:1px solid rgba(139,92,246,.18);
-    border-radius:12px;padding:15px 16px}
-  .kpi span{display:block;font-size:12px;color:#8b7fc7;letter-spacing:.03em}
-  .kpi b{display:block;font-size:22px;color:#c4b5fd;font-weight:800;margin:5px 0 2px;line-height:1.25}
-  .kpi i{font-style:normal;font-size:12px;color:#7d7599}
+  /* 诚实边界 */
+  .bounds{display:grid;gap:11px;margin-bottom:46px}
+  .bd1{display:grid;grid-template-columns:32px 1fr;gap:12px;padding:14px 16px;
+    border-radius:13px;background:var(--grey-s);border:1px solid var(--line)}
+  .bd1 .bn{width:32px;height:32px;border-radius:9px;background:#fff;border:1px solid var(--line);
+    display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;
+    color:var(--ink2);flex:none}
+  .bd1 h3{font-size:13.5px;font-weight:700;color:var(--ink);margin-bottom:3px}
+  .bd1 p{font-size:13px;color:var(--ink2);line-height:1.65;margin:0}
+  .bd1 b{color:var(--ink);font-weight:600}
 
-  footer{text-align:center;font-size:13px;color:#6f6690;padding-top:36px;
-    border-top:1px solid rgba(139,92,246,.14)}
-  footer a{color:#a78bfa;text-decoration:none}
+  .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);
+    border:1px solid var(--line);border-radius:13px;overflow:hidden;margin-bottom:46px}
+  .kpi{padding:13px 15px;background:#fff}
+  .kpi .kk{font-size:10.5px;font-weight:700;color:var(--ink3);letter-spacing:.05em;
+    text-transform:uppercase;margin-bottom:2px}
+  .kpi .kv{font-size:21px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.2}
+  .kpi .kv small{font-size:10.5px;font-weight:600;color:var(--ink3);margin-left:2px}
+  .kpi .kd{font-size:11px;color:var(--ink3);margin-top:1px}
+  .kpi:nth-child(1){background:linear-gradient(160deg,#FFF6F8,#FFEBEE)}
+  .kpi:nth-child(1) .kv{color:var(--red-d)}
+  .kpi:nth-child(2){background:linear-gradient(160deg,#F4FAFE,#EAF5FD)}
+  .kpi:nth-child(2) .kv{color:var(--blue-d)}
+  .kpi:nth-child(3){background:linear-gradient(160deg,#F2FBFA,#E9F9F7)}
+  .kpi:nth-child(3) .kv{color:var(--teal-d)}
+  .kpi:nth-child(4){background:linear-gradient(160deg,#FFFBF4,#FFF4E8)}
+  .kpi:nth-child(4) .kv{color:var(--orange-d)}
+  .kpi:nth-child(5){background:linear-gradient(160deg,#F4FAFE,#EAF5FD)}
+  .kpi:nth-child(5) .kv{color:var(--blue-d)}
+  .kpi:nth-child(6){background:linear-gradient(160deg,#FFF6F8,#FFEBEE)}
+  .kpi:nth-child(6) .kv{color:var(--red-d)}
+
+  /* 代码块：PyCharm Darcula */
+  .codeblk{background:#1E1F22;border:1px solid #2B2D30;border-radius:12px;
+    padding:16px 18px;font-family:Consolas,"Cascadia Code",Monaco,monospace;
+    font-size:12.8px;color:#BCBEC4;white-space:pre-wrap;word-break:break-word;
+    margin-bottom:10px;line-height:1.72;tab-size:4}
+  .codeblk .c{color:#7A7E85}
+  .codeblk .k{color:#CF8E6D}
+  .codeblk .s{color:#6AAB73}
+  .codeblk .n{color:#56A8F5}
+  .cap{font-size:12.5px;color:var(--ink3);margin:0}
+
+  footer{text-align:center;font-size:13px;color:var(--ink3);padding-top:34px;
+    border-top:1px solid var(--line)}
+  footer a{color:var(--blue-d);text-decoration:none}
+  footer a:hover{text-decoration:underline}
+
+  @media(max-width:900px){
+    .aw{grid-template-columns:1fr}
+    .ladder{border-right:0;border-bottom:1px solid var(--line);flex-direction:row;
+      flex-wrap:wrap;padding:10px}
+    .ladder .lt{width:100%;margin-bottom:0}
+    .dir{width:calc(50% - 3px);flex:none}
+    .bw{grid-template-columns:1fr;gap:16px}
+    .kpis{grid-template-columns:repeat(2,1fr)}
+    .oldshots{grid-template-columns:1fr}
+  }
+  @media(max-width:600px){
+    .wrap{padding:36px 16px 70px}
+    .dgrid{grid-template-columns:repeat(2,1fr)}
+    .dir{width:100%}
+    .cols{gap:10px;min-height:220px}
+    .col .cv{font-size:15px}
+  }
 </style>
 </head>
 <body>
 <div class="glow"></div>
 <div class="wrap">
-  <a class="back" href="../index.html">← 返回作品集</a>
-  <div class="num">PROJECT 20 · 数据分析</div>
-  <h1>兼职岗位技能溢价分析大屏</h1>
-  <p class="lede">把一个模糊的感觉——「复合技能更值钱」——变成一组可以被追问的数字。
-  用 <strong style="color:#ddd6f3">KPI 概览条 + 薪资柱状图 + 成长潜力雷达图</strong> 三个视角交叉验证同一件事，
-  而不是堆三张同义的图。</p>
+
+  <a class="back" href="../../index.html">← 返回作品集</a>
+  <div class="num">PROJECT 03 · 数据分析</div>
+  <h1>兼职岗位技能溢价分析</h1>
+  <p class="lede">想回答一个很具体的问题：<strong>同时会 Python 和 AIGC 的岗位，比只会一个到底值钱多少</strong>。
+  「更值钱」靠感觉说不清，也没法拿给别人看 —— 于是把 30,000 行数据按技能方向切开，
+  逐组算均值，让数字自己说话。结论比预想的更有意思：<strong>复合不是 1+1，它比单技能里最强的那一个还高 50%</strong>。</p>
+
   <div class="tags">
-    <span class="tag">Python</span>
-    <span class="tag">pandas</span>
-    <span class="tag">ECharts 5</span>
-    <span class="tag">占位符模板</span>
-    <span class="tag">30,000 行数据</span>
-    <span class="tag">28 个字段</span>
+    <span class="tag">pandas 分组聚合</span>
+    <span class="tag">30,000 行 × 28 列</span>
+    <span class="tag">18 个月趋势</span>
+    <span class="tag">线性拟合</span>
+    <span class="tag">ECharts 大屏</span>
   </div>
 
-  <!-- ============ 数据口径声明 ============ -->
   <div class="notice">
-    <div class="notice-icon">⚠️</div>
-    <div class="notice-body">
-      <b>数据口径先说明：</b>本项目使用的 <code>兼职岗位数据.csv</code> 是<b>课程/练习提供的模拟演示数据集</b>，
-      <b>不是我从招聘平台采集的真实报价</b>。数据集自带字段已明确标注「数据性质＝模拟演示数据」
-      「按技能稀缺度、城市和时间趋势生成，<b>非真实招聘报价</b>」。
-      因此这个项目展示的是<b>分析口径与可视化链路</b>，页面上所有结论<b>仅在该模拟数据集上成立，不代表真实市场水平</b>。
-      —— 我选择主动讲清这一点，因为分析的严谨性比结论好看更重要。
+    <div class="ic">◆</div>
+    <div class="bd">
+      <b>先说数据口径，因为它决定了这个页面能说什么。</b>
+      这份 30,000 行的兼职岗位数据集，自身字段里就写着
+      <code>数据性质 = 模拟演示数据</code>、<code>薪资口径说明 = 按技能稀缺度、城市和时间趋势生成，非真实招聘报价</code>。
+      所以下面所有数字<b>只在这份数据集内成立，不代表真实市场行情</b> ——
+      这个项目真正交付的是<b>一套能被追问的分析口径和可视化链路</b>，不是一份薪资调查报告。
     </div>
   </div>
 
-  <h2>项目背景</h2>
-  <p style="font-size:15px;color:#b8afd3;margin-bottom:46px">
-    手上拿到一份 3 万行的兼职岗位数据，里面有个字段叫「技能方向」。于是想回答一个很具体的问题：
-    <strong style="color:#ddd6f3">同时会 Python 和 AIGC 的岗位，比纯基础服务岗到底值钱多少、值钱在哪</strong>。
-    「更值钱」只靠感觉说不清楚，也没法拿给别人看 —— 得先把感觉变成数字，再让数字能被追问。
-  </p>
+  <!-- ==================================================
+       舞台 A · 五个技能方向
+       ================================================== -->
+  <div class="stage" id="stA">
+    <div class="bar">
+      <div class="dots"><i></i><i></i><i></i></div>
+      <div class="bt">兼职岗位数据.csv · 30,000 行 × 28 列 · 2025-01 ~ 2026-06</div>
+      <div class="sp"></div>
+      <span class="badge">LIVE 真数据聚合</span>
+      <button class="fsbtn" data-fs="stA">全屏 ↗</button>
+    </div>
 
-  <h2>运行截图</h2>
-  <div class="shots">
+    <div class="aw">
+      <aside class="ladder" id="ladder">
+        <div class="lt">技能方向 · 按时薪排序</div>
+      </aside>
 
-    <div class="shot">
-      <img src="shots/01-大屏整体.png" alt="兼职岗位分析大屏：KPI 概览条 + 薪资柱状图 + 成长潜力雷达图">
-      <div class="shot-body">
-        <h4><span class="shot-num">核心</span>三个视角交叉验证同一个结论</h4>
-        <p>顶部六个 KPI 给结论（月薪 14,081 元 vs 2,809 元、溢价率 401.2%、增长斜率 503.6 元/季、热度 91.6、成长潜力 4.51/5、远程办公率 77.1%）；
-        左侧柱状图给薪资差距的<strong>绝对量</strong>；右侧雷达图给<strong>结构</strong>——复合型在成长潜力、技能门槛、岗位热度、远程办公率四个维度全面外扩，
-        基础岗只在「培训可胜任率」「高考生适配率」上满格。一张图只能说一个数，三个视角才能说清结构。</p>
+      <div class="dmain" id="dmain">
+        <div class="dh">
+          <div>
+            <div class="dname" id="dName">—</div>
+            <div class="dn2" id="dSub">—</div>
+          </div>
+          <div class="big">
+            <b id="dHour">—<small>元/时</small></b>
+            <span id="dMonth">—</span>
+          </div>
+        </div>
+        <div class="dgrid" id="dGrid"></div>
+        <div class="tips" id="dTips"></div>
       </div>
     </div>
+  </div>
+  <p class="cap" style="margin-bottom:44px">点左边任意一条切换；条长按时薪归一化到最高值。「基础服务」那条几乎贴地，不是画错了 —— 29.4 元对 195.4 元，本来就该这么短。</p>
 
-    <div class="shot">
-      <img src="shots/02-扩展版13图.png" alt="扩展版大屏：13 张图表的完整分析矩阵">
-      <div class="shot-body">
-        <h4><span class="shot-num">扩展</span>把结论拆到 13 个维度去验证</h4>
-        <p>基础版回答「差多少」，扩展版回答「为什么差」。13 张图覆盖薪资五方向对比、成长潜力五维雷达、
-        技能方向结构环形、18 个月薪资趋势、岗位量与时薪双轴、热度仪表盘 ——
-        其中<strong>薪资趋势那条线最能说明问题</strong>：18 个月里复合型月薪从 12,786 涨到 15,406（+20.5%），
-        基础岗从 2,768 到 2,801，几乎是一条平线。</p>
+  <!-- ==================================================
+       舞台 B · 复合超加
+       ================================================== -->
+  <div class="stage" id="stB">
+    <div class="bar">
+      <div class="dots"><i></i><i></i><i></i></div>
+      <div class="bt">把两个单技能拆开看：复合到底多拿了多少</div>
+      <div class="sp"></div>
+      <span class="badge">LIVE 真数据聚合</span>
+      <button class="fsbtn" data-fs="stB">全屏 ↗</button>
+    </div>
+
+    <div class="bw">
+      <div class="cols" id="cols"></div>
+      <div class="bexp">
+        <div class="bx">如果技能只是简单叠加</div>
+        <div class="balt">
+          <div class="bl">两者取平均 · 预期时薪</div>
+          <div class="bv" id="bAvg">—<small>元/时</small></div>
+          <div class="bd" id="bAvgD">—</div>
+        </div>
+        <div class="balt">
+          <div class="bl">取单技能最强 · 预期时薪</div>
+          <div class="bv" id="bBest">—<small>元/时</small></div>
+          <div class="bd" id="bBestD">—</div>
+        </div>
+        <div class="bsum">
+          <div class="bl">实际观察到的复合岗时薪</div>
+          <div class="bv" id="bReal">—<small>元/时</small></div>
+          <div class="bd" id="bRealD">—</div>
+        </div>
       </div>
     </div>
-
   </div>
+  <p class="cap" style="margin-bottom:44px">这三根柱子用的是同一列（<code>时薪_元</code>）的组内均值，除了分组条件不同，没有任何额外处理。</p>
 
-  <h2>核心数字（该数据集内）</h2>
-  <div class="kpis">
-    <div class="kpi"><span>样本量</span><b>30,000</b><i>行 × 28 列</i></div>
-    <div class="kpi"><span>时间跨度</span><b>18 个月</b><i>2025-01 ~ 2026-06</i></div>
-    <div class="kpi"><span>复合型岗位月薪</span><b>14,081</b><i>基础岗 2,809 元</i></div>
-    <div class="kpi"><span>月薪溢价率</span><b>401.2%</b><i>约 5.0 倍</i></div>
-    <div class="kpi"><span>增长斜率</span><b>503.6</b><i>元/季；基础岗 +7.6</i></div>
-    <div class="kpi"><span>远程办公率</span><b>77.1%</b><i>基础岗 0%</i></div>
-  </div>
-
-  <h2>技术要点</h2>
-  <div class="grid">
-    <div class="card">
-      <h3>图表要做交叉验证</h3>
-      <p>KPI 条给结论、柱状图给绝对量、雷达图给结构 —— 三个视角互相印证，而不是三张同义图。</p>
+  <!-- ==================================================
+       舞台 C · 18 个月趋势
+       ================================================== -->
+  <div class="stage" id="stC">
+    <div class="bar">
+      <div class="dots"><i></i><i></i><i></i></div>
+      <div class="bt">18 个月 · 月薪均值走势（2025-01 ~ 2026-06）</div>
+      <div class="sp"></div>
+      <span class="badge">LIVE 真数据聚合</span>
+      <button class="fsbtn" data-fs="stC">全屏 ↗</button>
     </div>
-    <div class="card">
-      <h3>聚合全在 Python 端</h3>
-      <p>时薪/日薪/月收入均值、溢价率、成长潜力均值、远程办公率都由 pandas 算完再注入，前端只负责画。</p>
-    </div>
-    <div class="card">
-      <h3>占位符而非 f-string</h3>
-      <p>HTML 模板里写 <code>__COMP_MONTH__</code> 这类占位符最后统一替换 —— 直接拼 f-string 会被 CSS/JS 的花括号冲垮。</p>
-    </div>
-    <div class="card">
-      <h3>中文不被转义</h3>
-      <p>注入 JS 时用 <code>json.dumps(..., ensure_ascii=False)</code>，否则中文全变成 <code>\uXXXX</code>。</p>
-    </div>
-    <div class="card">
-      <h3>让它"活"起来</h3>
-      <p>KPI 数字用缓动函数做滚动动画、雷达图做呼吸效果、柱状图轮播高亮 —— 这些细节决定「专业还是不专业」。</p>
-    </div>
-    <div class="card">
-      <h3>主动标注数据边界</h3>
-      <p>数据集自身的口径字段被原样写进页面顶部，而不是把模拟数据当市场事实陈述。</p>
+    <div class="cw">
+      <div class="lg" id="lg"></div>
+      <svg class="chart" id="chart" viewBox="0 0 760 272" preserveAspectRatio="xMidYMid meet"
+           role="img" aria-label="五个技能方向的月薪均值在 18 个月内的走势折线图"></svg>
     </div>
   </div>
+  <p class="cap" style="margin-bottom:44px">点图例可以单独看某一条。复合型 18 个月涨了 22.7%，基础服务涨 1.9% —— 两条线的夹角就是「成长斜率差」。</p>
 
-  <h2>生成流程</h2>
-  <ul class="flow">
-    <li><strong>读数据</strong> — pandas 读入 30,000 行 CSV，按 <code>技能方向</code> 字段切出复合型与基础服务两组。</li>
-    <li><strong>算指标</strong> — 分组求均值：时薪、参考日薪、预计月收入、成长潜力、技能门槛、热度指数、远程办公率。</li>
-    <li><strong>算趋势</strong> — 按季度聚合月薪均值，用线性拟合求出 18 个月的增长斜率。</li>
-    <li><strong>注入模板</strong> — 指标转 JSON 塞进 HTML 模板的占位符，中文用 <code>ensure_ascii=False</code> 保持可读。</li>
-    <li><strong>渲染图表</strong> — ECharts 画柱状图与雷达图，另加缓动数字动画与呼吸效果。</li>
-  </ul>
+  <!-- ==================================================
+       核心数字
+       ================================================== -->
+  <div class="sect">
+    <h2>页面上用到的全部数字</h2>
+    <div class="kpis" id="kpis"></div>
+    <p class="cap">上面每一个数都由 <code>pandas.groupby</code> 现算，没有任何一个是我对着感觉填的。</p>
+  </div>
 
-  <h2>关键代码结构</h2>
-  <div class="code">
-<span class="c"># 生成可视化大屏.py —— 分组聚合（节选，真实写法）</span>
+  <!-- ==================================================
+       老版本截图
+       ================================================== -->
+  <div class="sect">
+    <h2>另一个版本：ECharts 深色大屏</h2>
+    <div class="oldshots">
+      <a class="osh" href="dark/basic.html" target="_blank" rel="noopener">
+        <span class="oshimg">
+          <img src="shots/01-大屏整体.png" alt="ECharts 大屏：KPI 概览条 + 薪资柱状图 + 成长潜力雷达图" loading="lazy">
+          <b class="go">打开 ↗</b>
+        </span>
+        <div class="oc">
+          <h4>基础版：三个视角交叉验证同一个结论</h4>
+          <p>KPI 条给结论，柱状图给绝对量，雷达图给结构 —— 一张图只能说一个数，三个视角才说得清结构。</p>
+        </div>
+      </a>
+      <a class="osh" href="dark/full.html" target="_blank" rel="noopener">
+        <span class="oshimg">
+          <img src="shots/02-扩展版13图.png" alt="扩展版大屏：13 张图表的完整分析矩阵" loading="lazy">
+          <b class="go">打开 ↗</b>
+        </span>
+        <div class="oc">
+          <h4>扩展版：拆到 13 个维度去验证</h4>
+          <p>基础版回答「差多少」，扩展版回答「为什么差」：薪资五方向对比、成长潜力五维、18 个月趋势、岗位量与时薪双轴。</p>
+        </div>
+      </a>
+    </div>
+    <p class="cap">两张都不是截图 —— 点开就是活的 ECharts 页面，能悬停看数值、图例能开关。深色是当时的风格，跟现在这个浅色站点不是一套，所以收在子页面里，不占正文。</p>
+  </div>
+
+  <!-- ==================================================
+       诚实边界
+       ================================================== -->
+  <div class="sect">
+    <h2>三条边界（写到结论旁边，而不是藏起来）</h2>
+    <div class="bounds">
+      <div class="bd1">
+        <div class="bn">①</div>
+        <div>
+          <h3>数据是模拟的，不是招聘平台的真实报价</h3>
+          <p>CSV 自身带 <b>数据性质</b> 和 <b>薪资口径说明</b> 两个字段，明写「模拟演示数据 / 非真实招聘报价」。
+          我在页面上把这个声明放在结论之前，而不是放到最后一行小字里 —— 因为一旦读者以为这是真实行情，
+          后面所有精确到小数点的溢价率都会变成误导。</p>
+        </div>
+      </div>
+      <div class="bd1">
+        <div class="bn">②</div>
+        <div>
+          <h3>6.6 倍这个数，取决于拿谁做分母</h3>
+          <p>「复合岗时薪是基础服务的 6.6 倍」听起来很响，但它只是<b>两个极端组之差</b>。
+          真正有解释力的是同一句里的另一半：复合岗比单技能最强的 AIGC 还高 50% —— 那个才是「复合」本身的价值，
+          因为它的对照物里已经排掉了「数字类岗位本来就比体力岗贵」这个因素。</p>
+        </div>
+      </div>
+      <div class="bd1">
+        <div class="bn">③</div>
+        <div>
+          <h3>相关不等于因果</h3>
+          <p>数据能说明「带这两个技能的岗位，标的薪资更高」，<b>不能说明</b>「学了这两样就一定能拿到那个数」。
+          薪资是岗位定价，不是个人能力价格 —— 中间还隔着经验、城市、公司、谈判。这条我没法用数据证明，所以只能明写。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================================================
+       方法
+       ================================================== -->
+  <div class="sect">
+    <h2>分析口径与流程</h2>
+    <ul class="flow">
+      <li><strong>先定分组</strong> — 数据集里 <code>技能方向</code> 这个字段天然给了分组依据：
+        基础服务 / 普通数字岗位 / Python / AIGC / Python+AIGC。不自己造标签，用数据自带的。</li>
+      <li><strong>再定指标</strong> — 每组取 <code>时薪_元</code>、<code>参考日薪_元</code>、<code>预计月收入_元</code> 的均值，
+        外加 <code>每周工时</code>、<code>远程办公</code> 占比、<code>成长潜力_1至5</code>、<code>技能门槛_1至5</code>、<code>岗位热度指数</code>。</li>
+      <li><strong>算溢价</strong> — 溢价率 = (复合 − 对照) / 对照 × 100。
+        <code>时薪</code> 和 <code>月薪</code> 的溢价率不同（564.2% vs 401.2%），因为基础岗周均工时更长（22.1h vs 16.6h）。</li>
+      <li><strong>算趋势</strong> — 按 <code>年月</code> 分组求月薪均值，18 个点做一元线性拟合取斜率，单位换算成「元/季」便于阅读。</li>
+      <li><strong>交叉验证</strong> — 同一结论用三种图说：KPI 给数值、柱状给绝对量、雷达给结构。三张图说的不是同一件事才算验证。</li>
+    </ul>
+  </div>
+
+  <!-- ==================================================
+       代码
+       ================================================== -->
+  <div class="sect">
+    <h2>关键代码</h2>
+    <div class="codeblk"><span class="c"># 分组聚合 + 溢价率（真实写法，就是生成上面那些数字的代码）</span>
 df   = pd.read_csv(CSV, encoding=<span class="s">'utf-8-sig'</span>)
-comp = df[df[<span class="s">'技能方向'</span>] == <span class="s">'Python+AIGC'</span>]   <span class="c"># 复合型组</span>
-base = df[df[<span class="s">'技能方向'</span>] == <span class="s">'基础服务'</span>]      <span class="c"># 基础对照组</span>
+comp = df[df[<span class="s">'技能方向'</span>] == <span class="s">'Python+AIGC'</span>]   <span class="c"># 复合型组 5,032 条</span>
+base = df[df[<span class="s">'技能方向'</span>] == <span class="s">'基础服务'</span>]      <span class="c"># 基础对照组 9,253 条</span>
 
-comp_month = <span class="k">round</span>(comp[<span class="s">'预计月收入_元'</span>].mean(), 1)   <span class="c"># 14081.1</span>
-base_month = <span class="k">round</span>(base[<span class="s">'预计月收入_元'</span>].mean(), 1)   <span class="c"># 2809.3</span>
-premium_rate = <span class="k">round</span>((comp_month - base_month) / base_month * 100, 1)  <span class="c"># 401.2%</span>
+comp_month = <span class="k">round</span>(comp[<span class="s">'预计月收入_元'</span>].mean(), <span class="s">1</span>)   <span class="c"># 14081.1</span>
+base_month = <span class="k">round</span>(base[<span class="s">'预计月收入_元'</span>].mean(), <span class="s">1</span>)   <span class="c">#  2809.3</span>
+premium_rate = <span class="k">round</span>((comp_month - base_month) / base_month * <span class="s">100</span>, <span class="s">1</span>)  <span class="c"># 401.2</span></div>
+    <p class="cap">整个页面的结论支点就是这三个数；其余图表都是围绕它们做交叉验证。</p>
+    <div class="codeblk" style="margin-top:12px"><span class="c"># 趋势斜率：18 个月线性拟合，单位换成「元/季」</span>
+p = df.pivot_table(index=<span class="s">'年月'</span>, columns=<span class="s">'技能方向'</span>,
+                   values=<span class="s">'预计月收入_元'</span>, aggfunc=<span class="s">'mean'</span>)
+x = np.arange(<span class="k">len</span>(p))
+<span class="k">for</span> col <span class="k">in</span> p.columns:
+    k, b = np.polyfit(x, p[col].values, <span class="s">1</span>)
+    <span class="k">print</span>(col, <span class="s">f'每季度 {k*3:.1f} 元'</span>)   <span class="c"># 复合型 +503.7 / 基础服务 +7.2</span></div>
+    <p class="cap">斜率用的是全 18 个点的最小二乘拟合，不是「末月减首月」——后者对端点噪声太敏感。</p>
   </div>
-  <p class="cap">三个数字就是整个页面的结论支点 —— 其余图表都是围绕它们做交叉验证。</p>
 
-  <div class="code">
-<span class="c"># 雷达图六维：复合型 vs 基础服务（0-100 归一化）</span>
-compRadar = [<span class="s">90.3, 90.0, 91.6, 77.1, 88.6, 17.9</span>]  <span class="c"># 成长/门槛/热度/远程/可胜任/高考适配</span>
-baseRadar = [<span class="s">40.1, 29.9, 62.8,  0.0, 100.0, 100.0</span>]
-
-<span class="c"># 这张图真正想说的：基础岗在"可胜任率/高考适配率"上满格，</span>
-<span class="c"># 在成长潜力与技能门槛上被压到底 —— 低门槛、人人可入、但天花板封顶。</span>
-  </div>
-  <p class="cap">雷达图的"结构性分化"比任何单个数字都更能解释「值钱在哪」。</p>
-
-  <h2>这个项目教了我什么</h2>
-  <div class="grid">
-    <div class="card">
-      <h3>先定口径，再下结论</h3>
-      <p>数据集的模拟属性被我写到了页面最显眼处，而不是藏在角落。结论带着边界一起说，才经得起追问。</p>
-    </div>
-    <div class="card">
-      <h3>可视化是论证不是装饰</h3>
-      <p>每张图都要能回答一个具体问题，否则就是在凑版面。</p>
+  <!-- ==================================================
+       学到什么
+       ================================================== -->
+  <div class="sect">
+    <h2>这个项目教了我什么</h2>
+    <div class="grid">
+      <div class="card">
+        <h3>先定口径，再下结论</h3>
+        <p>数据集的模拟属性写到了页面最显眼处，不是藏在角落。结论带着边界一起说，才经得起追问。</p>
+      </div>
+      <div class="card">
+        <h3>对照组选错，结论就废了</h3>
+        <p>拿复合岗比基础服务，结论是「6.6 倍」，听着很响但没什么信息量；
+        拿它比单技能的 AIGC，才看得到「复合本身」到底值多少 —— 分母决定了这句话有没有意义。</p>
+      </div>
+      <div class="card">
+        <h3>可视化是论证不是装饰</h3>
+        <p>每张图都要能回答一个具体问题。KPI 给数值、柱状给绝对量、雷达给结构、折线给趋势 ——
+        四张图说四件事，而不是把同一个数画四遍。</p>
+      </div>
+      <div class="card">
+        <h3>聚合放后端，前端只画</h3>
+        <p>3 万行不适合塞进浏览器。均值、斜率、占比全在 Python 端算完，前端拿的是一张已经算好的小表。</p>
+      </div>
     </div>
   </div>
 
@@ -253,5 +588,290 @@ baseRadar = [<span class="s">40.1, 29.9, 62.8,  0.0, 100.0, 100.0</span>]
     <a href="https://gitee.com/simonwangsy/a-new-beginning" target="_blank" rel="noopener">源码仓库</a>
   </footer>
 </div>
+
+<script>
+var D = {"total":30000,"cols":28,"months":["2025-01","2025-02","2025-03","2025-04","2025-05","2025-06","2025-07","2025-08","2025-09","2025-10","2025-11","2025-12","2026-01","2026-02","2026-03","2026-04","2026-05","2026-06"],"dirs":{"AIGC":{"n":5998,"hour":130.3,"day":787.7,"month":9310.0,"hours":16.5,"heat":86.1,"growth":4.5,"gate":4.01,"remote":70.1,"types":["脑力劳动"],"inds":10,"tips":[["提示词优化助理",9459,601],["AI视频制作助理",9444,557],["AI创意策划助理",9427,579],["AIGC内容运营",9395,605],["AI文案创作助理",9375,631]]},"Python":{"n":4986,"hour":95.8,"day":572.8,"month":6904.0,"hours":16.6,"heat":79.8,"growth":4.0,"gate":3.49,"remote":57.8,"types":["脑力劳动"],"inds":6,"tips":[["电商数据分析助理",7056,594],["Web后端开发助理",6997,546],["Python编程助教",6984,584],["Python数据清洗助理",6965,556],["自动化脚本开发",6879,548]]},"Python+AIGC":{"n":5032,"hour":195.4,"day":1160.7,"month":14081.0,"hours":16.6,"heat":91.6,"growth":4.51,"gate":4.5,"remote":77.1,"types":["脑力劳动"],"inds":9,"tips":[["AI学习工具开发助理",14662,477],["大模型API接入助理",14304,497],["多模态数据处理助理",14231,513],["智能客服搭建助理",14155,498],["RAG知识库项目助理",14067,497]]},"基础服务":{"n":9253,"hour":29.4,"day":176.6,"month":2809.0,"hours":22.1,"heat":62.8,"growth":2.0,"gate":1.49,"remote":0.0,"types":["体力劳动"],"inds":7,"tips":[["教室管理助理",2902,746],["商超理货员",2843,791],["景区引导员",2832,786],["餐厅服务员",2817,756],["饮品店店员",2812,814]]},"普通数字岗位":{"n":4731,"hour":42.0,"day":252.9,"month":3446.0,"hours":19.0,"heat":65.6,"growth":2.5,"gate":1.99,"remote":34.9,"types":["脑力劳动"],"inds":7,"tips":[["在线客服",3588,555],["表格数据处理员",3507,549],["商品信息录入员",3502,534],["店铺运营助理",3475,548],["短视频剪辑助理",3451,534]]}},"trend":{"AIGC":[8364,8611,8519,9038,8964,9049,9030,9451,9041,9675,9702,9795,9476,9465,9276,9778,10165,10037],"Python":[6480,6742,6453,6764,6772,6809,6702,6763,6742,6949,7123,6857,6882,7127,7136,7439,7183,7351],"Python+AIGC":[12698,12266,13335,13311,13051,13343,14146,13531,14697,14243,14134,14448,14615,14738,14738,15569,15065,15582],"基础服务":[2741,2738,2820,2825,2779,2806,2838,2849,2757,2862,2817,2831,2841,2867,2787,2790,2820,2794],"普通数字岗位":[3269,3452,3453,3477,3400,3457,3290,3349,3412,3628,3483,3522,3452,3641,3376,3469,3528,3373]},"city":{"一线":{"AIGC":154.0,"Python":114.2,"Python+AIGC":231.7,"基础服务":34.6,"普通数字岗位":49.7},"二线":{"AIGC":117.4,"Python":86.1,"Python+AIGC":176.8,"基础服务":26.5,"普通数字岗位":37.8},"新一线":{"AIGC":131.7,"Python":96.7,"Python+AIGC":196.3,"基础服务":29.6,"普通数字岗位":42.2}},"sample":[{"岗位ID":"PT202501000024","年月":"2025-01","城市":"重庆","城市等级":"新一线","行业":"餐饮","岗位名称":"餐厅服务员","技能方向":"基础服务","结算方式":"小时结","时薪_元":28.2,"每周工时":28,"预计月收入_元":3419,"数据性质":"模拟演示数据"},{"岗位ID":"PT202501000219","年月":"2025-01","城市":"贵阳","城市等级":"二线","行业":"本地生活","岗位名称":"搬运协助员","技能方向":"基础服务","结算方式":"日结","时薪_元":20.1,"每周工时":22,"预计月收入_元":1915,"数据性质":"模拟演示数据"},{"岗位ID":"PT202501000883","年月":"2025-01","城市":"长沙","城市等级":"新一线","行业":"教育服务","岗位名称":"教室管理助理","技能方向":"基础服务","结算方式":"小时结","时薪_元":27.5,"每周工时":12,"预计月收入_元":1429,"数据性质":"模拟演示数据"},{"岗位ID":"PT202501000950","年月":"2025-01","城市":"昆明","城市等级":"二线","行业":"本地生活","岗位名称":"搬运协助员","技能方向":"基础服务","结算方式":"小时结","时薪_元":23.0,"每周工时":15,"预计月收入_元":1494,"数据性质":"模拟演示数据"}],"prem":{"hour":564.2,"month":401.2,"avg":72.9,"best":50.0,"multi":5.0}};
+
+(function () {
+  'use strict';
+
+  var ORDER = ['基础服务', '普通数字岗位', 'Python', 'AIGC', 'Python+AIGC'];
+  var COLOR = {
+    '基础服务':    '#8B95A6',
+    '普通数字岗位': '#FF8A1E',
+    'Python':     '#4FA8E8',
+    'AIGC':       '#10B6A6',
+    'Python+AIGC':'#E8455F'
+  };
+  var SOFT = {
+    '基础服务':    '#F3F6FA',
+    '普通数字岗位': '#FFF4E8',
+    'Python':     '#EAF5FD',
+    'AIGC':       '#E9F9F7',
+    'Python+AIGC':'#FFEBEE'
+  };
+  var MAXH = Math.max.apply(null, ORDER.map(function (d) { return D.dirs[d].hour; }));
+
+  function fmt(n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+    });
+  }
+
+  /* ---------------- 舞台 A：阶梯 ---------------- */
+  var ladder = document.getElementById('ladder');
+  var cur = 'Python+AIGC';
+
+  function buildLadder() {
+    var sorted = ORDER.slice().sort(function (a, b) { return D.dirs[b].hour - D.dirs[a].hour; });
+    var html = '<div class="lt">技能方向 · 按时薪排序</div>';
+    sorted.forEach(function (d) {
+      var o = D.dirs[d];
+      var w = Math.max(2, o.hour / MAXH * 100);
+      html += '<button class="dir' + (d === cur ? ' on' : '') + '" data-d="' + esc(d) + '">'
+        + '<div class="d1"><span class="dn">' + esc(d) + '</span>'
+        +   '<span class="dv" style="color:' + COLOR[d] + '">' + o.hour.toFixed(1) + '<small>元</small></span></div>'
+        + '<div class="dbar"><i style="width:' + w.toFixed(1) + '%;background:' + COLOR[d] + '"></i></div>'
+        + '<div class="dmeta">' + fmt(o.n) + ' 条 · 月薪 ' + fmt(o.month) + '</div>'
+        + '</button>';
+    });
+    ladder.innerHTML = html;
+  }
+
+  function paintDir(d) {
+    cur = d;
+    var o = D.dirs[d];
+    document.getElementById('dName').innerHTML = esc(d)
+      + '<em style="background:' + SOFT[d] + ';color:' + COLOR[d] + '">' + esc(o.types.join(' / ')) + '</em>';
+    document.getElementById('dSub').textContent =
+      fmt(o.n) + ' 条样本 · 覆盖 ' + o.inds + ' 个行业 · 占全样本 ' + (o.n / D.total * 100).toFixed(1) + '%';
+    document.getElementById('dHour').innerHTML = o.hour.toFixed(1) + '<small>元/时</small>';
+    document.getElementById('dHour').style.color = COLOR[d];
+    document.getElementById('dMonth').textContent = '预计月薪 ' + fmt(o.month) + ' 元';
+
+    document.getElementById('dGrid').innerHTML =
+      cell('周均工时', o.hours, 'h') +
+      cell('远程办公', o.remote, '%') +
+      cell('成长潜力', o.growth, '/5') +
+      cell('技能门槛', o.gate, '/5');
+
+    var th = '<div class="tt2">该方向月薪 Top 5 岗位</div>';
+    o.tips.forEach(function (t, i) {
+      th += '<div class="tip"><div class="rk">' + (i + 1) + '</div>'
+          + '<div class="tn">' + esc(t[0]) + '</div>'
+          + '<div class="tm">' + fmt(t[1]) + '<i>元 · ' + t[2] + '条</i></div></div>';
+    });
+    document.getElementById('dTips').innerHTML = th;
+
+    var bs = ladder.querySelectorAll('.dir');
+    for (var i = 0; i < bs.length; i++) {
+      bs[i].classList.toggle('on', bs[i].getAttribute('data-d') === d);
+    }
+  }
+  function cell(k, v, u) {
+    return '<div class="dg"><div class="gk">' + k + '</div>'
+         + '<div class="gv">' + v + '<small>' + u + '</small></div></div>';
+  }
+
+  buildLadder();
+  paintDir(cur);
+  ladder.addEventListener('click', function (e) {
+    var b = e.target.closest('.dir');
+    if (b) paintDir(b.getAttribute('data-d'));
+  });
+
+  /* ---------------- 舞台 B：复合超加 ---------------- */
+  var py   = D.dirs['Python'];
+  var ai   = D.dirs['AIGC'];
+  var both = D.dirs['Python+AIGC'];
+  var avg  = (py.hour + ai.hour) / 2;
+  var best = Math.max(py.hour, ai.hour);
+  var vsAvg  = D.prem.avg;      // 预存值：用原始精度算好，避免二次四舍五入漂移
+  var vsBest = D.prem.best;
+  var MAXB = both.hour;
+
+  var colsHTML = '';
+  [
+    { k: 'Python', name: 'Python', sub: '纯编程 · ' + fmt(py.n) + ' 条', main: false },
+    { k: 'AIGC',   name: 'AIGC',   sub: '纯智能内容 · ' + fmt(ai.n) + ' 条', main: false },
+    { k: 'Python+AIGC', name: 'Python + AIGC', sub: '复合 · ' + fmt(both.n) + ' 条', main: true }
+  ].forEach(function (c) {
+    var o = D.dirs[c.k];
+    var h = Math.max(8, o.hour / MAXB * 190);
+    colsHTML += '<div class="col' + (c.main ? ' main' : '') + '">'
+      + '<div class="cv" style="color:' + COLOR[c.k] + '">' + o.hour.toFixed(1) + '<small>元/时</small></div>'
+      + '<div class="cb" data-h="' + fmt(o.month) + '" style="height:' + h.toFixed(0) + 'px;'
+      +   'background:linear-gradient(180deg,' + COLOR[c.k] + ',' + COLOR[c.k] + 'CC)"></div>'
+      + '<div class="cn">' + c.name + '</div>'
+      + '<div class="cc">' + c.sub + '</div>'
+      + '</div>';
+  });
+  document.getElementById('cols').innerHTML = colsHTML;
+  document.getElementById('bAvg').innerHTML   = avg.toFixed(1) + '<small>元/时</small>';
+  document.getElementById('bAvgD').textContent = 'Python ' + py.hour + ' 与 AIGC ' + ai.hour + ' 的算术平均';
+  document.getElementById('bBest').innerHTML  = best.toFixed(1) + '<small>元/时</small>';
+  document.getElementById('bBestD').textContent = '取两者中更高的 AIGC ' + ai.hour + ' 元';
+  document.getElementById('bReal').innerHTML  = both.hour.toFixed(1) + '<small>元/时</small>';
+  document.getElementById('bRealD').innerHTML = '比「取平均」高 <b>+' + vsAvg.toFixed(1) + '%</b>，'
+    + '比「取最强」高 <b>+' + vsBest.toFixed(1) + '%</b>';
+
+  /* ---------------- 舞台 C：趋势折线 ---------------- */
+  var W = 760, H = 272, L = 48, R = 14, T = 16, B = 40;
+  var cw = W - L - R, ch = H - T - B;
+  var months = D.months;
+  var n = months.length;
+  var yMax = 16000;
+  var svg = document.getElementById('chart');
+  var hidden = {};
+  var NS = 'http://www.w3.org/2000/svg';
+
+  function px(i) { return L + (n <= 1 ? 0 : i * cw / (n - 1)); }
+  function py2(v) { return T + ch - Math.max(0, v) / yMax * ch; }
+
+  function el(tag, attrs, text) {
+    var e = document.createElementNS(NS, tag);
+    for (var k in attrs) if (attrs.hasOwnProperty(k)) e.setAttribute(k, attrs[k]);
+    if (text != null) e.textContent = text;
+    return e;
+  }
+
+  function drawChart() {
+    tipG = null;                       // 重绘后旧的提示层已不在树里，先断引用
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+
+    // 横向网格 + Y 轴刻度
+    [0, 4000, 8000, 12000, 16000].forEach(function (v) {
+      var y = py2(v);
+      svg.appendChild(el('line', { x1: L, y1: y, x2: W - R, y2: y,
+        stroke: v === 0 ? '#D8E2EE' : '#EEF3F9', 'stroke-width': 1 }));
+      svg.appendChild(el('text', { x: L - 8, y: y + 3.5, 'text-anchor': 'end',
+        'font-size': 10.5, fill: '#8B95A6' }, v === 0 ? '0' : (v / 1000) + 'k'));
+    });
+
+    // X 轴标签：每 3 个月一个
+    months.forEach(function (m, i) {
+      if (i % 3 !== 0 && i !== n - 1) return;
+      svg.appendChild(el('text', { x: px(i), y: H - B + 17, 'text-anchor': 'middle',
+        'font-size': 10.5, fill: '#8B95A6' }, m.slice(2)));
+    });
+
+    // 折线（按 y 值从低到高画，红色复合型最后画在最上层）
+    var ordered = ORDER.slice().sort(function (a, b) {
+      return D.trend[a][n - 1] - D.trend[b][n - 1];
+    });
+    ordered.forEach(function (d) {
+      if (hidden[d]) return;
+      var vals = D.trend[d];
+      var pts = vals.map(function (v, i) { return px(i).toFixed(1) + ',' + py2(v).toFixed(1); }).join(' ');
+      var isMain = d === 'Python+AIGC';
+      svg.appendChild(el('polyline', { points: pts, fill: 'none', stroke: COLOR[d],
+        'stroke-width': isMain ? 2.6 : 1.7, 'stroke-linejoin': 'round',
+        'stroke-linecap': 'round', opacity: isMain ? 1 : .85 }));
+      // 末点 + 数值
+      var lx = px(n - 1), ly = py2(vals[n - 1]);
+      svg.appendChild(el('circle', { cx: lx, cy: ly, r: isMain ? 4 : 2.8,
+        fill: '#fff', stroke: COLOR[d], 'stroke-width': isMain ? 2.4 : 1.8 }));
+      if (isMain) {
+        svg.appendChild(el('text', { x: lx - 7, y: ly - 9, 'text-anchor': 'end',
+          'font-size': 11, 'font-weight': 800, fill: COLOR[d] }, fmt(vals[n - 1])));
+      }
+    });
+
+    // 悬停热区
+    months.forEach(function (m, i) {
+      var r = el('rect', { x: px(i) - cw / (n - 1) / 2, y: T, width: cw / (n - 1),
+        height: ch, fill: 'transparent', style: 'cursor:crosshair' });
+      r.addEventListener('mouseenter', function () { showTip(i); });
+      svg.appendChild(r);
+    });
+  }
+
+  var tipG = null;
+  function showTip(i) {
+    if (tipG) svg.removeChild(tipG);
+    tipG = el('g', {});
+    tipG.appendChild(el('line', { x1: px(i), y1: T, x2: px(i), y2: T + ch,
+      stroke: '#C6D6E6', 'stroke-width': 1, 'stroke-dasharray': '3 3' }));
+    var rows = ORDER.filter(function (d) { return !hidden[d]; })
+      .map(function (d) { return { d: d, v: D.trend[d][i] }; })
+      .sort(function (a, b) { return b.v - a.v; });
+    var bw = 138, bh = 20 + rows.length * 15;
+    var bx = px(i) + 12, by = T + 6;
+    if (bx + bw > W - R) bx = px(i) - bw - 12;
+    tipG.appendChild(el('rect', { x: bx, y: by, width: bw, height: bh, rx: 7,
+      fill: '#fff', stroke: '#E4EBF5', 'stroke-width': 1 }));
+    tipG.appendChild(el('text', { x: bx + 9, y: by + 14, 'font-size': 10.5,
+      'font-weight': 700, fill: '#1A1D24' }, months[i]));
+    rows.forEach(function (r, j) {
+      var y = by + 27 + j * 15;
+      tipG.appendChild(el('circle', { cx: bx + 12, cy: y - 3, r: 3, fill: COLOR[r.d] }));
+      tipG.appendChild(el('text', { x: bx + 21, y: y, 'font-size': 10, fill: '#525B6B' }, r.d));
+      tipG.appendChild(el('text', { x: bx + bw - 9, y: y, 'font-size': 10, 'text-anchor': 'end',
+        'font-weight': 700, fill: '#1A1D24' }, fmt(r.v)));
+    });
+    svg.appendChild(tipG);
+  }
+
+  // 图例
+  var lg = document.getElementById('lg');
+  lg.innerHTML = ORDER.map(function (d) {
+    var end = D.trend[d][n - 1];
+    return '<b data-d="' + esc(d) + '"><i style="background:' + COLOR[d] + '"></i>'
+      + esc(d) + '<em>' + fmt(end) + '</em></b>';
+  }).join('');
+  lg.addEventListener('click', function (e) {
+    var b = e.target.closest('b');
+    if (!b) return;
+    var d = b.getAttribute('data-d');
+    if (d === 'Python+AIGC') return;          // 主角不让关
+    hidden[d] = !hidden[d];
+    b.classList.toggle('off', hidden[d]);
+    if (tipG) { svg.removeChild(tipG); tipG = null; }
+    drawChart();
+  });
+
+  drawChart();
+
+  /* ---------------- 核心数字 ---------------- */
+  var base = D.dirs['基础服务'];
+  var monthPrem = D.prem.month;
+  document.getElementById('kpis').innerHTML =
+    kpi('样本量', fmt(D.total), '行 × ' + D.cols + ' 列') +
+    kpi('时间跨度', n, '个月 · 2025-01 起') +
+    kpi('复合岗月薪', fmt(both.month), '基础服务 ' + fmt(base.month) + ' 元') +
+    kpi('月薪溢价率', monthPrem.toFixed(1) + '%', '约 ' + D.prem.multi.toFixed(1) + ' 倍') +
+    kpi('复合 vs 单技能最强', '+' + vsBest.toFixed(1) + '%', '对照 AIGC ' + ai.hour + ' 元/时') +
+    kpi('远程办公率', both.remote + '%', '基础服务 ' + base.remote + '%');
+  function kpi(k, v, d) {
+    return '<div class="kpi"><div class="kk">' + k + '</div>'
+      + '<div class="kv">' + v + '</div><div class="kd">' + d + '</div></div>';
+  }
+
+  /* ---------------- 全屏 ---------------- */
+  var fsBtns = document.querySelectorAll('.fsbtn');
+  for (var i2 = 0; i2 < fsBtns.length; i2++) {
+    fsBtns[i2].addEventListener('click', function () {
+      var st = document.getElementById(this.getAttribute('data-fs'));
+      var on = st.classList.toggle('fs');
+      document.body.classList.toggle('fs-on', on);
+      this.textContent = on ? '退出 ✕' : '全屏 ↗';
+      if (st.id === 'stC') { drawChart(); }
+      if (st.id === 'stA') { paintDir(cur); }
+    });
+  }
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape') return;
+    var fs = document.querySelector('.stage.fs');
+    if (!fs) return;
+    fs.classList.remove('fs');
+    document.body.classList.remove('fs-on');
+    var b = fs.querySelector('.fsbtn');
+    if (b) b.textContent = '全屏 ↗';
+    if (fs.id === 'stC') drawChart();
+    if (fs.id === 'stA') paintDir(cur);
+  });
+})();
+</script>
 </body>
 </html>

@@ -1,9 +1,34 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
+<link rel="icon" type="image/svg+xml" href="../favicon.svg?v=2">
 <meta charset="UTF-8">
 <title>今日星座运势罗盘</title>
 <style>
+@font-face{font-family:"Noto Sans SC";font-style:normal;font-weight:400;font-display:swap;
+    src:url("../fonts/NotoSansSC-400-subset.woff2") format("woff2")}
+@font-face{font-family:"Noto Sans SC";font-style:normal;font-weight:500;font-display:swap;
+    src:url("../fonts/NotoSansSC-500-subset.woff2") format("woff2")}
+@font-face{font-family:"Noto Sans SC";font-style:normal;font-weight:600;font-display:swap;
+    src:url("../fonts/NotoSansSC-600-subset.woff2") format("woff2")}
+@font-face{font-family:"Noto Sans SC";font-style:normal;font-weight:700;font-display:swap;
+    src:url("../fonts/NotoSansSC-700-subset.woff2") format("woff2")}
+
+:root {
+    --bg: #FBFCFE;
+    --ink: #1A1D24;
+    --ink2: #525B6B;
+    --ink3: #8B95A6;
+    --line: #E4EBF5;
+    --red: #E8455F;
+    --blue: #4FA8E8;
+    /* 占星色：金色在浅底上压一档才有质感，太亮会像廉价渐变 */
+    --gold: #B8860B;
+    --gold-soft: #C9A227;
+    --violet: #7B5CD6;
+    --panel: #F7FAFD;
+}
+
 * {
     box-sizing: border-box;
 }
@@ -12,27 +37,25 @@ body {
     margin: 0;
     min-height: 100vh;
     overflow-x: hidden;
-    font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
-    color: #fff;
-    background:
-        radial-gradient(circle at 20% 20%, rgba(116, 93, 255, 0.35), transparent 30%),
-        radial-gradient(circle at 80% 10%, rgba(255, 205, 112, 0.20), transparent 26%),
-        radial-gradient(circle at 50% 80%, rgba(70, 179, 255, 0.22), transparent 34%),
-        linear-gradient(135deg, #070817 0%, #10112c 48%, #050510 100%);
+    font-family: "Noto Sans SC", "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+    color: var(--ink);
+    background: var(--bg);
 }
 
+/* 原来是深色底上的金白星点；浅底上改成极淡的紫灰，
+   让它像印在纸上的星图，而不是脏点 */
 body::before {
     content: "";
     position: fixed;
     inset: 0;
     pointer-events: none;
     background-image:
-        radial-gradient(#ffffff 1px, transparent 1px),
-        radial-gradient(#ffe9a6 1px, transparent 1px);
+        radial-gradient(circle, rgba(123, 92, 214, 0.28) 1px, transparent 1.2px),
+        radial-gradient(circle, rgba(79, 168, 232, 0.22) 1px, transparent 1.2px);
     background-size: 90px 90px, 150px 150px;
     background-position: 0 0, 30px 60px;
-    opacity: 0.28;
-    animation: starDrift 18s linear infinite;
+    opacity: 0.7;
+    animation: starDrift 30s linear infinite;
 }
 
 @keyframes starDrift {
@@ -43,43 +66,90 @@ body::before {
 .page {
     position: relative;
     z-index: 2;
-    width: min(1180px, 94vw);
+    width: min(1600px, 94vw);
     margin: 0 auto;
-    padding: 42px 0 52px;
+    padding: 26px 0 48px;
+}
+
+/* ── 统一壳 ── */
+.shell {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-bottom: 26px;
+}
+
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--ink3);
+    text-decoration: none;
+    font-size: 14px;
+    transition: color .2s;
+}
+
+.back-link:hover {
+    color: var(--blue);
+}
+
+.pnum {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .06em;
+    color: #fff;
+    background: linear-gradient(100deg, #3E9FE0 0%, #E8455F 72%, #D62F4A 100%);
+    border-radius: 999px;
+    padding: 5px 15px;
+    box-shadow: 0 6px 18px rgba(214, 47, 74, .26);
 }
 
 .hero {
-    text-align: center;
-    margin-bottom: 28px;
+    text-align: left;
+    margin-bottom: 26px;
 }
 
 .badge {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    padding: 8px 16px;
-    border: 1px solid rgba(255, 225, 158, 0.42);
+    padding: 6px 13px;
+    border: 1px solid var(--line);
     border-radius: 999px;
-    background: rgba(255, 255, 255, 0.08);
-    color: #ffe7a7;
-    letter-spacing: 1px;
-    box-shadow: 0 0 25px rgba(255, 209, 102, 0.12);
+    background: #fff;
+    color: var(--ink2);
+    font-size: 13px;
 }
 
 h1 {
-    margin: 18px 0 10px;
-    font-size: clamp(34px, 5vw, 68px);
-    letter-spacing: 6px;
-    background: linear-gradient(90deg, #fff, #ffe7a7, #8ed8ff);
-    -webkit-background-clip: text;
-    color: transparent;
-    text-shadow: 0 0 35px rgba(255, 225, 158, 0.18);
+    margin: 14px 0 10px;
+    font-size: clamp(26px, 3.6vw, 38px);
+    font-weight: 700;
+    letter-spacing: -.01em;
+    line-height: 1.28;
+    color: var(--ink);
+}
+
+h1::after {
+    content: "";
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+    background: var(--red);
+    margin-left: 11px;
+    vertical-align: .12em;
+    box-shadow: 0 3px 10px rgba(232, 69, 95, .45);
 }
 
 .subtitle {
     margin: 0;
-    color: rgba(255,255,255,0.72);
-    font-size: 17px;
+    color: var(--ink2);
+    font-size: 15px;
+    line-height: 1.72;
+    max-width: 860px;
 }
 
 .dashboard {
@@ -99,18 +169,30 @@ h1 {
 
 .compass {
     position: relative;
+    /* 它是 flex 项，不加这句会被 flex-shrink 压窄（窄屏实测被压到 394px），
+       而 12 个星座方块是按 translate(220px) 的固定半径摆的，一压缩就全跑出盘外 */
+    flex: none;
     width: 520px;
     height: 520px;
     border-radius: 50%;
+    /* 深色版靠发光和外圈光晕撑起来；浅底上没有发光可用，
+       改成「仪器刻度 + 双层圆环」：每 30° 一条细刻度，正好对着 12 个星座 */
+    /* 白盘压在白底上等于没画 —— 边缘那圈渐深 + 双层描边才立得住。
+       刻度也得下面这个浓度，0.26 的白底上基本看不见。 */
     background:
-        radial-gradient(circle, rgba(255,255,255,0.16) 0 3px, transparent 4px),
-        radial-gradient(circle, rgba(255, 217, 137, 0.15), transparent 35%),
-        conic-gradient(from 0deg, rgba(255,255,255,0.03), rgba(255,215,122,0.14), rgba(114,191,255,0.12), rgba(255,255,255,0.03));
-    border: 1px solid rgba(255, 235, 176, 0.36);
+        /* 12 条放射线，正好从圆心指向 12 个星座方块。
+           0.35deg 在 520px 圆上只有 1.6px，抗锯齿后基本消失，所以给到 0.55deg */
+        repeating-conic-gradient(from -90deg,
+            rgba(120, 150, 195, 0.55) 0deg 0.55deg,
+            transparent 0.55deg 30deg),
+        radial-gradient(circle at 50% 42%, #FFFFFF 0%, #F4F9FE 50%, #DFEAF6 100%);
+    border: 1px solid #C6D8EB;
     box-shadow:
-        inset 0 0 70px rgba(102, 127, 255, 0.22),
-        0 0 70px rgba(96, 125, 255, 0.24);
-    animation: compassGlow 4s ease-in-out infinite alternate;
+        0 0 0 7px #FFFFFF,
+        0 0 0 8px #D8E5F2,
+        0 2px 10px rgba(26, 29, 36, .05),
+        0 22px 50px rgba(90, 120, 170, .14),
+        inset 0 1px 0 rgba(255, 255, 255, .95);
 }
 
 .compass::before,
@@ -119,18 +201,13 @@ h1 {
     position: absolute;
     border-radius: 50%;
     inset: 45px;
-    border: 1px dashed rgba(255, 255, 255, 0.24);
+    border: 1px dashed rgba(120, 150, 195, 0.55);
 }
 
 .compass::after {
     inset: 112px;
     border-style: solid;
-    border-color: rgba(255, 226, 164, 0.20);
-}
-
-@keyframes compassGlow {
-    from { filter: drop-shadow(0 0 12px rgba(255, 225, 158, 0.15)); }
-    to { filter: drop-shadow(0 0 32px rgba(143, 211, 255, 0.28)); }
+    border-color: rgba(184, 134, 11, 0.34);
 }
 
 .center-orb {
@@ -142,8 +219,8 @@ h1 {
     transform: translate(-50%, -50%);
     border-radius: 50%;
     background:
-        radial-gradient(circle at 35% 25%, rgba(255,255,255,0.95), rgba(255, 225, 153, 0.74) 12%, rgba(87, 92, 207, 0.42) 48%, rgba(5, 7, 23, 0.92) 78%);
-    border: 1px solid rgba(255, 235, 181, 0.5);
+        radial-gradient(circle at 38% 28%, #FFFFFF 0%, #FFF9E8 26%, #FBF4E2 62%, #F3EAD3 100%);
+    border: 1px solid rgba(184, 134, 11, 0.28);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -151,28 +228,31 @@ h1 {
     gap: 8px;
     text-align: center;
     box-shadow:
-        inset 0 0 35px rgba(255,255,255,0.16),
-        0 0 45px rgba(255, 225, 158, 0.18);
+        0 6px 20px rgba(184, 134, 11, .10),
+        0 2px 6px rgba(26, 29, 36, .04);
 }
 
 .center-orb .big-symbol {
     font-size: 58px;
     line-height: 1;
-    text-shadow: 0 0 22px rgba(255,255,255,0.55);
+    color: var(--violet);
 }
 
 .center-orb .current-star {
     font-size: 22px;
-    font-weight: 800;
-    letter-spacing: 2px;
+    font-weight: 700;
+    letter-spacing: .04em;
+    color: var(--ink);
 }
 
 .center-orb .num-pill {
-    padding: 6px 14px;
+    padding: 5px 13px;
     border-radius: 999px;
-    background: rgba(0,0,0,0.24);
-    color: #ffe7a7;
-    border: 1px solid rgba(255,255,255,0.18);
+    background: #fff;
+    color: var(--gold);
+    border: 1px solid rgba(184, 134, 11, 0.26);
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
 }
 
 .zodiac-dot {
@@ -183,86 +263,107 @@ h1 {
     height: 84px;
     margin-left: -42px;
     margin-top: -42px;
-    border-radius: 22px;
-    background: rgba(255,255,255,0.07);
-    border: 1px solid rgba(255,255,255,0.13);
+    border-radius: 20px;
+    background: #fff;
+    border: 1px solid var(--line);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     gap: 3px;
-    color: rgba(255,255,255,0.74);
-    backdrop-filter: blur(8px);
+    color: var(--ink2);
+    box-shadow: 0 2px 8px rgba(26, 29, 36, .05);
     transition: 0.35s;
+    transform-origin: center;
 }
 
 .zodiac-dot .symbol {
     font-size: 28px;
+    color: var(--violet);
 }
 
 .zodiac-dot .name {
     font-size: 12px;
 }
 
+/* 命中星座：全页唯一一块金色，用来当视线落点 */
 .zodiac-dot.active {
-    color: #1a1200;
-    background: linear-gradient(135deg, #fff2b8, #ffc857, #8ed8ff);
-    border-color: rgba(255,255,255,0.78);
+    color: #4A3406;
+    background: linear-gradient(135deg, #FFF3C9, #FFDD8F);
+    border-color: rgba(184, 134, 11, 0.45);
     box-shadow:
-        0 0 25px rgba(255, 210, 92, 0.86),
-        0 0 70px rgba(113, 198, 255, 0.42);
-    transform-origin: center;
+        0 6px 18px rgba(184, 134, 11, .22),
+        0 2px 6px rgba(184, 134, 11, .12);
+}
+
+.zodiac-dot.active .symbol {
+    color: #8A6206;
 }
 
 .result-panel {
     position: relative;
-    padding: 28px;
-    border-radius: 32px;
-    background: rgba(8, 10, 30, 0.72);
-    border: 1px solid rgba(255,255,255,0.15);
-    box-shadow: 0 24px 70px rgba(0,0,0,0.32);
-    backdrop-filter: blur(18px);
+    padding: 24px;
+    border-radius: 20px;
+    background: #fff;
+    border: 1px solid var(--line);
+    box-shadow: 0 2px 8px rgba(26, 29, 36, .04), 0 16px 40px rgba(90, 120, 170, .06);
     overflow: hidden;
+    transition: border-color .35s, box-shadow .35s;
 }
 
 .result-panel::before {
     content: "";
     position: absolute;
-    inset: -40%;
-    background: radial-gradient(circle, rgba(255, 214, 120, 0.22), transparent 38%);
-    transform: translate(28%, -12%);
-    pointer-events: none;
+    inset: 0 0 auto 0;
+    height: 4px;
+    opacity: .9;
+    transition: background .35s;
 }
+
+/* 深色版靠大范围发光表示运势等级；白卡上发光会糊成一团脏雾，
+   改成「顶部 3px 色条 + 边框染色 + 卡片淡投影」三级表达 */
+/* 注意：luck-* 和 result-panel 是同一个元素上的两个类，
+   必须写成 .result-panel.luck-xxx（无空格）；写成后代选择器会一条都不生效。 */
+.result-panel.luck-strong { border-color: rgba(184, 134, 11, .34); }
+.result-panel.luck-strong::before { background: linear-gradient(90deg, #FFE9A8, #E8B93B); }
+.luck-strong .result-card { box-shadow: 0 8px 24px rgba(184, 134, 11, .12); }
+
+.result-panel.luck-soft { border-color: rgba(79, 168, 232, .32); }
+.result-panel.luck-soft::before { background: linear-gradient(90deg, #A8D8F5, #4FA8E8); }
+.luck-soft .result-card { box-shadow: 0 8px 24px rgba(79, 168, 232, .10); }
+
+.result-panel.luck-stable { border-color: rgba(123, 92, 214, .26); }
+.result-panel.luck-stable::before { background: linear-gradient(90deg, #CDBCF0, #8B72DE); }
+.luck-stable .result-card { box-shadow: 0 8px 24px rgba(123, 92, 214, .08); }
+
+.result-panel.luck-error { border-color: rgba(232, 69, 95, .30); }
+.result-panel.luck-error::before { background: linear-gradient(90deg, #F7B6C0, #E8455F); }
+.luck-error .result-card { box-shadow: 0 8px 24px rgba(232, 69, 95, .10); }
+
+/* 四档只染边框太弱：卡片里那排 chip 一起染色，才能一眼看出等级 */
+.luck-strong .luck-chip { background: #FFFBEF; border-color: #F1E3BC; color: #8A6206; }
+.luck-soft   .luck-chip { background: #F3F9FD; border-color: #D2E5F6; color: #2E7FC4; }
+.luck-stable .luck-chip { background: #F8F5FE; border-color: #DFD4F6; color: #6B4FBF; }
+.luck-error  .luck-chip { background: #FEF3F5; border-color: #F8D6DC; color: #BC3548; }
+
+.luck-strong .luck-stars { color: #C9A227; }
+.luck-soft   .luck-stars { color: #4FA8E8; }
+.luck-stable .luck-stars { color: #8B72DE; }
+.luck-error  .luck-stars { color: #E8455F; }
 
 .result-card {
     position: relative;
     z-index: 1;
-    border-radius: 26px;
-    padding: 26px;
-    background: linear-gradient(145deg, rgba(255,255,255,0.13), rgba(255,255,255,0.05));
-    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 14px;
+    padding: 20px;
+    background: var(--panel);
+    border: 1px solid var(--line);
     animation: cardPop 0.8s ease-out both;
 }
 
 @keyframes cardPop {
     0% { opacity: 0; transform: translateY(24px) scale(0.94); }
     100% { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-.luck-strong .result-card {
-    box-shadow: 0 0 32px rgba(255, 220, 108, 0.55), inset 0 0 24px rgba(255,255,255,0.08);
-}
-
-.luck-soft .result-card {
-    box-shadow: 0 0 28px rgba(126, 216, 255, 0.38), inset 0 0 20px rgba(255,255,255,0.06);
-}
-
-.luck-stable .result-card {
-    box-shadow: 0 0 22px rgba(178, 184, 255, 0.22), inset 0 0 18px rgba(255,255,255,0.05);
-}
-
-.luck-error .result-card {
-    box-shadow: 0 0 28px rgba(255, 92, 92, 0.30), inset 0 0 18px rgba(255,255,255,0.05);
 }
 
 .meta-grid {
@@ -273,39 +374,41 @@ h1 {
 }
 
 .meta-box {
-    padding: 16px;
-    border-radius: 18px;
-    background: rgba(0,0,0,0.18);
-    border: 1px solid rgba(255,255,255,0.12);
+    padding: 14px;
+    border-radius: 12px;
+    background: #fff;
+    border: 1px solid var(--line);
 }
 
 .meta-box span {
     display: block;
-    margin-bottom: 7px;
-    font-size: 13px;
-    color: rgba(255,255,255,0.55);
+    margin-bottom: 6px;
+    font-size: 12.5px;
+    color: var(--ink3);
 }
 
 .meta-box strong {
-    font-size: 24px;
-    color: #ffe7a7;
+    font-size: 22px;
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
 }
 
 .fortune-title {
     display: flex;
     align-items: center;
-    gap: 12px;
-    margin: 8px 0 12px;
-    font-size: 22px;
-    font-weight: 800;
+    gap: 10px;
+    margin: 6px 0 10px;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--ink2);
 }
 
 .fortune-text {
-    min-height: 88px;
-    font-size: 26px;
-    line-height: 1.55;
-    color: #ffffff;
-    text-shadow: 0 0 18px rgba(255,255,255,0.16);
+    min-height: 74px;
+    font-size: 22px;
+    line-height: 1.6;
+    font-weight: 500;
+    color: var(--ink);
 }
 
 .luck-row {
@@ -317,76 +420,83 @@ h1 {
 }
 
 .luck-chip {
-    padding: 10px 14px;
+    padding: 7px 13px;
     border-radius: 999px;
-    background: rgba(255, 226, 156, 0.14);
-    border: 1px solid rgba(255, 226, 156, 0.28);
-    color: #ffe7a7;
+    background: #fff;
+    border: 1px solid var(--line);
+    color: var(--ink2);
+    font-size: 13px;
+    line-height: 1.5;
 }
 
 .luck-stars {
-    color: #ffe27d;
-    letter-spacing: 3px;
-    text-shadow: 0 0 16px rgba(255, 213, 82, 0.6);
+    color: var(--gold-soft);
+    letter-spacing: 2px;
+    font-weight: 600;
 }
 
 .example-box {
-    margin-top: 18px;
-    padding: 16px;
-    border-radius: 18px;
-    background: rgba(255, 93, 93, 0.10);
-    border: 1px solid rgba(255, 120, 120, 0.25);
-    color: rgba(255,255,255,0.86);
+    margin-top: 16px;
+    padding: 14px;
+    border-radius: 12px;
+    background: #FEF2F4;
+    border: 1px solid #F8D4DA;
+    color: #A03040;
 }
 
 .knowledge {
-    margin-top: 34px;
-    padding: 26px;
-    border-radius: 30px;
-    background: rgba(255,255,255,0.08);
-    border: 1px solid rgba(255,255,255,0.12);
-    backdrop-filter: blur(14px);
+    margin-top: 30px;
+    padding: 24px;
+    border-radius: 20px;
+    background: #fff;
+    border: 1px solid var(--line);
+    box-shadow: 0 2px 8px rgba(26, 29, 36, .04);
 }
 
 .knowledge h2 {
-    margin: 0 0 18px;
-    font-size: 24px;
-    color: #ffe7a7;
+    margin: 0 0 16px;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--ink);
 }
 
 .knowledge-grid {
     display: grid;
     grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 14px;
+    gap: 12px;
 }
 
 .knowledge-item {
-    padding: 18px 14px;
-    border-radius: 20px;
-    background: rgba(0,0,0,0.20);
-    border: 1px solid rgba(255,255,255,0.10);
+    padding: 15px 13px;
+    border-radius: 12px;
+    background: var(--panel);
+    border: 1px solid var(--line);
 }
 
 .knowledge-item strong {
     display: block;
-    margin-bottom: 8px;
-    color: #8ed8ff;
+    margin-bottom: 7px;
+    font-family: Consolas, Monaco, monospace;
+    font-size: 13px;
+    color: #2E8BD0;
 }
 
 .knowledge-item p {
     margin: 0;
-    color: rgba(255,255,255,0.72);
-    line-height: 1.6;
-    font-size: 14px;
+    color: var(--ink2);
+    line-height: 1.62;
+    font-size: 13px;
 }
 
 .particle {
     position: fixed;
-    width: 4px;
-    height: 4px;
+    width: 3px;
+    height: 3px;
     border-radius: 50%;
-    background: #fff8cc;
-    box-shadow: 0 0 12px #ffe47a;
+    /* 金色粒子在深底上是星光，在白底上会像掉了几粒沙子，
+       改成极淡的紫蓝，随动画上浮时仍然看得见但不脏 */
+    background: rgba(123, 92, 214, .55);
+    box-shadow: 0 0 8px rgba(123, 92, 214, .35);
     pointer-events: none;
     animation: floatParticle linear infinite;
     z-index: 1;
@@ -401,19 +511,29 @@ h1 {
 
 .footer-note {
     text-align: center;
-    margin-top: 24px;
-    color: rgba(255,255,255,0.48);
-    font-size: 13px;
+    margin-top: 22px;
+    color: var(--ink3);
+    font-size: 12.5px;
 }
 
 @media (max-width: 980px) {
     .dashboard {
         grid-template-columns: 1fr;
+        gap: 22px;
     }
 
     .compass-wrap {
+        /* 缩放移到 .compass 上：transform 不改变布局占位，
+           放在容器上时 520px 的罗盘还是会撑出视口。
+           另外要用固定 height：min-height 挡不住 520px 的内容撑高 */
+        /* 基础规则里 min-height:570px 会盖过 height，必须一起清掉 */
+        height: 460px;
+        min-height: 0;
+        overflow: hidden;
+    }
+
+    .compass {
         transform: scale(0.86);
-        min-height: 500px;
     }
 
     .knowledge-grid {
@@ -422,9 +542,18 @@ h1 {
 }
 
 @media (max-width: 620px) {
+    .page {
+        padding: 20px 0 36px;
+    }
+
     .compass-wrap {
+        height: 350px;
+        min-height: 0;
+        overflow: hidden;
+    }
+
+    .compass {
         transform: scale(0.66);
-        min-height: 380px;
     }
 
     .meta-grid,
@@ -433,15 +562,38 @@ h1 {
     }
 
     .fortune-text {
-        font-size: 22px;
+        font-size: 19px;
+        min-height: 0;
+    }
+
+    .result-panel {
+        padding: 18px;
+    }
+
+    .result-card {
+        padding: 16px;
+    }
+
+    h1::after {
+        display: none;
+    }
+
+    .footer-note {
+        line-height: 1.7;
+        text-align: left;
     }
 }
 </style>
 </head>
 <body>
 <div class="page">
+    <div class="shell">
+        <a class="back-link" href="../index.html">← 返回作品集</a>
+        <span class="pnum">PROJECT 21 · 互动小游戏</span>
+    </div>
+
     <section class="hero">
-        <div class="badge">✦ Python 课堂可视化外化页 ✦</div>
+        <div class="badge">✦ Python 可视化外化页 ✦</div>
         <h1>今日星座运势罗盘</h1>
         <p class="subtitle">原 Python 代码先运行，HTML 页面只负责把 star、num 和 if / elif 判断结果外化展示。</p>
     </section>
@@ -497,7 +649,7 @@ h1 {
     </section>
 
     <section class="knowledge">
-        <h2>课堂知识点：这段代码到底在练什么？</h2>
+        <h2>知识点：这段代码到底在练什么？</h2>
         <div class="knowledge-grid">
             <div class="knowledge-item">
                 <strong>input 输入</strong>

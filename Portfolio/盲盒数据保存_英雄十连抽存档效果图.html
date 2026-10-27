@@ -1,9 +1,40 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
+<link rel="icon" type="image/svg+xml" href="../favicon.svg?v=2">
 <meta charset="UTF-8">
 <title>英雄盲盒十连抽 · 角色档案卡 + 存档效果页</title>
 <style>
+    @font-face{font-family:"Noto Sans SC";font-style:normal;font-weight:400;font-display:swap;
+        src:url("../fonts/NotoSansSC-400-subset.woff2") format("woff2")}
+    @font-face{font-family:"Noto Sans SC";font-style:normal;font-weight:500;font-display:swap;
+        src:url("../fonts/NotoSansSC-500-subset.woff2") format("woff2")}
+    @font-face{font-family:"Noto Sans SC";font-style:normal;font-weight:600;font-display:swap;
+        src:url("../fonts/NotoSansSC-600-subset.woff2") format("woff2")}
+    @font-face{font-family:"Noto Sans SC";font-style:normal;font-weight:700;font-display:swap;
+        src:url("../fonts/NotoSansSC-700-subset.woff2") format("woff2")}
+    @font-face{font-family:"Noto Sans SC";font-style:normal;font-weight:900;font-display:swap;
+        src:url("../fonts/NotoSansSC-700-subset.woff2") format("woff2")}
+
+    :root {
+        /* 站点色板 */
+        --bg: #FBFCFE;
+        --ink: #1A1D24;
+        --ink2: #525B6B;
+        --ink3: #8B95A6;
+        --line: #E4EBF5;
+        --red: #E8455F;
+        --blue: #4FA8E8;
+        /* 抽卡舞台（唯一保留深色的区域：抽卡机本体就该是暗的） */
+        --stage: #0E1226;
+        --stage2: #0A0D1C;
+        /* 稀有度在浅底上的取色 —— 深色版那套 #ffd965 / #c783ff 在白底上会糊，
+           这里压一档饱和度保住对比度 */
+        --ssr: #C08A12;
+        --sr: #7B45D8;
+        --r: #2E7FC4;
+    }
+
     * {
         box-sizing: border-box;
         margin: 0;
@@ -12,41 +43,64 @@
 
     body {
         min-height: 100vh;
-        font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
-        color: #ffffff;
+        font-family: "Noto Sans SC", "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+        color: var(--ink);
         overflow-x: hidden;
-        background:
-            radial-gradient(circle at 20% 10%, rgba(255, 199, 64, 0.24), transparent 28%),
-            radial-gradient(circle at 85% 20%, rgba(142, 83, 255, 0.28), transparent 32%),
-            radial-gradient(circle at 50% 100%, rgba(40, 134, 255, 0.24), transparent 35%),
-            linear-gradient(135deg, #050816 0%, #10152d 42%, #050712 100%);
+        background: var(--bg);
     }
 
     .page {
         position: relative;
         width: 100%;
         min-height: 100vh;
-        padding: 42px 34px 34px;
+        padding: 26px 34px 34px;
     }
 
-    .page::before {
-        content: "";
-        position: fixed;
-        inset: 0;
-        background-image:
-            linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px);
-        background-size: 44px 44px;
-        mask-image: linear-gradient(to bottom, rgba(0,0,0,0.95), rgba(0,0,0,0.2));
-        pointer-events: none;
+    /* ── 统一壳（与作品集其他页面一致） ── */
+    .shell {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        flex-wrap: wrap;
+        max-width:min(1600px,100%);
+        margin: 0 auto 22px;
+    }
+
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: var(--ink3);
+        text-decoration: none;
+        font-size: 14px;
+        transition: color .2s;
+    }
+
+    .back-link:hover {
+        color: var(--blue);
+    }
+
+    .pnum {
+        display: inline-block;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: .06em;
+        color: #fff;
+        background: linear-gradient(100deg, #3E9FE0 0%, #E8455F 72%, #D62F4A 100%);
+        border-radius: 999px;
+        padding: 5px 15px;
+        box-shadow: 0 6px 18px rgba(214, 47, 74, .26);
     }
 
     .star-field {
-        position: fixed;
+        /* 原来 fixed 铺满整页；整页变浅之后星星必须收进抽卡区，
+           否则深色粒子飘在白底上像脏点 */
+        position: absolute;
         inset: 0;
         overflow: hidden;
         pointer-events: none;
-        z-index: 1;
+        z-index: 0;
+        border-radius: 20px;
     }
 
     .star {
@@ -76,7 +130,7 @@
     .content {
         position: relative;
         z-index: 2;
-        max-width: 1380px;
+        max-width:min(1600px,100%);
         margin: 0 auto;
     }
 
@@ -92,41 +146,49 @@
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        padding: 7px 14px;
-        border: 1px solid rgba(255, 213, 93, 0.5);
+        padding: 6px 13px;
+        border: 1px solid var(--line);
         border-radius: 999px;
-        background: rgba(255, 213, 93, 0.1);
-        color: #ffe7a0;
-        font-size: 14px;
-        letter-spacing: 1px;
-        margin-bottom: 12px;
-        box-shadow: 0 0 24px rgba(255, 194, 64, 0.14);
+        background: #fff;
+        color: var(--ink2);
+        font-size: 13px;
+        margin-bottom: 13px;
     }
 
     h1 {
-        font-size: 48px;
-        line-height: 1.08;
-        letter-spacing: 2px;
-        text-shadow:
-            0 0 18px rgba(255, 198, 64, 0.6),
-            0 0 36px rgba(90, 123, 255, 0.34);
+        font-size: clamp(26px, 3.6vw, 38px);
+        line-height: 1.28;
+        letter-spacing: -.01em;
+        color: var(--ink);
+    }
+
+    h1::after {
+        content: "";
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border-radius: 3px;
+        background: var(--red);
+        margin-left: 11px;
+        /* 36px 标题下 .2em 会压到基线以下，看着像正文句号 */
+        vertical-align: .12em;
+        box-shadow: 0 3px 10px rgba(232, 69, 95, .45);
     }
 
     .subtitle {
-        margin-top: 12px;
-        color: rgba(255,255,255,0.68);
-        font-size: 16px;
+        margin-top: 10px;
+        color: var(--ink2);
+        font-size: 15px;
+        line-height: 1.7;
     }
 
     .corner-note {
-        padding: 12px 15px;
-        border-radius: 16px;
-        color: rgba(255,255,255,0.72);
+        padding: 10px 14px;
+        border-radius: 12px;
+        color: var(--ink2);
         font-size: 13px;
-        border: 1px solid rgba(255,255,255,0.12);
-        background: rgba(10, 15, 35, 0.65);
-        backdrop-filter: blur(12px);
-        box-shadow: 0 12px 36px rgba(0,0,0,0.24);
+        border: 1px solid var(--line);
+        background: #fff;
         white-space: nowrap;
     }
 
@@ -138,19 +200,26 @@
     }
 
     .panel {
-        border: 1px solid rgba(255,255,255,0.12);
-        border-radius: 26px;
-        background: rgba(8, 13, 31, 0.72);
-        box-shadow:
-            0 22px 80px rgba(0,0,0,0.38),
-            inset 0 0 42px rgba(255,255,255,0.035);
-        backdrop-filter: blur(14px);
+        border-radius: 20px;
+        background: #fff;
+        border: 1px solid var(--line);
+        box-shadow: 0 2px 8px rgba(26, 29, 36, .04);
     }
 
+    /* 抽卡机本体保留深色 —— 金/紫/蓝卡面只有压在暗底上才立得住。
+       整页暗变整页亮，只留这一块「舞台」暗。 */
     .draw-panel {
-        padding: 24px;
         position: relative;
         overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        padding: 24px;
+        border: 1px solid rgba(255, 255, 255, .07);
+        background:
+            radial-gradient(circle at 18% 0%, rgba(255, 199, 64, .16), transparent 42%),
+            radial-gradient(circle at 88% 18%, rgba(142, 83, 255, .18), transparent 45%),
+            linear-gradient(160deg, var(--stage2) 0%, var(--stage) 100%);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, .06);
     }
 
     .draw-panel::before {
@@ -160,9 +229,9 @@
         background: conic-gradient(
             from 180deg,
             transparent,
-            rgba(255, 218, 112, 0.08),
+            rgba(255, 218, 112, 0.07),
             transparent,
-            rgba(116, 94, 255, 0.1),
+            rgba(116, 94, 255, 0.09),
             transparent
         );
         animation: rotateAura 18s linear infinite;
@@ -184,44 +253,97 @@
     }
 
     .section-title {
-        font-size: 22px;
-        font-weight: 800;
-        letter-spacing: 1px;
+        font-size: 15px;
+        font-weight: 700;
+        letter-spacing: .01em;
+        color: var(--ink);
+    }
+
+    /* 深色抽卡区里的标题要单独反白 */
+    .draw-panel .section-title {
+        font-size: 18px;
+        color: #fff;
+    }
+
+    .draw-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
     }
 
     .draw-badge {
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        padding: 9px 13px;
+        padding: 7px 12px;
         border-radius: 999px;
-        font-size: 13px;
-        color: #d9e5ff;
-        background: rgba(68, 96, 178, 0.28);
-        border: 1px solid rgba(143, 170, 255, 0.24);
+        font-size: 12.5px;
+        color: #c9d6ff;
+        background: rgba(110, 140, 255, .13);
+        border: 1px solid rgba(143, 170, 255, .22);
+    }
+
+    /* 原来页面 900ms 后自动弹 SSR 弹窗，一进来整屏被糊掉，
+       等于把 10 张卡和右栏全挡在弹窗后面。改成显式入口。
+       配色跟着本次结果走：没出 SSR 就不该亮金色，否则像在骗人。 */
+    .draw-badge.ssr-hint {
+        font-family: inherit;
+        color: #c9d6ff;
+        background: rgba(110, 140, 255, .13);
+        border-color: rgba(143, 170, 255, .22);
+        cursor: pointer;
+        transition: background .2s, border-color .2s, color .2s, transform .2s;
+    }
+
+    .draw-badge.ssr-hint:hover {
+        transform: translateY(-1px);
+        background: rgba(143, 170, 255, .24);
+    }
+
+    .draw-badge.ssr-hint.is-ssr {
+        color: #ffe7a0;
+        background: rgba(255, 205, 72, .14);
+        border-color: rgba(255, 205, 72, .38);
+    }
+
+    .draw-badge.ssr-hint.is-ssr:hover {
+        background: rgba(255, 205, 72, .26);
     }
 
     .cards-grid {
         position: relative;
         z-index: 1;
+        flex: 1;
         display: grid;
         grid-template-columns: repeat(5, minmax(130px, 1fr));
+        grid-auto-rows: 1fr;
         gap: 16px;
     }
 
     .card {
         position: relative;
+        display: flex;
+        flex-direction: column;
+        /* 原来靠 min-height + 绝对定位的 tagline 收尾，内容一多台词就被 tagline 盖住
+           （截图里「我要成为世界第一大剑豪！」第二行直接被裁）。
+           改成 flex，让 tagline 用 margin-top:auto 自然沉底，不再压住内容。 */
         min-height: 224px;
-        border-radius: 22px;
-        padding: 15px 13px;
+        border-radius: 18px;
+        padding: 14px 13px 12px;
         overflow: hidden;
-        transform-style: preserve-3d;
         animation: cardIn 0.8s ease both;
         border: 1px solid rgba(255,255,255,0.16);
         background:
             linear-gradient(160deg, rgba(255,255,255,0.09), rgba(255,255,255,0.02)),
             rgba(17, 24, 54, 0.86);
-        box-shadow: 0 16px 38px rgba(0,0,0,0.36);
+        box-shadow: 0 10px 26px rgba(0,0,0,0.32);
+        cursor: pointer;
+        transition: transform .22s ease, box-shadow .22s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-3px);
     }
 
     @keyframes cardIn {
@@ -244,15 +366,15 @@
     }
 
     .card.ssr {
-        border: 1px solid rgba(255, 221, 121, 0.98);
+        border: 1px solid rgba(255, 221, 121, 0.95);
         background:
-            radial-gradient(circle at 50% -20%, rgba(255, 235, 146, 0.7), transparent 35%),
-            linear-gradient(160deg, rgba(130, 82, 12, 0.96), rgba(31, 19, 4, 0.95));
+            radial-gradient(circle at 50% -20%, rgba(255, 235, 146, 0.62), transparent 38%),
+            linear-gradient(160deg, rgba(126, 80, 12, 0.96), rgba(28, 17, 4, 0.96));
         box-shadow:
-            0 0 0 1px rgba(255,255,255,0.16),
-            0 0 28px rgba(255, 202, 74, 0.7),
-            0 0 80px rgba(255, 179, 26, 0.38),
-            0 20px 48px rgba(0,0,0,0.52);
+            0 0 0 1px rgba(255,255,255,0.14),
+            0 0 22px rgba(255, 202, 74, 0.5),
+            0 0 52px rgba(255, 179, 26, 0.26),
+            0 12px 30px rgba(0,0,0,0.42);
         animation: cardIn 0.8s ease both, ssrPulse 2.2s ease-in-out infinite;
     }
 
@@ -262,23 +384,23 @@
     }
 
     .card.sr {
-        border: 1px solid rgba(197, 125, 255, 0.86);
+        border: 1px solid rgba(197, 125, 255, 0.82);
         background:
-            radial-gradient(circle at 50% -20%, rgba(196, 111, 255, 0.55), transparent 35%),
-            linear-gradient(160deg, rgba(66, 26, 116, 0.94), rgba(18, 12, 38, 0.96));
+            radial-gradient(circle at 50% -20%, rgba(196, 111, 255, 0.5), transparent 38%),
+            linear-gradient(160deg, rgba(62, 24, 110, 0.94), rgba(17, 11, 36, 0.96));
         box-shadow:
-            0 0 24px rgba(172, 88, 255, 0.44),
-            0 18px 44px rgba(0,0,0,0.42);
+            0 0 18px rgba(172, 88, 255, 0.3),
+            0 12px 30px rgba(0,0,0,0.38);
     }
 
     .card.r {
-        border: 1px solid rgba(87, 169, 255, 0.76);
+        border: 1px solid rgba(87, 169, 255, 0.7);
         background:
-            radial-gradient(circle at 50% -20%, rgba(73, 155, 255, 0.42), transparent 38%),
-            linear-gradient(160deg, rgba(20, 53, 112, 0.92), rgba(9, 18, 42, 0.96));
+            radial-gradient(circle at 50% -20%, rgba(73, 155, 255, 0.36), transparent 40%),
+            linear-gradient(160deg, rgba(18, 48, 102, 0.92), rgba(9, 17, 40, 0.96));
         box-shadow:
-            0 0 18px rgba(65, 149, 255, 0.24),
-            0 14px 34px rgba(0,0,0,0.38);
+            0 0 14px rgba(65, 149, 255, 0.16),
+            0 10px 26px rgba(0,0,0,0.34);
     }
 
     @keyframes shine {
@@ -289,17 +411,17 @@
     @keyframes ssrPulse {
         0%, 100% {
             box-shadow:
-                0 0 0 1px rgba(255,255,255,0.16),
-                0 0 28px rgba(255, 202, 74, 0.7),
-                0 0 80px rgba(255, 179, 26, 0.38),
-                0 20px 48px rgba(0,0,0,0.52);
+                0 0 0 1px rgba(255,255,255,0.14),
+                0 0 22px rgba(255, 202, 74, 0.5),
+                0 0 52px rgba(255, 179, 26, 0.26),
+                0 12px 30px rgba(0,0,0,0.42);
         }
         50% {
             box-shadow:
-                0 0 0 1px rgba(255,255,255,0.24),
-                0 0 46px rgba(255, 230, 135, 0.95),
-                0 0 110px rgba(255, 188, 39, 0.58),
-                0 20px 48px rgba(0,0,0,0.52);
+                0 0 0 1px rgba(255,255,255,0.22),
+                0 0 34px rgba(255, 230, 135, 0.75),
+                0 0 74px rgba(255, 188, 39, 0.4),
+                0 12px 30px rgba(0,0,0,0.42);
         }
     }
 
@@ -335,194 +457,248 @@
     .hero-name {
         position: relative;
         z-index: 1;
-        margin-top: 18px;
-        font-size: 28px;
-        font-weight: 900;
-        letter-spacing: 1px;
+        margin-top: 20px;
+        /* 必须显式给色：不写就继承 body 的深色字，压在深色卡面上等于隐形 */
+        color: #fff;
+        font-size: 29px;
+        font-weight: 700;
+        letter-spacing: .02em;
+        line-height: 1.2;
     }
 
     .card.ssr .hero-name {
-        font-size: 34px;
+        font-size: 33px;
         color: #fff4bd;
-        text-shadow: 0 0 18px rgba(255, 217, 96, 0.9);
+        text-shadow: 0 0 16px rgba(255, 217, 96, 0.7);
     }
 
     .identity {
         position: relative;
         z-index: 1;
         margin-top: 10px;
-        min-height: 40px;
         color: rgba(255,255,255,0.72);
-        font-size: 13px;
-        line-height: 1.45;
+        font-size: 13.5px;
+        line-height: 1.55;
     }
 
     .quote {
         position: relative;
         z-index: 1;
-        margin-top: 14px;
-        padding-top: 12px;
-        border-top: 1px solid rgba(255,255,255,0.15);
+        /* auto 让它沉到卡片下部：名字/身份在上，台词/标签在下，
+           中间那段留白看起来是「分区」，而不是「内容没填满」 */
+        margin-top: auto;
+        padding-top: 11px;
+        border-top: 1px solid rgba(255,255,255,0.16);
         color: rgba(255,255,255,0.9);
-        font-size: 14px;
-        line-height: 1.5;
+        font-size: 13.5px;
+        line-height: 1.6;
+        /* 给两行的高度：台词一行的卡（沙僧/敖丙/娜美）不会因为少一行
+           就把台词顶到更低的位置，十张卡的台词起点能对齐 */
+        min-height: 43px;
     }
 
     .tagline {
-        position: absolute;
-        left: 12px;
-        bottom: 12px;
-        right: 12px;
+        /* 从 absolute 改回流内 —— 原来绝对定位在 bottom:12px，台词一多就被它盖住 */
+        position: relative;
         z-index: 1;
-        font-size: 12px;
-        color: rgba(255,255,255,0.58);
+        margin-top: 10px;
+        font-size: 11.5px;
+        letter-spacing: .02em;
+        color: rgba(255,255,255,0.62);
     }
 
     .side-panel {
         display: flex;
         flex-direction: column;
-        gap: 18px;
+        gap: 14px;
+        /* 左栏被 grid 撑到整列高，右栏只靠内容自然高度会短一截；
+           让三块均分剩余空间，两边底边齐平 */
+        justify-content: space-between;
     }
 
     .stats-panel,
     .archive-panel,
     .profile-panel {
-        padding: 20px;
+        padding: 18px;
     }
 
+    /* 三行竖排会把右栏顶得比 10 张卡还高，末了大片空白；
+       改成一排三格，高度立刻跟左栏对齐 */
     .stats-grid {
         display: grid;
-        grid-template-columns: 1fr;
-        gap: 12px;
-        margin-top: 16px;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        margin-top: 13px;
     }
 
     .stat-item {
         display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 14px 15px;
-        border-radius: 18px;
-        background: rgba(255,255,255,0.06);
-        border: 1px solid rgba(255,255,255,0.1);
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+        padding: 11px 12px;
+        border-radius: 12px;
+        background: #F7FAFD;
+        border: 1px solid var(--line);
     }
 
     .stat-label {
-        font-size: 14px;
-        color: rgba(255,255,255,0.7);
+        font-size: 12px;
+        color: var(--ink3);
     }
 
     .stat-value {
-        font-size: 26px;
-        font-weight: 900;
+        font-size: 24px;
+        font-weight: 700;
+        font-variant-numeric: tabular-nums;
+        line-height: 1.1;
     }
 
-    .stat-value.ssr-color {
-        color: #ffd965;
-        text-shadow: 0 0 18px rgba(255, 210, 74, 0.6);
-    }
-
-    .stat-value.sr-color {
-        color: #c783ff;
-        text-shadow: 0 0 18px rgba(184, 101, 255, 0.6);
-    }
-
-    .stat-value.r-color {
-        color: #6bbcff;
-        text-shadow: 0 0 18px rgba(85, 164, 255, 0.55);
-    }
+    .stat-value.ssr-color { color: var(--ssr); }
+    .stat-value.sr-color  { color: var(--sr); }
+    .stat-value.r-color   { color: var(--r); }
 
     .archive-box {
-        margin-top: 16px;
-        padding: 18px;
-        border-radius: 20px;
-        background:
-            linear-gradient(135deg, rgba(32, 255, 175, 0.09), rgba(57, 116, 255, 0.08)),
-            rgba(255,255,255,0.045);
-        border: 1px solid rgba(78, 255, 194, 0.18);
+        margin-top: 13px;
+        padding: 14px 15px;
+        border-radius: 12px;
+        background: #F4FBF8;
+        border: 1px solid #D8F0E6;
     }
 
     .archive-row {
         display: flex;
         justify-content: space-between;
+        align-items: center;
         gap: 12px;
-        margin-bottom: 10px;
-        font-size: 14px;
+        font-size: 13.5px;
+    }
+
+    .archive-row + .archive-row {
+        margin-top: 9px;
+        padding-top: 9px;
+        border-top: 1px dashed #DCEBE5;
     }
 
     .archive-row span:first-child {
-        color: rgba(255,255,255,0.58);
+        color: var(--ink3);
     }
 
     .archive-row span:last-child {
-        font-weight: 800;
+        font-weight: 600;
+        color: var(--ink);
+        font-variant-numeric: tabular-nums;
     }
 
     .status-ok {
-        color: #5dffc9;
-        text-shadow: 0 0 18px rgba(63, 255, 192, 0.5);
+        color: #1B9E63;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .status-ok::before {
+        content: "";
+        width: 6px;
+        height: 6px;
+        border-radius: 999px;
+        background: #1FBF79;
+        box-shadow: 0 0 0 3px rgba(31, 191, 121, .16);
     }
 
     .status-miss {
-        color: #ffcc6a;
-        text-shadow: 0 0 18px rgba(255, 187, 72, 0.45);
+        color: #C4700E;
     }
 
     .profile-main {
-        margin-top: 16px;
-        padding: 18px;
-        min-height: 220px;
-        border-radius: 22px;
-        background:
-            radial-gradient(circle at 50% 0%, rgba(255,255,255,0.13), transparent 34%),
-            rgba(255,255,255,0.045);
-        border: 1px solid rgba(255,255,255,0.12);
+        margin-top: 13px;
+        padding: 16px;
+        min-height: 168px;
+        border-radius: 14px;
+        background: #F7FAFD;
+        border: 1px solid var(--line);
+        transition: border-color .25s, box-shadow .25s;
     }
 
     .profile-rarity {
-        font-size: 13px;
-        letter-spacing: 1px;
-        color: #ffe7a0;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: .02em;
+        color: var(--ink3);
     }
 
     .profile-name {
-        margin-top: 10px;
-        font-size: 36px;
-        font-weight: 900;
+        margin-top: 8px;
+        font-size: 28px;
+        font-weight: 700;
+        line-height: 1.2;
     }
 
     .profile-id {
-        margin-top: 9px;
-        color: rgba(255,255,255,0.68);
-        font-size: 14px;
+        margin-top: 7px;
+        color: var(--ink2);
+        font-size: 13.5px;
     }
 
     .profile-quote {
-        margin-top: 16px;
+        margin-top: 13px;
+        padding-top: 12px;
+        border-top: 1px solid var(--line);
         line-height: 1.7;
-        font-size: 15px;
-        color: rgba(255,255,255,0.92);
+        font-size: 14px;
+        color: var(--ink);
     }
 
     .button-row {
-        margin-top: 20px;
+        margin-top: 14px;
         display: flex;
         justify-content: center;
     }
 
-    .fake-button {
+    /* 原来是个 <div class="fake-button">，点上去什么都不发生。
+       抽卡页面不能抽，说不过去 —— 改成真按钮。 */
+    .draw-again {
         width: 100%;
-        padding: 15px 18px;
-        border-radius: 999px;
-        text-align: center;
-        font-size: 18px;
-        font-weight: 900;
-        color: #2d1700;
-        background: linear-gradient(135deg, #fff0a3, #ffb32d 55%, #ffde76);
-        box-shadow:
-            0 0 24px rgba(255, 195, 64, 0.5),
-            inset 0 1px 0 rgba(255,255,255,0.65);
-        user-select: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        padding: 11px 18px;
+        border-radius: 10px;
+        font-family: inherit;
+        font-size: 14px;
+        font-weight: 600;
+        color: #2E8BD0;
+        background: #F2F8FD;
+        border: 1px solid #CFE4F5;
+        cursor: pointer;
+        transition: background .18s, border-color .18s, transform .12s;
+    }
+
+    .draw-again:hover {
+        background: #E6F2FC;
+        border-color: #A8CFEC;
+    }
+
+    .draw-again:active {
+        transform: scale(.985);
+    }
+
+    .draw-again:disabled {
+        opacity: .55;
+        cursor: default;
+        transform: none;
+    }
+
+    /* 重抽瞬间给统计数字一个提示，让人知道它跟着变了 */
+    .stat-value.pulse {
+        animation: statPulse .55s ease;
+    }
+
+    @keyframes statPulse {
+        0%   { transform: scale(1); }
+        40%  { transform: scale(1.22); }
+        100% { transform: scale(1); }
     }
 
     .modal-mask {
@@ -544,12 +720,12 @@
         padding: 34px;
         overflow: hidden;
         background:
-            radial-gradient(circle at 50% -20%, rgba(255, 231, 130, 0.52), transparent 36%),
-            linear-gradient(145deg, rgba(29, 20, 8, 0.98), rgba(11, 12, 30, 0.98));
-        border: 1px solid rgba(255, 221, 120, 0.66);
+            radial-gradient(circle at 50% -20%, rgba(255, 231, 130, 0.46), transparent 38%),
+            linear-gradient(145deg, rgba(28, 19, 7, 0.98), rgba(11, 12, 30, 0.98));
+        border: 1px solid rgba(255, 221, 120, 0.6);
         box-shadow:
-            0 0 70px rgba(255, 205, 72, 0.52),
-            0 30px 120px rgba(0,0,0,0.72);
+            0 0 56px rgba(255, 205, 72, 0.36),
+            0 30px 100px rgba(0,0,0,0.66);
         text-align: center;
         animation: modalIn 0.5s ease both;
     }
@@ -574,6 +750,9 @@
 
     .modal-name {
         margin-top: 16px;
+        /* 与 .hero-name 同一个坑：body 底色从白改深之后，
+           没写 color 的浅底元素会继承到深色字，压在深色弹窗上直接隐形 */
+        color: #fff;
         font-size: 54px;
         font-weight: 900;
         letter-spacing: 2px;
@@ -599,9 +778,9 @@
     }
 
     .bottom-note {
-        margin-top: 20px;
+        margin-top: 16px;
         text-align: right;
-        color: rgba(255,255,255,0.42);
+        color: var(--ink3);
         font-size: 12px;
     }
 
@@ -611,42 +790,106 @@
         }
 
         .cards-grid {
-            grid-template-columns: repeat(2, minmax(130px, 1fr));
+            grid-template-columns: repeat(3, minmax(120px, 1fr));
+            grid-auto-rows: auto;
         }
 
         .top-bar {
             flex-direction: column;
+            gap: 14px;
         }
 
         .corner-note {
             white-space: normal;
         }
+    }
 
-        h1 {
-            font-size: 38px;
+    @media (max-width: 720px) {
+        .page {
+            padding: 20px 16px 26px;
+        }
+
+        .cards-grid {
+            grid-template-columns: repeat(2, minmax(120px, 1fr));
+            gap: 11px;
+        }
+
+        .card {
+            min-height: 0;
+            padding: 12px 11px;
+        }
+
+        .draw-panel {
+            padding: 16px;
+        }
+
+        /* 标题 + 两个 badge 抢一行，「十连抽结果区」会被压成「十连抽结果 / 区」 */
+        .section-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 9px;
+        }
+
+        .draw-panel .section-title {
+            font-size: 16px;
+        }
+
+        .draw-badge {
+            font-size: 11px;
+            padding: 5px 9px;
+        }
+
+        .hero-name {
+            font-size: 21px;
+            margin-top: 14px;
+        }
+
+        .card.ssr .hero-name {
+            font-size: 24px;
+        }
+
+        .profile-name {
+            font-size: 24px;
+        }
+
+        h1::after {
+            display: none;
+        }
+
+        .bottom-note {
+            text-align: left;
+            line-height: 1.6;
         }
     }
 </style>
 </head>
 <body>
-<div class="star-field" id="starField"></div>
 
 <div class="page">
+    <div class="shell">
+        <a class="back-link" href="../index.html">← 返回作品集</a>
+        <span class="pnum">PROJECT 20 · 互动小游戏</span>
+    </div>
+
     <div class="content">
         <div class="top-bar">
             <div class="title-block">
                 <div class="title-kicker">十连抽结果 · 英雄档案 · Python 存档</div>
                 <h1>英雄盲盒十连抽</h1>
-                <div class="subtitle">角色档案卡 + 存档效果页</div>
+                <div class="subtitle">一次抽十张，结果由 Python 跑完写进文件、再由页面读出来 —— 抽卡逻辑不在浏览器里重算。</div>
             </div>
             <div class="corner-note">抽卡结果与存档来自 Python 原代码</div>
         </div>
 
         <div class="hero-stage">
             <section class="panel draw-panel">
+                <div class="star-field" id="starField"></div>
                 <div class="section-header">
                     <div class="section-title">十连抽结果区</div>
-                    <div class="draw-badge">本次展示记录：10 抽</div>
+                    <div class="draw-actions">
+                        <div class="draw-badge">本次展示记录：10 抽</div>
+                        <button class="draw-badge ssr-hint" id="ssrHint" type="button">⭐ 最高稀有度特写</button>
+                    </div>
                 </div>
                 <div class="cards-grid" id="cardsGrid"></div>
             </section>
@@ -657,15 +900,15 @@
                     <div class="stats-grid">
                         <div class="stat-item">
                             <span class="stat-label">SSR 数量</span>
-                            <span class="stat-value ssr-color">3</span>
+                            <span class="stat-value ssr-color" id="cntSSR">3</span>
                         </div>
                         <div class="stat-item">
                             <span class="stat-label">SR 数量</span>
-                            <span class="stat-value sr-color">4</span>
+                            <span class="stat-value sr-color" id="cntSR">4</span>
                         </div>
                         <div class="stat-item">
                             <span class="stat-label">R 数量</span>
-                            <span class="stat-value r-color">3</span>
+                            <span class="stat-value r-color" id="cntR">3</span>
                         </div>
                     </div>
                 </section>
@@ -697,13 +940,15 @@
                         </div>
                     </div>
                     <div class="button-row">
-                        <div class="fake-button">再抽一次</div>
+                        <button class="draw-again" id="drawAgain" type="button">
+                            <span aria-hidden="true">↻</span>再抽一次
+                        </button>
                     </div>
                 </section>
             </aside>
         </div>
 
-        <div class="bottom-note">抽卡结果由 Python 新增代码生成；JavaScript 仅负责页面展示，不重新执行随机逻辑。</div>
+        <div class="bottom-note">首屏这 10 张是 Python 脚本跑完写进 盲盒.txt 的原始结果；点「再抽一次」是照同一套规则（6 个英雄等概率、无稀有度加权）在浏览器里重放，不写回文件。</div>
     </div>
 </div>
 
@@ -718,9 +963,11 @@
 </div>
 
 <script>
-    const drawResults = [{"序号": 1, "名字": "索隆", "稀有度": "SR", "身份": "草帽海贼团剑士", "台词": "我要成为世界第一大剑豪！"}, {"序号": 2, "名字": "路飞", "稀有度": "SSR", "身份": "草帽海贼团船长", "台词": "我是要成为海贼王的男人！"}, {"序号": 3, "名字": "路飞", "稀有度": "SSR", "身份": "草帽海贼团船长", "台词": "我是要成为海贼王的男人！"}, {"序号": 4, "名字": "沙僧", "稀有度": "R", "身份": "西天取经师徒护法", "台词": "踏实行路，护你周全。"}, {"序号": 5, "名字": "索隆", "稀有度": "SR", "身份": "草帽海贼团剑士", "台词": "我要成为世界第一大剑豪！"}, {"序号": 6, "名字": "敖丙", "稀有度": "SR", "身份": "东海龙族太子", "台词": "一念沧海，一念星河。"}, {"序号": 7, "名字": "沙僧", "稀有度": "R", "身份": "西天取经师徒护法", "台词": "踏实行路，护你周全。"}, {"序号": 8, "名字": "路飞", "稀有度": "SSR", "身份": "草帽海贼团船长", "台词": "我是要成为海贼王的男人！"}, {"序号": 9, "名字": "娜美", "稀有度": "R", "身份": "草帽海贼团航海士", "台词": "前路的风向，由我掌控！"}, {"序号": 10, "名字": "索隆", "稀有度": "SR", "身份": "草帽海贼团剑士", "台词": "我要成为世界第一大剑豪！"}];
+    let drawResults = [{"序号": 1, "名字": "索隆", "稀有度": "SR", "身份": "草帽海贼团剑士", "台词": "我要成为世界第一大剑豪！"}, {"序号": 2, "名字": "路飞", "稀有度": "SSR", "身份": "草帽海贼团船长", "台词": "我是要成为海贼王的男人！"}, {"序号": 3, "名字": "路飞", "稀有度": "SSR", "身份": "草帽海贼团船长", "台词": "我是要成为海贼王的男人！"}, {"序号": 4, "名字": "沙僧", "稀有度": "R", "身份": "西天取经师徒护法", "台词": "踏实行路，护你周全。"}, {"序号": 5, "名字": "索隆", "稀有度": "SR", "身份": "草帽海贼团剑士", "台词": "我要成为世界第一大剑豪！"}, {"序号": 6, "名字": "敖丙", "稀有度": "SR", "身份": "东海龙族太子", "台词": "一念沧海，一念星河。"}, {"序号": 7, "名字": "沙僧", "稀有度": "R", "身份": "西天取经师徒护法", "台词": "踏实行路，护你周全。"}, {"序号": 8, "名字": "路飞", "稀有度": "SSR", "身份": "草帽海贼团船长", "台词": "我是要成为海贼王的男人！"}, {"序号": 9, "名字": "娜美", "稀有度": "R", "身份": "草帽海贼团航海士", "台词": "前路的风向，由我掌控！"}, {"序号": 10, "名字": "索隆", "稀有度": "SR", "身份": "草帽海贼团剑士", "台词": "我要成为世界第一大剑豪！"}];
     const heroPool = [{"名字": "路飞", "稀有度": "SSR", "身份": "草帽海贼团船长", "台词": "我是要成为海贼王的男人！"}, {"名字": "索隆", "稀有度": "SR", "身份": "草帽海贼团剑士", "台词": "我要成为世界第一大剑豪！"}, {"名字": "敖丙", "稀有度": "SR", "身份": "东海龙族太子", "台词": "一念沧海，一念星河。"}, {"名字": "娜美", "稀有度": "R", "身份": "草帽海贼团航海士", "台词": "前路的风向，由我掌控！"}, {"名字": "沙僧", "稀有度": "R", "身份": "西天取经师徒护法", "台词": "踏实行路，护你周全。"}, {"名字": "猪八戒", "稀有度": "R", "身份": "天蓬元帅转世", "台词": "吃饱了，才有力气闯荡江湖！"}];
-    const highRarityHero = {"序号": 2, "名字": "路飞", "稀有度": "SSR", "身份": "草帽海贼团船长", "台词": "我是要成为海贼王的男人！"};
+    // 首屏这份是 Python 跑完写进 盲盒.txt 的结果，原样保留；
+    // 点「再抽一次」时 highRarityHero 会更新成本次的最高稀有度
+    let highRarityHero = {"序号": 2, "名字": "路飞", "稀有度": "SSR", "身份": "草帽海贼团船长", "台词": "我是要成为海贼王的男人！"};
 
     const cardsGrid = document.getElementById("cardsGrid");
     const profileMain = document.getElementById("profileMain");
@@ -773,11 +1020,79 @@
             <div class="profile-id">${hero["身份"]}</div>
             <div class="profile-quote">“${hero["台词"]}”</div>
         `;
-        profileMain.style.boxShadow = cls === "ssr"
-            ? "0 0 44px rgba(255, 210, 74, 0.35)"
+        // 原来写的是深色底上的大范围发光，换到白卡上会变成一块脏雾；
+        // 改成同色系描边 + 极淡投影
+        const tone = cls === "ssr"
+            ? ["#E8C877", "rgba(192, 138, 18, .12)"]
             : cls === "sr"
-                ? "0 0 34px rgba(181, 95, 255, 0.3)"
-                : "0 0 28px rgba(72, 153, 255, 0.22)";
+                ? ["#CDAEF5", "rgba(123, 69, 216, .10)"]
+                : ["#B6D6F0", "rgba(46, 127, 196, .10)"];
+        profileMain.style.borderColor = tone[0];
+        profileMain.style.boxShadow = `0 6px 20px ${tone[1]}`;
+    }
+
+    // ── 再抽一次 ──────────────────────────────────────
+    // 概率跟 Python 那份一致：源码里就是 random.randint(0, len(heros)-1)，
+    // 六个英雄等概率、没有稀有度权重，这里照抄，不额外编一套。
+    const RARITY_ORDER = { "SSR": 3, "SR": 2, "R": 1 };
+
+    function drawOne() {
+        return heroPool[Math.floor(Math.random() * heroPool.length)];
+    }
+
+    function updateStats(bump) {
+        const tally = { "SSR": 0, "SR": 0, "R": 0 };
+        drawResults.forEach(hero => {
+            if (tally[hero["稀有度"]] !== undefined) tally[hero["稀有度"]]++;
+        });
+        const map = { "SSR": "cntSSR", "SR": "cntSR", "R": "cntR" };
+        Object.keys(map).forEach(rarity => {
+            const el = document.getElementById(map[rarity]);
+            if (!el) return;
+            el.textContent = tally[rarity];
+            if (bump) {
+                el.classList.remove("pulse");
+                void el.offsetWidth;      // 强制重排，动画才会重跑
+                el.classList.add("pulse");
+            }
+        });
+    }
+
+    // 特写按钮跟着本次最高稀有度变色：没出 SSR 就退回中性色
+    function syncHintButton() {
+        const btn = document.getElementById("ssrHint");
+        if (!btn || !highRarityHero) return;
+        const isSSR = highRarityHero["稀有度"] === "SSR";
+        btn.classList.toggle("is-ssr", isSSR);
+        btn.textContent = (isSSR ? "⭐ " : "") + "最高稀有度特写";
+    }
+
+    function redraw() {
+        const btn = document.getElementById("drawAgain");
+
+        // 抽十次
+        drawResults = [];
+        for (let i = 0; i < 10; i++) {
+            const hero = drawOne();
+            drawResults.push({
+                "序号": i + 1,
+                "名字": hero["名字"],
+                "稀有度": hero["稀有度"],
+                "身份": hero["身份"],
+                "台词": hero["台词"]
+            });
+        }
+
+        // 本次最高稀有度：给「最高稀有度特写」按钮用
+        highRarityHero = drawResults.reduce((best, hero) =>
+            RARITY_ORDER[hero["稀有度"]] > RARITY_ORDER[best["稀有度"]] ? hero : best
+        , drawResults[0]);
+
+        // 重渲染卡片：先清空，动画才会从头播一遍
+        cardsGrid.innerHTML = "";
+        renderCards();
+        updateStats(true);
+        syncHintButton();
     }
 
     function typeText(element, text) {
@@ -811,7 +1126,8 @@
         for (let i = 0; i < total; i++) {
             const star = document.createElement("div");
             star.className = "star";
-            star.style.left = Math.random() * 100 + "vw";
+            // 容器已经从整页缩成抽卡面板，用 vw 会让星星全挤在左半边
+            star.style.left = Math.random() * 100 + "%";
             star.style.top = -Math.random() * 100 + "px";
             star.style.animationDelay = Math.random() * 5 + "s";
             star.style.animationDuration = 3.2 + Math.random() * 3.8 + "s";
@@ -822,11 +1138,23 @@
     renderCards();
     createStars();
 
-    setTimeout(() => {
-        if (highRarityHero) {
-            showModal(highRarityHero);
-        }
-    }, 900);
+    // 首屏统计按真实数据算一遍，别用 HTML 里写死的 3/4/3
+    updateStats(false);
+    syncHintButton();
+
+    // 不再自动弹窗：首屏该让人先看到十张卡和统计，而不是一层模糊遮罩
+    document.getElementById("ssrHint").addEventListener("click", () => {
+        if (highRarityHero) showModal(highRarityHero);
+    });
+
+    document.getElementById("drawAgain").addEventListener("click", function () {
+        const btn = this;
+        if (btn.disabled) return;
+        btn.disabled = true;
+        redraw();
+        // 卡片入场动画 0.8s + 最后一张延迟 0.72s，按钮跟着锁一会儿防连点
+        setTimeout(() => { btn.disabled = false; }, 900);
+    });
 </script>
 </body>
 </html>

@@ -1,567 +1,619 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
+<link rel="icon" type="image/svg+xml" href="../favicon.svg?v=2">
 <meta charset="UTF-8">
-<title>王思洋 · Python 自我介绍 RAP</title>
+<title>Python 自我介绍 RAP 舞台</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-* {
-    box-sizing: border-box;
+@font-face{font-family:"Noto Sans SC";font-style:normal;font-weight:400;font-display:swap;
+    src:url("../fonts/NotoSansSC-400-subset.woff2") format("woff2")}
+@font-face{font-family:"Noto Sans SC";font-style:normal;font-weight:500;font-display:swap;
+    src:url("../fonts/NotoSansSC-500-subset.woff2") format("woff2")}
+@font-face{font-family:"Noto Sans SC";font-style:normal;font-weight:600;font-display:swap;
+    src:url("../fonts/NotoSansSC-600-subset.woff2") format("woff2")}
+@font-face{font-family:"Noto Sans SC";font-style:normal;font-weight:700;font-display:swap;
+    src:url("../fonts/NotoSansSC-700-subset.woff2") format("woff2")}
+
+:root{
+    --bg:#FBFCFE;
+    --ink:#1A1D24;
+    --ink2:#525B6B;
+    --ink3:#8B95A6;
+    --line:#E4EBF5;
+    --red:#E8455F;
+    --blue:#4FA8E8;
+    --panel:#F7FAFD;
+
+    /* 舞台内部还是黑的 —— 灯打在黑箱里才立得住 */
+    --stage1:#0B0E1A;
+    --stage2:#161C32;
+    --gold:#F0C15C;
+    --gold-soft:rgba(240,193,92,.42);
 }
 
-:root {
-    --gold: #ffd36a;
-    --hot: #ff4fd8;
-    --blue: #45d7ff;
-    --green: #57ff9a;
-    --dark: #060711;
-    --panel: rgba(13, 16, 38, 0.82);
+*{box-sizing:border-box;}
+
+body{
+    margin:0;
+    min-height:100vh;
+    overflow-x:hidden;
+    color:var(--ink);
+    font-family:"Noto Sans SC","Microsoft YaHei","PingFang SC",Arial,sans-serif;
+    background:var(--bg);
 }
 
-body {
-    margin: 0;
-    min-height: 100vh;
-    overflow-x: hidden;
-    color: #ffffff;
-    font-family: "Microsoft YaHei", "PingFang SC", "Segoe UI", Arial, sans-serif;
+
+.subtitle code{
+    font-family:Consolas,Monaco,monospace;
+    font-size:.9em;
+    background:#EFF5FC;
+    border:1px solid var(--line);
+    border-radius:5px;
+    padding:1px 5px;
+    color:#2F6F9E;
+}
+
+.page{
+    width:min(1600px,94vw);
+    margin:0 auto;
+    padding:26px 0 52px;
+}
+
+/* ── 统一壳 ── */
+.shell{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    flex-wrap:wrap;
+    margin-bottom:24px;
+}
+.back-link{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    color:var(--ink3);
+    text-decoration:none;
+    font-size:14px;
+    transition:color .2s;
+}
+.back-link:hover{color:var(--blue);}
+.pnum{
+    display:inline-block;
+    font-size:12px;
+    font-weight:700;
+    letter-spacing:.06em;
+    color:#fff;
+    background:linear-gradient(100deg,#3E9FE0 0%,#E8455F 72%,#D62F4A 100%);
+    border-radius:999px;
+    padding:5px 15px;
+    box-shadow:0 6px 18px rgba(214,47,74,.26);
+}
+
+.hero{margin-bottom:24px;}
+.badge{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding:6px 13px;
+    border:1px solid var(--line);
+    border-radius:999px;
+    background:#fff;
+    color:var(--ink2);
+    font-size:13px;
+}
+h1{
+    margin:14px 0 10px;
+    font-size:clamp(26px,3.6vw,38px);
+    font-weight:700;
+    letter-spacing:-.01em;
+    line-height:1.28;
+    color:var(--ink);
+}
+h1::after{
+    content:"";
+    display:inline-block;
+    width:10px;height:10px;
+    border-radius:3px;
+    background:var(--red);
+    margin-left:11px;
+    vertical-align:.12em;
+    box-shadow:0 3px 10px rgba(232,69,95,.45);
+}
+.subtitle{
+    margin:0;
+    color:var(--ink2);
+    font-size:15px;
+    line-height:1.78;
+    max-width:920px;
+}
+
+/* ── 外壳卡片 ── */
+.stage-shell{
+    position:relative;
+    z-index:2;
+    border:1px solid var(--line);
+    border-radius:18px;
+    padding:20px;
+    background:#fff;
+    box-shadow:0 20px 60px rgba(26,29,36,.07);
+}
+
+/* 卡片头跟 11（短视频工坊）同一套：17px 小标题 + 13px 说明 一行排，
+   不再搞第二套「大标题 + 副标题」，页面里只留 hero 那一个 h1 */
+.stage-header{
+    display:flex;
+    align-items:baseline;
+    gap:18px;
+    flex-wrap:wrap;
+    padding-bottom:16px;
+    border-bottom:1px solid var(--line);
+}
+.stage-header h2{
+    margin:0;
+    font-size:17px;
+    font-weight:700;
+    color:var(--ink);
+    display:flex;
+    align-items:center;
+    gap:9px;
+}
+.stage-header h2::before{
+    content://;
+    width:8px;height:8px;
+    border-radius:2px;
+    background:var(--red);
+    box-shadow:0 2px 8px rgba(232,69,95,.4);
+}
+.stage-header h2 .tag{
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:.08em;
+    color:#fff;
+    background:linear-gradient(100deg,#3E9FE0,#E8455F);
+    border-radius:999px;
+    padding:3px 10px;
+}
+.stage-header .sub{
+    font-size:13px;
+    color:var(--ink3);
+    border-left:2px solid var(--line);
+    padding-left:16px;
+}
+
+.meta-card{
+    margin-left:auto;
+    min-width:240px;
+    padding:13px 16px;
+    border-radius:14px;
+    background:var(--panel);
+    border:1px solid var(--line);
+    color:var(--ink2);
+    font-size:12.5px;
+    line-height:1.72;
+}
+.meta-card div:first-child{
+    color:var(--ink);
+    font-weight:600;
+    margin-bottom:4px;
+}
+
+.main-grid{
+    display:grid;
+    grid-template-columns:minmax(0,1.35fr) minmax(300px,0.65fr);
+    gap:20px;
+    margin-top:20px;
+}
+
+/* ── 舞台：整页唯一一块深色 ── */
+.performance-panel{
+    position:relative;
+    min-height:560px;
+    padding:24px;
+    border-radius:20px;
+    overflow:hidden;
     background:
-        radial-gradient(circle at 20% 12%, rgba(255, 79, 216, 0.28), transparent 32%),
-        radial-gradient(circle at 82% 18%, rgba(69, 215, 255, 0.22), transparent 34%),
-        radial-gradient(circle at 50% 85%, rgba(255, 211, 106, 0.16), transparent 35%),
-        linear-gradient(145deg, #02030a 0%, #080b18 42%, #111327 100%);
+        radial-gradient(circle at 50% 26%, rgba(79,168,232,.18), transparent 34%),
+        radial-gradient(circle at 12% 6%, rgba(232,69,95,.14), transparent 30%),
+        linear-gradient(180deg, var(--stage1), var(--stage2));
+    border:1px solid rgba(255,255,255,.10);
+    box-shadow:0 18px 46px rgba(11,14,26,.28);
 }
 
-.stage-page {
-    position: relative;
-    min-height: 100vh;
-    padding: 28px;
-    overflow: hidden;
+/* 台口的两道光 */
+.spotlight{
+    position:absolute;
+    top:-14%;
+    width:34%;
+    height:82%;
+    opacity:.42;
+    filter:blur(9px);
+    transform-origin:top center;
+    background:linear-gradient(to bottom, rgba(240,193,92,.62), rgba(240,193,92,.10), transparent);
+    clip-path:polygon(43% 0%,57% 0%,100% 100%,0% 100%);
+    animation:swing 4s ease-in-out infinite alternate;
+    pointer-events:none;
+}
+.spotlight.left{left:6%;transform:rotate(16deg);}
+.spotlight.right{right:6%;transform:rotate(-16deg);animation-delay:-1.5s;
+    background:linear-gradient(to bottom, rgba(92,170,232,.58), rgba(92,170,232,.10), transparent);}
+
+@keyframes swing{
+    from{opacity:.22;transform:rotate(11deg);}
+    to{opacity:.58;transform:rotate(-9deg);}
 }
 
-.noise {
-    pointer-events: none;
-    position: fixed;
-    inset: 0;
-    opacity: 0.08;
-    background-image:
-        linear-gradient(rgba(255,255,255,0.12) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.08) 1px, transparent 1px);
-    background-size: 36px 36px;
-    mix-blend-mode: screen;
-}
-
-.spotlight {
-    position: fixed;
-    top: -12%;
-    width: 34vw;
-    height: 75vh;
-    opacity: 0.36;
-    filter: blur(12px);
-    transform-origin: top center;
-    background: linear-gradient(to bottom, rgba(255,255,255,0.28), rgba(255,255,255,0.04), transparent);
-    clip-path: polygon(43% 0%, 57% 0%, 100% 100%, 0% 100%);
-    animation: swing 4s ease-in-out infinite alternate;
-}
-
-.spotlight.left {
-    left: 10%;
-    transform: rotate(18deg);
-}
-
-.spotlight.right {
-    right: 10%;
-    transform: rotate(-18deg);
-    animation-delay: -1.5s;
-}
-
-@keyframes swing {
-    from { opacity: 0.16; transform: rotate(12deg); }
-    to { opacity: 0.44; transform: rotate(-10deg); }
-}
-
-.stage-shell {
-    position: relative;
-    z-index: 2;
-    max-width: 1180px;
-    margin: 0 auto;
-    border: 1px solid rgba(255,255,255,0.14);
-    border-radius: 28px;
-    padding: 26px;
-    background: linear-gradient(180deg, rgba(8,10,28,0.88), rgba(5,6,14,0.72));
-    box-shadow:
-        0 28px 90px rgba(0,0,0,0.62),
-        inset 0 0 42px rgba(69,215,255,0.08);
-    backdrop-filter: blur(14px);
-}
-
-.stage-header {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 18px;
-    padding-bottom: 18px;
-    border-bottom: 1px solid rgba(255,255,255,0.11);
-}
-
-.title-wrap h1 {
-    margin: 0;
-    font-size: clamp(30px, 5vw, 58px);
-    letter-spacing: 2px;
-    line-height: 1.08;
-    background: linear-gradient(90deg, #fff8d8, var(--gold), #ff8be7, #8cecff);
-    -webkit-background-clip: text;
-    color: transparent;
-    text-shadow: 0 0 38px rgba(255, 211, 106, 0.26);
-}
-
-.title-wrap p {
-    margin: 10px 0 0;
-    color: rgba(255,255,255,0.72);
-    font-size: 15px;
-}
-
-.meta-card {
-    min-width: 240px;
-    padding: 14px 16px;
-    border-radius: 18px;
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.12);
-    color: rgba(255,255,255,0.76);
-    font-size: 13px;
-    line-height: 1.7;
-}
-
-.main-grid {
-    display: grid;
-    grid-template-columns: minmax(0, 1.35fr) minmax(300px, 0.65fr);
-    gap: 22px;
-    margin-top: 22px;
-}
-
-.performance-panel {
-    position: relative;
-    min-height: 560px;
-    padding: 26px;
-    border-radius: 26px;
-    overflow: hidden;
+/* 地灯 */
+.performance-panel::before{
+    content:"";
+    position:absolute;
+    left:-18%;right:-18%;bottom:-20%;
+    height:40%;
     background:
-        radial-gradient(circle at 50% 28%, rgba(255, 211, 106, 0.15), transparent 30%),
-        linear-gradient(180deg, rgba(255,255,255,0.07), rgba(255,255,255,0.025));
-    border: 1px solid rgba(255,255,255,0.12);
+        radial-gradient(ellipse at center, rgba(240,193,92,.20), transparent 58%),
+        linear-gradient(90deg, transparent, rgba(255,255,255,.08), transparent);
+    filter:blur(10px);
+    pointer-events:none;
 }
 
-.performance-panel::before {
-    content: "";
-    position: absolute;
-    left: -18%;
-    right: -18%;
-    bottom: -22%;
-    height: 42%;
-    background:
-        radial-gradient(ellipse at center, rgba(255, 211, 106, 0.22), transparent 58%),
-        linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
-    filter: blur(10px);
+.stage-border{
+    position:relative;
+    z-index:2;
+    min-height:46px;
+    padding:12px 14px;
+    border-radius:12px;
+    border:1px dashed var(--gold-soft);
+    color:var(--gold);
+    text-align:center;
+    letter-spacing:4px;
+    font-family:Consolas,Monaco,monospace;
+    font-size:13px;
+    background:rgba(240,193,92,.06);
+    overflow:hidden;
+    white-space:nowrap;
+    text-overflow:ellipsis;
 }
 
-.stage-border {
-    position: relative;
-    z-index: 2;
-    min-height: 48px;
-    padding: 12px 14px;
-    border-radius: 16px;
-    border: 1px dashed rgba(255,211,106,0.45);
-    color: var(--gold);
-    text-align: center;
-    letter-spacing: 4px;
-    font-family: Consolas, Monaco, monospace;
-    background: rgba(255,211,106,0.06);
+.rap-center{
+    position:relative;
+    z-index:2;
+    display:grid;
+    /* 必须写死 minmax(0,1fr)：原来只有 place-items:center，
+       隐式列会被 .current-card 的 min(700px,100%) 顶成 700 宽（100% 又反过来问轨道要宽度），
+       窗口一窄（1000/960/920/900 都复现）轨道比面板还宽，内容整体被推到右边，话筒就不在正中了 */
+    grid-template-columns:minmax(0,1fr);
+    place-items:center;
+    min-height:335px;
+    padding:24px 12px;
 }
 
-.rap-center {
-    position: relative;
-    z-index: 2;
-    display: grid;
-    place-items: center;
-    min-height: 335px;
-    padding: 26px 12px;
+.mic-wrap{
+    position:relative;
+    width:180px;
+    height:180px;
+    display:grid;
+    place-items:center;
+    margin-bottom:14px;
 }
 
-.mic-wrap {
-    position: relative;
-    width: 190px;
-    height: 190px;
-    display: grid;
-    place-items: center;
-    margin-bottom: 16px;
+.wave{
+    position:absolute;
+    width:88px;height:88px;
+    border-radius:999px;
+    border:2px solid rgba(92,170,232,.36);
+    animation:wavePulse 1.8s linear infinite;
+}
+.wave.w2{animation-delay:.6s;border-color:rgba(240,193,92,.34);}
+.wave.w3{animation-delay:1.2s;border-color:rgba(232,69,95,.34);}
+
+@keyframes wavePulse{
+    from{transform:scale(.55);opacity:.95;}
+    to{transform:scale(2.1);opacity:0;}
 }
 
-.wave {
-    position: absolute;
-    width: 92px;
-    height: 92px;
-    border-radius: 999px;
-    border: 2px solid rgba(69,215,255,0.28);
-    animation: wavePulse 1.8s linear infinite;
+.microphone{
+    position:relative;
+    z-index:2;
+    width:84px;height:84px;
+    border-radius:50%;
+    display:grid;
+    place-items:center;
+    font-size:46px;
+    background:radial-gradient(circle at 35% 30%, #FFFFFF, #C9D6E8 45%, #3A4257 78%);
+    box-shadow:0 0 32px rgba(92,170,232,.36), 0 0 56px rgba(240,193,92,.20);
+    animation:micBounce 1.25s ease-in-out infinite alternate;
+}
+@keyframes micBounce{
+    from{transform:translateY(0) rotate(-4deg);}
+    to{transform:translateY(-10px) rotate(5deg);}
 }
 
-.wave.w2 {
-    animation-delay: 0.6s;
-    border-color: rgba(255,79,216,0.28);
+.beat-status{
+    text-align:center;
+    font-weight:800;
+    letter-spacing:2px;
+    font-size:13px;
+    color:#7FE0A6;
+    text-shadow:0 0 16px rgba(87,255,154,.45);
+    margin-bottom:14px;
 }
 
-.wave.w3 {
-    animation-delay: 1.2s;
-    border-color: rgba(255,211,106,0.28);
+.current-card{
+    width:100%;
+    max-width:700px;
+    min-height:158px;
+    padding:22px;
+    border-radius:18px;
+    text-align:center;
+    background:linear-gradient(135deg, rgba(255,255,255,.10), rgba(255,255,255,.03));
+    border:1px solid rgba(255,255,255,.14);
+    box-shadow:0 16px 38px rgba(0,0,0,.34);
 }
 
-@keyframes wavePulse {
-    from { transform: scale(0.55); opacity: 0.95; }
-    to { transform: scale(2.18); opacity: 0; }
+.current-label{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    margin-bottom:12px;
+    padding:5px 12px;
+    border-radius:999px;
+    background:rgba(92,170,232,.16);
+    color:#BEE4FA;
+    font-size:12px;
+    letter-spacing:1px;
 }
 
-.microphone {
-    position: relative;
-    z-index: 2;
-    width: 86px;
-    height: 86px;
-    border-radius: 50%;
-    display: grid;
-    place-items: center;
-    font-size: 50px;
-    background: radial-gradient(circle at 35% 30%, #ffffff, #adbbd8 45%, #30364f 76%);
-    box-shadow:
-        0 0 35px rgba(69,215,255,0.34),
-        0 0 60px rgba(255,79,216,0.18);
-    animation: micBounce 1.25s ease-in-out infinite alternate;
+.current-emoji{
+    font-size:44px;
+    line-height:1;
+    margin-bottom:8px;
+    filter:drop-shadow(0 0 16px rgba(240,193,92,.45));
 }
 
-@keyframes micBounce {
-    from { transform: translateY(0) rotate(-4deg); }
-    to { transform: translateY(-10px) rotate(5deg); }
+.current-lyric{
+    /* 收尾那句偏长，balance 让它从逗号处断，不会剩一个孤零零的字 */
+    text-wrap:balance;
+    font-size:clamp(24px,4.4vw,42px);
+    font-weight:700;
+    line-height:1.24;
+    letter-spacing:1px;
+    color:#fff;
+    text-shadow:0 0 18px rgba(255,255,255,.14), 0 0 26px rgba(92,170,232,.18);
+}
+.current-lyric.rap{color:#FFFFFF;}
+.current-lyric.intro{color:#8FE8B0;animation:glowIntro .9s ease-in-out infinite alternate;}
+.current-lyric.finale{color:#FFE6AE;animation:finaleGlow .8s ease-in-out infinite alternate;}
+
+@keyframes glowIntro{
+    from{text-shadow:0 0 12px rgba(87,255,154,.45);}
+    to{text-shadow:0 0 32px rgba(87,255,154,.85), 0 0 56px rgba(92,170,232,.32);}
+}
+@keyframes finaleGlow{
+    from{text-shadow:0 0 12px rgba(240,193,92,.5);transform:scale(1);}
+    to{text-shadow:0 0 30px rgba(240,193,92,.9), 0 0 62px rgba(232,69,95,.32);transform:scale(1.02);}
 }
 
-.beat-status {
-    text-align: center;
-    font-weight: 800;
-    letter-spacing: 3px;
-    color: var(--green);
-    text-shadow: 0 0 18px rgba(87,255,154,0.65);
-    margin-bottom: 16px;
+.beat-bars{
+    position:relative;
+    z-index:2;
+    height:88px;
+    display:flex;
+    align-items:end;
+    justify-content:center;
+    gap:7px;
+    margin-top:14px;
+}
+.beat-bars span{
+    width:9px;height:24px;
+    border-radius:999px 999px 2px 2px;
+    background:linear-gradient(to top, #5CAAE8, #E8455F, #F0C15C);
+    box-shadow:0 0 14px rgba(92,170,232,.35);
+    animation:beat .75s ease-in-out infinite alternate;
+}
+.beat-bars span:nth-child(2n){animation-delay:.16s;}
+.beat-bars span:nth-child(3n){animation-delay:.32s;}
+.beat-bars span:nth-child(4n){animation-delay:.48s;}
+@keyframes beat{
+    from{height:18px;opacity:.58;}
+    to{height:82px;opacity:1;}
 }
 
-.current-card {
-    width: min(720px, 100%);
-    min-height: 158px;
-    padding: 24px;
-    border-radius: 24px;
-    text-align: center;
-    background:
-        linear-gradient(135deg, rgba(255,255,255,0.12), rgba(255,255,255,0.04)),
-        rgba(0,0,0,0.24);
-    border: 1px solid rgba(255,255,255,0.15);
-    box-shadow: 0 18px 42px rgba(0,0,0,0.34);
+/* ── 右侧时间轴 ── */
+.timeline-panel{
+    padding:18px;
+    border-radius:18px;
+    background:var(--panel);
+    border:1px solid var(--line);
+}
+.timeline-panel h3{
+    margin:0 0 13px;
+    font-size:15px;
+    font-weight:600;
+    color:var(--ink);
+    display:flex;
+    align-items:center;
+    gap:8px;
+}
+.timeline-panel h3::before{
+    content:"";
+    width:8px;height:8px;
+    border-radius:2px;
+    background:var(--red);
+    box-shadow:0 2px 8px rgba(232,69,95,.4);
+}
+.timeline{
+    display:grid;
+    gap:8px;
+    max-height:508px;
+    overflow:auto;
+    padding-right:6px;
+}
+.timeline::-webkit-scrollbar{width:7px;}
+.timeline::-webkit-scrollbar-track{background:#EDF3FA;border-radius:7px;}
+.timeline::-webkit-scrollbar-thumb{background:#B9CFE7;border-radius:7px;}
+
+.line-item{
+    display:grid;
+    grid-template-columns:38px 1fr;
+    gap:10px;
+    align-items:center;
+    padding:9px 10px;
+    border-radius:12px;
+    color:var(--ink2);
+    background:#fff;
+    border:1px solid var(--line);
+    transition:.25s ease;
+}
+.line-num{
+    width:30px;height:30px;
+    border-radius:50%;
+    display:grid;
+    place-items:center;
+    color:var(--ink3);
+    background:var(--panel);
+    border:1px solid var(--line);
+    font-size:11px;
+    font-family:Consolas,Monaco,monospace;
+}
+.line-text{
+    font-size:13px;
+    line-height:1.5;
+}
+.line-item.active{
+    color:var(--ink);
+    font-weight:500;
+    transform:translateX(4px);
+    border-color:rgba(232,69,95,.42);
+    background:linear-gradient(90deg, rgba(232,69,95,.07), rgba(79,168,232,.05));
+    box-shadow:0 6px 18px rgba(26,29,36,.06);
+}
+.line-item.active .line-num{
+    background:var(--red);
+    border-color:var(--red);
+    color:#fff;
+    font-weight:700;
 }
 
-.current-label {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 12px;
-    padding: 6px 12px;
-    border-radius: 999px;
-    background: rgba(69,215,255,0.12);
-    color: #b8f2ff;
-    font-size: 13px;
-    letter-spacing: 1px;
+/* ── 底部说明 ── */
+.knowledge{
+    margin-top:20px;
+    padding:18px;
+    border-radius:18px;
+    background:var(--panel);
+    border:1px solid var(--line);
+}
+.knowledge h3{
+    margin:0 0 13px;
+    font-size:15px;
+    font-weight:600;
+    color:var(--ink);
+    display:flex;
+    align-items:center;
+    gap:8px;
+}
+.knowledge h3::before{
+    content:"";
+    width:8px;height:8px;
+    border-radius:2px;
+    background:var(--red);
+    box-shadow:0 2px 8px rgba(232,69,95,.4);
+}
+.knowledge-grid{
+    display:grid;
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:12px;
+}
+.knowledge-card{
+    padding:14px;
+    border-radius:14px;
+    background:#fff;
+    border:1px solid var(--line);
+}
+.knowledge-card strong{
+    display:block;
+    color:var(--ink);
+    margin-bottom:7px;
+    font-size:13.5px;
+    font-family:Consolas,Monaco,monospace;
+}
+.knowledge-card span{
+    color:var(--ink2);
+    font-size:12.5px;
+    line-height:1.6;
 }
 
-.current-emoji {
-    font-size: 48px;
-    line-height: 1;
-    margin-bottom: 8px;
-    filter: drop-shadow(0 0 18px rgba(255,211,106,0.45));
+/* ── 星星 / 撒花 ── */
+.star{
+    position:absolute;
+    width:3px;height:3px;
+    border-radius:50%;
+    background:#CFE6F8;
+    box-shadow:0 0 10px rgba(207,230,248,.9);
+    animation:twinkle 1.3s ease-in-out infinite alternate;
+    pointer-events:none;
+    z-index:1;
+}
+@keyframes twinkle{
+    from{opacity:.2;transform:scale(.8);}
+    to{opacity:1;transform:scale(1.6);}
 }
 
-.current-lyric {
-    font-size: clamp(26px, 4.8vw, 48px);
-    font-weight: 900;
-    line-height: 1.22;
-    letter-spacing: 1px;
-    text-shadow:
-        0 0 18px rgba(255,255,255,0.16),
-        0 0 26px rgba(69,215,255,0.20);
+.confetti-layer{
+    pointer-events:none;
+    position:fixed;
+    inset:0;
+    z-index:5;
+    overflow:hidden;
+}
+.confetti{
+    position:absolute;
+    top:-20px;
+    width:9px;height:16px;
+    border-radius:3px;
+    background:var(--gold);
+    animation:confettiDrop 3.2s linear forwards;
+}
+@keyframes confettiDrop{
+    to{transform:translateY(110vh) rotate(720deg);opacity:0;}
 }
 
-.current-lyric.rap {
-    color: #ffffff;
+@media (max-width:920px){
+    /* minmax(0,1fr) 而不是 1fr：台口那行 nowrap 的 ==== 会把轨道顶宽，手机上撑出横向滚动 */
+    .main-grid{grid-template-columns:minmax(0,1fr);}
+    .stage-header{flex-direction:column;}
+    .meta-card{width:100%;}
+    .knowledge-grid{grid-template-columns:1fr 1fr;}
 }
 
-.current-lyric.intro {
-    color: var(--green);
-    animation: glowIntro 0.9s ease-in-out infinite alternate;
+@media (max-width:560px){
+    .stage-shell{padding:14px;border-radius:18px;}
+    .performance-panel{padding:14px;min-height:480px;}
+    .knowledge-grid{grid-template-columns:1fr;}
+    .stage-border{letter-spacing:2px;font-size:11px;}
 }
 
-.current-lyric.finale {
-    color: #fff1a8;
-    animation: finaleGlow 0.8s ease-in-out infinite alternate;
-}
-
-@keyframes glowIntro {
-    from { text-shadow: 0 0 12px rgba(87,255,154,0.5); }
-    to { text-shadow: 0 0 35px rgba(87,255,154,0.95), 0 0 60px rgba(69,215,255,0.35); }
-}
-
-@keyframes finaleGlow {
-    from { text-shadow: 0 0 12px rgba(255,211,106,0.55); transform: scale(1); }
-    to { text-shadow: 0 0 34px rgba(255,211,106,0.95), 0 0 70px rgba(255,79,216,0.38); transform: scale(1.025); }
-}
-
-.beat-bars {
-    position: relative;
-    z-index: 2;
-    height: 92px;
-    display: flex;
-    align-items: end;
-    justify-content: center;
-    gap: 7px;
-    margin-top: 16px;
-}
-
-.beat-bars span {
-    width: 10px;
-    height: 24px;
-    border-radius: 999px 999px 2px 2px;
-    background: linear-gradient(to top, var(--blue), var(--hot), var(--gold));
-    box-shadow: 0 0 16px rgba(69,215,255,0.35);
-    animation: beat 0.75s ease-in-out infinite alternate;
-}
-
-.beat-bars span:nth-child(2n) {
-    animation-delay: 0.16s;
-}
-
-.beat-bars span:nth-child(3n) {
-    animation-delay: 0.32s;
-}
-
-.beat-bars span:nth-child(4n) {
-    animation-delay: 0.48s;
-}
-
-@keyframes beat {
-    from { height: 18px; opacity: 0.58; }
-    to { height: 86px; opacity: 1; }
-}
-
-.timeline-panel {
-    padding: 20px;
-    border-radius: 24px;
-    background: var(--panel);
-    border: 1px solid rgba(255,255,255,0.12);
-    box-shadow: inset 0 0 28px rgba(255,255,255,0.04);
-}
-
-.timeline-panel h2 {
-    margin: 0 0 14px;
-    font-size: 20px;
-    color: #fff4cf;
-}
-
-.timeline {
-    display: grid;
-    gap: 10px;
-    max-height: 510px;
-    overflow: auto;
-    padding-right: 6px;
-}
-
-.timeline::-webkit-scrollbar {
-    width: 6px;
-}
-
-.timeline::-webkit-scrollbar-thumb {
-    background: rgba(255,255,255,0.2);
-    border-radius: 999px;
-}
-
-.line-item {
-    display: grid;
-    grid-template-columns: 42px 1fr;
-    gap: 10px;
-    align-items: center;
-    padding: 10px;
-    border-radius: 16px;
-    color: rgba(255,255,255,0.64);
-    background: rgba(255,255,255,0.045);
-    border: 1px solid transparent;
-    transition: 0.25s ease;
-}
-
-.line-num {
-    width: 34px;
-    height: 34px;
-    border-radius: 50%;
-    display: grid;
-    place-items: center;
-    color: rgba(255,255,255,0.75);
-    background: rgba(255,255,255,0.08);
-    font-size: 12px;
-    font-family: Consolas, Monaco, monospace;
-}
-
-.line-text {
-    font-size: 14px;
-    line-height: 1.45;
-}
-
-.line-item.active {
-    color: #ffffff;
-    transform: translateX(4px);
-    border-color: rgba(255,211,106,0.48);
-    background: linear-gradient(90deg, rgba(255,211,106,0.18), rgba(69,215,255,0.08));
-    box-shadow: 0 0 28px rgba(255,211,106,0.12);
-}
-
-.line-item.active .line-num {
-    background: var(--gold);
-    color: #191000;
-    font-weight: 900;
-}
-
-.knowledge {
-    position: relative;
-    z-index: 2;
-    margin-top: 22px;
-    padding: 20px;
-    border-radius: 24px;
-    background: rgba(255,255,255,0.055);
-    border: 1px solid rgba(255,255,255,0.12);
-}
-
-.knowledge h2 {
-    margin: 0 0 14px;
-    color: #b8f2ff;
-}
-
-.knowledge-grid {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 12px;
-}
-
-.knowledge-card {
-    min-height: 98px;
-    padding: 15px;
-    border-radius: 18px;
-    background: rgba(0,0,0,0.22);
-    border: 1px solid rgba(255,255,255,0.11);
-}
-
-.knowledge-card strong {
-    display: block;
-    color: var(--gold);
-    margin-bottom: 8px;
-    font-size: 15px;
-}
-
-.knowledge-card span {
-    color: rgba(255,255,255,0.70);
-    font-size: 13px;
-    line-height: 1.55;
-}
-
-.confetti-layer {
-    pointer-events: none;
-    position: fixed;
-    inset: 0;
-    z-index: 5;
-    overflow: hidden;
-}
-
-.confetti {
-    position: absolute;
-    top: -20px;
-    width: 10px;
-    height: 18px;
-    border-radius: 3px;
-    background: var(--gold);
-    animation: confettiDrop 3.2s linear forwards;
-}
-
-@keyframes confettiDrop {
-    to {
-        transform: translateY(110vh) rotate(720deg);
-        opacity: 0;
-    }
-}
-
-.star {
-    position: absolute;
-    width: 3px;
-    height: 3px;
-    border-radius: 50%;
-    background: #ffffff;
-    box-shadow: 0 0 12px #ffffff;
-    animation: twinkle 1.3s ease-in-out infinite alternate;
-}
-
-@keyframes twinkle {
-    from { opacity: 0.2; transform: scale(0.8); }
-    to { opacity: 1; transform: scale(1.6); }
-}
-
-@media (max-width: 920px) {
-    .main-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .stage-header {
-        flex-direction: column;
-    }
-
-    .meta-card {
-        width: 100%;
-    }
-
-    .knowledge-grid {
-        grid-template-columns: 1fr 1fr;
-    }
-}
-
-@media (max-width: 560px) {
-    .stage-page {
-        padding: 14px;
-    }
-
-    .stage-shell {
-        padding: 16px;
-        border-radius: 20px;
-    }
-
-    .performance-panel {
-        padding: 16px;
-        min-height: 520px;
-    }
-
-    .knowledge-grid {
-        grid-template-columns: 1fr;
-    }
-}
 </style>
 </head>
 <body>
-<div class="stage-page">
-    <div class="noise"></div>
-    <div class="spotlight left"></div>
-    <div class="spotlight right"></div>
-    <div class="confetti-layer" id="confettiLayer"></div>
+<div class="confetti-layer" id="confettiLayer"></div>
+<div class="page">
+    <div class="shell">
+        <a class="back-link" href="../index.html">← 返回作品集</a>
+        <span class="pnum">PROJECT 22 · 创意视觉</span>
+    </div>
+
+    <section class="hero">
+        <div class="badge">✦ Python 脚本外化 · 逐句播放 ✦</div>
+        <h1>Python 自我介绍 RAP 舞台</h1>
+        <p class="subtitle">
+            一份 Python 脚本跑出来的自我介绍：15 句词连每句后面停几秒，全写在一个数组里，<code>await wait()</code> 按这个秒数一句一句往下推。左边是舞台，歌词按 kind 换高亮；右边是时间轴，播到哪句同步亮起来；收尾自动撒花。
+        </p>
+    </section>
 
     <main class="stage-shell">
         <header class="stage-header">
-            <div class="title-wrap">
-                <h1>开阳老师 · Python 自我介绍 RAP</h1>
-                <p>把 print 顺序执行、time.sleep 节奏控制，外化成一场 Python RAP 舞台播放器。</p>
-            </div>
+            <h2>🎤 Python 自我介绍 RAP 舞台 <span class="tag">LIVE</span></h2>
+            <div class="sub">把 print 顺序执行、time.sleep 节奏控制，外化成一场 RAP 舞台</div>
             <div class="meta-card">
                 <div>主题：Python RAP 舞台播放器</div>
                 <div>源码读取：<span id="sourceFile"></span></div>
@@ -570,7 +622,9 @@ body {
         </header>
 
         <section class="main-grid">
-            <section class="performance-panel">
+            <section class="performance-panel" id="stagePanel">
+                <div class="spotlight left"></div>
+                <div class="spotlight right"></div>
                 <div class="stage-border" id="stageBorder">========================================</div>
 
                 <div class="rap-center">
@@ -599,29 +653,29 @@ body {
             </section>
 
             <aside class="timeline-panel">
-                <h2>逐句 RAP 播放列表</h2>
+                <h3>逐句 RAP 播放列表</h3>
                 <div class="timeline" id="timeline"></div>
             </aside>
         </section>
 
         <section class="knowledge">
-            <h2>课堂知识点</h2>
+            <h3>这段 RAP 是怎么放出来的</h3>
             <div class="knowledge-grid">
                 <div class="knowledge-card">
-                    <strong>import time</strong>
-                    <span>导入 Python 标准库 time，让程序拥有“等待”和“控制节奏”的能力。</span>
+                    <strong>RAP_EVENTS</strong>
+                    <span>15 句词、每句停几秒、算哪种高亮，全塞在这一个数组里。想加一句，往数组里补个对象就行。</span>
                 </div>
                 <div class="knowledge-card">
-                    <strong>time.sleep 控制节奏</strong>
-                    <span>每次 sleep 都像 Rap 的停顿，让上一句歌词停留指定秒数。</span>
+                    <strong>await wait(ms)</strong>
+                    <span>用 Promise 把 setTimeout 包一层，说停 1 秒就停 1 秒，前一句没念完不会抢下一句。</span>
                 </div>
                 <div class="knowledge-card">
-                    <strong>print 顺序执行</strong>
-                    <span>print 会按照代码从上到下的顺序，一句一句输出内容。</span>
+                    <strong>activateEvent()</strong>
+                    <span>按 kind 分配舞台表现：border 画台口线、rap 换高亮歌词、finale 撒花加星光。</span>
                 </div>
                 <div class="knowledge-card">
-                    <strong>程序从上往下运行</strong>
-                    <span>Python 不会乱跳，默认按照文件顺序执行，这就是课堂第一课的核心。</span>
+                    <strong>for 顺序执行</strong>
+                    <span>从第 0 句一路念到最后，中间不跳步 —— 和 print 从上往下一个道理。</span>
                 </div>
             </div>
         </section>
@@ -629,7 +683,7 @@ body {
 </div>
 
 <script>
-const RAP_EVENTS = [{"line": 16, "text": "========================================", "sleep_seconds": 0.45, "kind": "border", "has_emoji": false}, {"line": 17, "text": "        张三老师 · Python自我介绍RAP", "sleep_seconds": 0.75, "kind": "normal", "has_emoji": false}, {"line": 18, "text": "========================================", "sleep_seconds": 1.0, "kind": "border", "has_emoji": false}, {"line": 22, "text": "🎤 节奏响起，准备出发！", "sleep_seconds": 1.0, "kind": "intro", "has_emoji": true}, {"line": 25, "text": "hello everyone，this is AKAname", "sleep_seconds": 1.0, "kind": "normal", "has_emoji": false}, {"line": 28, "text": "今年十八，意气风发！", "sleep_seconds": 1.0, "kind": "rap", "has_emoji": false}, {"line": 31, "text": "编程教学，是我的家！", "sleep_seconds": 1.0, "kind": "rap", "has_emoji": false}, {"line": 34, "text": "酷爱代码，笔生繁花！", "sleep_seconds": 1.0, "kind": "rap", "has_emoji": false}, {"line": 37, "text": "带领学员，勇闯天涯！", "sleep_seconds": 1.0, "kind": "rap", "has_emoji": false}, {"line": 40, "text": "学好Python，梦想不塌！", "sleep_seconds": 1.0, "kind": "rap", "has_emoji": false}, {"line": 43, "text": "用心授课，不负韶华！", "sleep_seconds": 1.0, "kind": "rap", "has_emoji": false}, {"line": 46, "text": "愿你前行，步步生花！", "sleep_seconds": 1.0, "kind": "rap", "has_emoji": false}, {"line": 49, "text": "编程之路，一起出发！", "sleep_seconds": 1.0, "kind": "rap", "has_emoji": false}, {"line": 53, "text": "✨ 祝所有学员：代码无错，快乐相伴！", "sleep_seconds": 0.5, "kind": "finale", "has_emoji": true}, {"line": 55, "text": "✨ Python第一课，我们正式启航！", "sleep_seconds": 1.2, "kind": "finale", "has_emoji": true}];
+const RAP_EVENTS = [{"line": 1, "text": "========================================", "sleep_seconds": 0.45, "kind": "border", "has_emoji": false}, {"line": 2, "text": "        王思洋 · Python 自我介绍 RAP", "sleep_seconds": 0.75, "kind": "normal", "has_emoji": false}, {"line": 3, "text": "========================================", "sleep_seconds": 1.0, "kind": "border", "has_emoji": false}, {"line": 4, "text": "🎤 节奏响起，准备出发！", "sleep_seconds": 1.0, "kind": "intro", "has_emoji": true}, {"line": 5, "text": "hello everyone，this is Siyang", "sleep_seconds": 1.0, "kind": "normal", "has_emoji": false}, {"line": 6, "text": "十九岁，大一，代码在路上", "sleep_seconds": 1.0, "kind": "rap", "has_emoji": false}, {"line": 7, "text": "爬虫起步，数据开场", "sleep_seconds": 1.0, "kind": "rap", "has_emoji": false}, {"line": 8, "text": "闲鱼签名，一层层扒", "sleep_seconds": 1.0, "kind": "rap", "has_emoji": false}, {"line": 9, "text": "贝壳房源，一条条拿下", "sleep_seconds": 1.0, "kind": "rap", "has_emoji": false}, {"line": 10, "text": "大屏图表，让数据说话", "sleep_seconds": 1.0, "kind": "rap", "has_emoji": false}, {"line": 11, "text": "白天布网，夜里敲码", "sleep_seconds": 1.0, "kind": "rap", "has_emoji": false}, {"line": 12, "text": "日语考研，一起扛下", "sleep_seconds": 1.0, "kind": "rap", "has_emoji": false}, {"line": 13, "text": "作品三十多个，还在往上加", "sleep_seconds": 1.0, "kind": "rap", "has_emoji": false}, {"line": 14, "text": "起点不高，但每一步都算数", "sleep_seconds": 0.5, "kind": "finale", "has_emoji": false}, {"line": 15, "text": "✨ 我的 Python 之路，正式启航！", "sleep_seconds": 1.2, "kind": "finale", "has_emoji": true}];
 const SOURCE_FILE = "demo4库_可视化.py";
 
 const timeline = document.getElementById("timeline");
@@ -691,18 +745,30 @@ function activateTimeline(index) {
     const active = document.querySelector(`.line-item[data-index="${index}"]`);
     if (active) {
         active.classList.add("active");
-        active.scrollIntoView({ behavior: "smooth", block: "center" });
+        // 原来用 scrollIntoView，它会把所有能滚的祖先一起滚 ——
+        // 手机上等于每念一句就把整页往下拽一次。这里只滚时间轴自己
+        const box = timeline;
+        const br = active.getBoundingClientRect();
+        const cr = box.getBoundingClientRect();
+        box.scrollTo({
+            top: box.scrollTop + (br.top - cr.top) - (box.clientHeight - br.height) / 2,
+            behavior: "smooth"
+        });
     }
 }
 
 function createStars() {
+    // 星星原来是撒在 body 上的白点，浅底上直接看不见；
+    // 现在只撒在舞台里，用百分比定位，跟着面板走
+    const panel = document.getElementById("stagePanel");
+    if (!panel) return;
     for (let i = 0; i < 42; i++) {
         const star = document.createElement("div");
         star.className = "star";
-        star.style.left = Math.random() * 100 + "vw";
-        star.style.top = Math.random() * 100 + "vh";
+        star.style.left = Math.random() * 100 + "%";
+        star.style.top = Math.random() * 100 + "%";
         star.style.animationDelay = Math.random() * 1.2 + "s";
-        document.body.appendChild(star);
+        panel.appendChild(star);
 
         setTimeout(() => {
             star.remove();
@@ -711,7 +777,7 @@ function createStars() {
 }
 
 function createConfetti() {
-    const colors = ["#ffd36a", "#ff4fd8", "#45d7ff", "#57ff9a", "#ffffff"];
+    const colors = ["#F0C15C", "#4FA8E8", "#E8455F", "#7FE0A6", "#FFFFFF"];
 
     for (let i = 0; i < 100; i++) {
         const piece = document.createElement("div");
@@ -728,6 +794,22 @@ function createConfetti() {
     }
 }
 
+// 收尾那句比其他句长，固定字号会从「之路」中间断开、留个孤字。
+// 这里按实际高度判断有没有折行，折了就一点点缩字号；
+// 缩到 21px 就停手 —— 手机上卡片本来就窄，再缩就比别的句子小得明显
+function fitLyric() {
+    currentLyric.style.fontSize = "";
+    const cs = getComputedStyle(currentLyric);
+    const lh = parseFloat(cs.lineHeight) || parseFloat(cs.fontSize) * 1.24;
+    let fs = parseFloat(cs.fontSize);
+    let guard = 0;
+    while (currentLyric.scrollHeight > lh * 1.4 && fs > 21 && guard < 24) {
+        fs -= 1.5;
+        currentLyric.style.fontSize = fs + "px";
+        guard++;
+    }
+}
+
 function activateEvent(event, index) {
     activateTimeline(index);
 
@@ -737,6 +819,7 @@ function activateEvent(event, index) {
 
     currentLyric.textContent = text || "(空输出)";
     currentLyric.className = "current-lyric " + kind;
+    fitLyric();
     currentLabel.textContent = labelByKind(kind);
 
     if (emoji) {
@@ -772,7 +855,7 @@ function activateEvent(event, index) {
     }
 
     if (kind === "finale") {
-        beatStatus.textContent = "FINAL CEREMONY · PYTHON 第一课正式启航";
+        beatStatus.textContent = "FINAL CEREMONY · 我的 Python 之路，正式启航";
         createStars();
         createConfetti();
     }
@@ -799,7 +882,7 @@ async function playRapStage() {
         await wait(pause);
     }
 
-    beatStatus.textContent = "SHOW END · 代码无错，快乐相伴";
+    beatStatus.textContent = "SHOW END · 路还长，代码别停";
 }
 
 playRapStage();
